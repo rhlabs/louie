@@ -1,0 +1,43 @@
+PBRequest Architecture
+
+Request1(Data1-1,Data1-2,Data1-3)
+Request1(Data2-1,Data2-2,Data2-3)
+.
+.
+.
+Request2(Data1-1,Data1-2)
+Request2(Data2-1,Data2-2)
+.
+.
+.
+
+
+Header
+    Request1
+        Param1
+            Data1-1
+            Data1-2
+            Data1-3
+        Param2
+            Data2-1
+            Data2-2
+            Data2-3
+        .
+        .
+        .
+    Request2
+        Param1
+            Data1-1
+            Data1-2
+        Param2
+            Data2-1
+            Data2-2
+        .
+        .
+        .
+    .
+    .
+    .
+
+
+{HEADER}{REQUEST}{DATA}{DATA}{DATA}{DATA}{DATA}{DATA}....{REQUEST}{DATA}{DATA}{DATA}{DATA}{DATA}{DATA}

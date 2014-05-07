@@ -1,0 +1,65 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ *
+ * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+ */
+package ${info.packageName};
+
+import com.rhythm.louie.jms.MessageHandler;
+
+import com.rhythm.pb.PBType;
+import com.rhythm.pb.command.AnnotatedService;
+import com.rhythm.pb.command.CacheLayer;
+
+public class ${className} extends AnnotatedService implements ${baseName}Service {
+    protected ${baseName}Client client;
+    protected ${className}(${baseName}Client client) {
+        super("${info.serviceName}");
+        this.client = client;
+    }
+
+    protected ${className}() {
+        this(null);
+    }
+
+    protected ${baseName}Client getClient() {
+        return client;
+    }
+
+    @Override
+    public MessageHandler getMessageHandler() {
+        if (client==null || !(client instanceof CacheLayer)) {
+            return null;
+        }
+        return ((CacheLayer)client).getMessageHandler();
+    }
+
+    @Override
+    public void initialize() throws Exception {
+        super.initialize();
+        if (client!=null && client instanceof CacheLayer) {
+            ((CacheLayer)client).initialize();
+        }
+    }
+
+    @Override
+    public void shutdown() throws Exception {
+        super.shutdown();
+        if (client!=null && client instanceof CacheLayer) {
+            ((CacheLayer)client).shutdown();
+        }
+    }
+#foreach($method in $info.methodInfos)
+
+#if ( $method.isDeprecated() )
+    @Deprecated
+#end
+    @Override
+    public ${method.returnType} ${method.name}(${method.paramString}) throws ${method.throwsClause} {
+        ${method.convertedReturnType} pb = client.${method.name}(${method.convertParamString});
+        return ${method.getReturnBuilderCode("pb")};
+    }
+#end
+}

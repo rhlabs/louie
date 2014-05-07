@@ -1,0 +1,116 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ *
+ * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+ */
+package ${info.packageName};
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rhythm.louie.Server;
+import com.rhythm.louie.ServiceProperties;
+import com.rhythm.louie.connection.LouieConnection;
+import com.rhythm.louie.connection.LouieConnectionFactory;
+
+import com.rhythm.pb.command.Service;
+import com.rhythm.pb.command.ServiceFactory;
+
+public class ${className} implements ServiceFactory {
+
+    private static final String serviceName = "${info.serviceName}";
+    private static final Logger LOGGER = LoggerFactory.getLogger(${className}.class);
+
+    private ${className}() {}
+
+    public static ${className} getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private static class Holder {
+        private static final ${className} INSTANCE = new ${className}();
+    }
+
+    @Override
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public ${baseName}Client getServiceClient() throws Exception {
+        getService();
+        return service.getClient();
+    }
+
+    private static ${baseName}ServiceHandler service;
+
+    @Override
+    public synchronized Service getService() throws Exception{
+        ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
+        boolean centralized = props.isCentralized();
+        if (service==null) {
+            if (centralized) {
+                service = new ${baseName}ServiceRouter();
+            } else {
+                ${baseName}Client dao = getConfiguredDAO(props);
+                ${baseName}Client client = new ${baseName}CacheDelegate(dao);
+                service = new ${baseName}ServiceHandler(client);
+            }
+        }
+        return service;
+    }
+
+    private static ${baseName}Client getConfiguredDAO(ServiceProperties props) throws Exception{
+        String daoSource = props.getDAO();
+        if (!daoSource.equals("rh")){
+            if (daoSource.equals("cave")){
+                try {
+                    return (${baseName}Client) Class.forName("${info.packageName}.${baseName}CaveDAO").newInstance();
+                } catch( ClassNotFoundException e) {
+                    LOGGER.error("${baseName}CaveDAO set in config but not found, defaulting to R&H DAO");
+                }
+            } else {
+                try {
+                    Object alternateDAO = Class.forName(daoSource).newInstance();
+                    if (alternateDAO instanceof ${baseName}Client){
+                        LOGGER.info("Loading alternate DAO "+daoSource+" for service ${baseName}");
+                        return (${baseName}Client) alternateDAO;
+                    } else {
+                        LOGGER.warn("Alternate DAO "+daoSource+" for service ${baseName} does not implement${baseName}Client, defaulting to R&H DAO");
+                    }
+                } catch (ClassNotFoundException e) {
+                    LOGGER.warn("Attempt to load alternate DAO "+daoSource+" for service ${baseName} has failed.");
+                    throw e;
+                }
+            }
+        }
+        return new ${baseName}DAO();
+    }
+
+    private static class ${baseName}ServiceRouter extends ${baseName}ServiceHandler {
+        public ${baseName}ServiceRouter() {
+            super();
+        }
+
+        @Override
+        public void initialize() throws Exception {
+            ServiceProperties props = ServiceProperties.getServiceProperties(getServiceName());
+
+            Server MAIN = Server.getServer(props.getMain());
+            if (MAIN == null) {
+                throw new Exception("Cannot establish service!  Unknown MAIN server: " + props.getMain());
+            }
+
+            if (Server.LOCAL == MAIN) {
+                ${baseName}Client dao = getConfiguredDAO(props);
+                client = new ${baseName}CacheDelegate(dao);
+            } else {
+                LouieConnection connection = LouieConnectionFactory.getConnectionForServer(MAIN);
+                client = new ${baseName}CacheDelegate(${baseName}ClientFactory.getClient(connection));
+            }
+
+            super.initialize();
+        }
+    }
+}

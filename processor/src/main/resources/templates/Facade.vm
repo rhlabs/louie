@@ -1,0 +1,38 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ *
+ * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+ */
+package ${info.packageName};
+
+import com.rhythm.louie.connection.LouieServiceClient;
+import com.rhythm.louie.connection.LouieConnection;
+import com.rhythm.pb.PBParam;
+
+public class ${className} extends LouieServiceClient implements ${baseName}Service {
+    public ${className}(LouieConnection connection) {
+        super("${info.serviceName}", connection);
+    }
+#foreach($method in $info.methodInfos)
+
+#if ( $method.isDeprecated() )
+    @Deprecated
+#end
+    @Override
+    public ${method.returnType} ${method.name}(${method.paramString}) throws ${method.throwsClause} {
+#if ( $method.hasParams() )
+        PBParam param = PBParam.createParam(${method.paramNameString});
+        return doRequest("${method.name}", param,
+#else
+        return doRequest("${method.name}",
+#end
+#if ( $method.returnsList() )
+            ${method.baseReturnType}.getDefaultInstance()).getResults();
+#else
+            ${method.baseReturnType}.getDefaultInstance()).getSingleResult();
+#end
+    }
+#end
+}

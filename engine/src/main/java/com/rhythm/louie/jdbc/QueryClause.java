@@ -1,0 +1,269 @@
+/*
+ * QueryClause.java
+ * 
+ * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+ */
+package com.rhythm.louie.jdbc;
+
+import java.sql.Types;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import com.rhythm.louie.Constants;
+import com.rhythm.louie.DAOUtils;
+
+/**
+ * This class is to be used in conjunction with QueryBuilder to aid in constructing 
+ * and executing dynamic queries. A QueryClause encapsulates a single clause in a 
+ * Database query, meaning the conditions in the WHERE portion of a query, separated by ANDs
+ * <p>
+ * Examples:<br>
+ * uname=?<br>
+ * id IN (123,456)<br>
+ * not active<br>
+ * <p>
+ * Fields and clauses must be fully qualified, meaning containing a prefixing alias
+ * if the table name is aliased in the query.  This class is merely a utility helper.
+ * <p>
+ * Example Query:<br>
+ * SELECT g.name,e.uname FROM goals g,employee e WHERE g.assignment=e.code AND g.job=?
+ * <p>
+ * g.job=? would be an example QueryClause.  You could utilize that in code like
+ * <p>
+ * QueryClause clause = QueryClause.createFieldClause("g.job","ripd",Types.VARCHAR);
+ * <p>
+ * This would then inject g.job="ripd" into the prepared statement upon execution. 
+ */
+public class QueryClause {
+
+    private final String clause;
+    private final Object value;
+    private final int sqlType;
+    private boolean hasParam;
+    private boolean isList;
+    private boolean batched = false;
+
+    QueryClause(String clause, Object value) {
+        this(clause, value, Types.OTHER);
+    }
+
+    QueryClause(String clause, Object value, int sqlType) {
+        this.clause = clause;
+        this.value = value;
+        this.sqlType = sqlType;
+        hasParam = true;
+        isList = false;
+    }
+
+    /**
+     * Creates a clause that does not contain any ?, such as "t.visible"
+     */
+    public static QueryClause createNoParamClause(String clause) throws Exception {
+        if (clause.contains("?")) {
+            throw new Exception("Update Builder Error: Cannot add a no param field that declares a param!");
+        }
+        QueryClause f = new QueryClause(clause, null);
+        f.hasParam = false;
+        return f;
+    }
+
+    /**
+     * Creates a clause in the form of: field IN (?,?,?) 
+     */
+    public static QueryClause createInClause(String field, Collection<?> values, int sqlType) {
+        String clause = DAOUtils.appendInParams(field + " IN ", values.size());
+        QueryClause f = new QueryClause(clause, values, sqlType);
+        f.isList = true;
+        return f;
+    }
+    
+    /**
+     * Creates a clause in the form of: field NOT IN (?,?,?) 
+     */
+    public static QueryClause createNotInClause(String field, Collection<?> values, int sqlType) {
+        String clause = DAOUtils.appendInParams(field + " NOT IN ", values.size());
+        QueryClause f = new QueryClause(clause, values, sqlType);
+        f.isList = true;
+        return f;
+    }
+    
+    /**
+     * Creates a clause in the form of: (field LIKE ? OR field LIKE ?)
+     * Only takes strings, automatically sets the type to VARCHAR
+     * If useInIfPossible is set to true, it will scan the values to see if any contain a %,
+     * if none do, it will use an IN statement instead
+     */
+    public static QueryClause createInLikeClause(String field, Collection<String> values, boolean useInIfPossible) {
+        
+        if (useInIfPossible) {
+            boolean found = false;
+            for (String s : values) {
+                if (s.contains("%")) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return createInClause(field, values, Types.VARCHAR);
+            }
+        }
+        
+        StringBuilder clause = new StringBuilder();
+        clause.append("(");
+        for (int i=0;i<values.size();i++) {
+            if (i!=0) {
+                clause.append(" OR ");
+            }
+            clause.append(field).append(" LIKE ?");
+        }
+        clause.append(")");
+        
+        QueryClause f = new QueryClause(clause.toString(), values, Types.VARCHAR);
+        f.isList = true;
+        return f;
+    }
+    
+
+    /**
+     * Creates a clause in the form of: field=? 
+     */
+    public static QueryClause createFieldClause(String field, Object value, int sqlType) {
+        return new QueryClause(field + "=?", value, sqlType);
+    }
+    
+    /**
+     * Creates a custom clause that has a list of values of the same type
+     * This method is a bit of a hack work around in order to add a clause like:
+     * (job is null OR job in (?,?,?))
+     */
+    public static QueryClause createCustomListClause(String clause, Object value, int sqlType) {
+        QueryClause f = new QueryClause(clause, value, sqlType);
+        f.isList = true;
+        return f;
+    }
+
+    /**
+     * @return the clause
+     */
+    public String getClause() {
+        return clause;
+    }
+
+    public boolean hasParam() {
+        return hasParam;
+    }
+
+    public boolean isList() {
+        return isList;
+    }
+    
+    public boolean isBatched() {
+        return batched;
+    }
+    
+    public String getClauseForBatch(int batch) {
+        return getClause();
+    }
+    
+    public List<?> getValuesForBatch(int batch) {
+        return Collections.emptyList();
+    }
+    
+     /**
+     * @return a collection of values, if the isList=true, if this is not a list
+     * it will throw an Exception
+     * @throws java.lang.Exception
+     */
+    public Collection<?> getValuesList() throws Exception {
+        if (!isList) {
+            throw new Exception("This is not a list!");
+        }
+        return (Collection<?>) value;
+    }
+    
+    /**
+     * @return the value, may be a in the form of a Collection if isList=true
+     * You should use getValuesList() instead
+     */
+    public Object getValue() {
+        return value;
+    }
+
+    public int getSqlType() {
+        return sqlType;
+    }
+    
+     /**
+     * Creates a clause in the form of: field IN (?,?,?) 
+     * @param field
+     * @param values
+     * @param sqlType
+     * @return 
+     */
+    public static BatchedInClause createBatchedInClause(String field, List<?> values, int sqlType) {
+        return new BatchedInClause(field, values, sqlType);
+    }
+     /**
+     * Creates a clause in the form of: field IN (?,?,?) 
+     * @param field
+     * @param values
+     * @param sqlType
+     * @param batchSize
+     * @return 
+     */
+    public static BatchedInClause createBatchedInClause(String field, List<?> values, int sqlType, int batchSize) {
+        return new BatchedInClause(field, values, sqlType, batchSize);
+    }
+    public static class BatchedInClause extends QueryClause {
+        private int batchSize;
+        private List<?> values;
+        public BatchedInClause(String field, List<?> values, int sqlType) {
+            this(field,values,sqlType,Constants.JDBC_IN_LIMIT);
+        }
+        public BatchedInClause(String field, List<?> values, int sqlType, int batchSize) {
+            super(field+" IN ", values, sqlType);
+            super.batched = true;
+            super.isList = true;
+            this.batchSize = batchSize;
+            this.values = values;
+        }
+        
+        private int getBatchSize(int batch) {
+            int startIndex = batch*batchSize;
+            if (startIndex>values.size()) {
+                return 0;
+            } else if (startIndex+batchSize>values.size()) {
+                return values.size()-startIndex;
+            } else {
+                return batchSize;
+            }
+        }
+        
+        @Override
+        public String getClauseForBatch(int batch) {
+            int size = getBatchSize(batch);
+            if (size==0) {
+                return null;
+            } else {
+                return DAOUtils.appendInParams(super.clause, size);
+            }
+        }
+        
+        @Override
+        public List<?> getValuesForBatch(int batch) {
+            int size = getBatchSize(batch);
+            if (size==0) {
+                return Collections.emptyList();
+            } else {
+                int startIndex = batch*batchSize;
+                return values.subList(startIndex, startIndex+size);
+            }
+        }
+        
+        @Override
+        public String getClause() {
+            return DAOUtils.appendInParams(super.clause, values.size());
+        }
+    }
+}

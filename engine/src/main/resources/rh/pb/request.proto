@@ -1,0 +1,84 @@
+package rh.pb;
+
+option java_package = "com.rhythm.pb";
+option java_outer_classname = "RequestProtos";
+option java_generate_equals_and_hash = true;
+
+message RequestHeaderPB {
+    optional string user  = 1 [deprecated=true];
+    optional string agent = 2;
+    optional uint32 count = 3;
+
+    optional SessionKey   key = 10;
+
+    repeated RoutePB route    = 20;
+
+    optional string routeUser = 30;
+}
+
+message RoutePB {
+    optional string hostIp     = 1;
+    optional string gateway    = 2;
+    optional string service    = 3;
+    optional string variant    = 4;
+}
+
+message IdentityPB {
+    optional string user             = 1;
+    optional string language         = 2;
+    optional string program          = 3;
+  
+    optional string path             = 4;
+    optional string location         = 5;
+    optional string machine          = 6;
+    optional string env              = 7;
+    optional string ip               = 8;
+
+    optional string languageVersion  = 9;
+    optional string programVersion   = 10;
+    optional string os               = 11;
+    optional string osVersion        = 12;
+
+    optional string processId        = 13;
+}
+
+message SessionKey {
+    optional string key = 1;
+}
+
+message SessionBPB {
+    optional SessionKey      key        = 1;
+    optional IdentityPB      identity   = 2;
+    optional SessionStatsPB  stats      = 3;
+}
+
+message SessionStatsPB {
+    optional sint32    requestCount     = 1;
+    optional uint64    createTime       = 2;
+    optional uint64    lastRequestTime  = 3;
+}
+
+message RequestPB {
+    optional uint32 id           = 1;
+    optional string system       = 2;
+    optional string method       = 3;
+    repeated string type         = 4;
+    optional uint32 param_count  = 5 [deprecated=true];
+}
+
+message ResponseHeaderPB {
+    optional uint32 count = 1;
+}
+
+message ResponsePB {
+    optional uint32 id      = 1;
+    optional uint32 count   = 2;
+    optional string type   = 3;
+    optional ErrorPB error = 4;
+}
+
+message ErrorPB {
+    optional uint32 code = 1;
+    optional string type = 2;
+    optional string description = 3;
+}

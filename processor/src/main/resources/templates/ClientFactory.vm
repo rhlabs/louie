@@ -1,0 +1,18 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ *
+ * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+ */
+package ${info.packageName};
+
+import com.rhythm.louie.connection.LouieConnection;
+
+public class ${className} {
+    private ${className}() {}
+
+    public static ${baseName}Client getClient(LouieConnection connection) {
+        return new ${baseName}ServiceClient(new ${baseName}Facade(connection));
+    }
+}

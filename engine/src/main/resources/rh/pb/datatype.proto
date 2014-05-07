@@ -1,0 +1,118 @@
+package rh.pb;
+
+//import "rh/pb/options.proto";
+//import "google/protobuf/descriptor.proto"; 
+
+option java_package = "com.rhythm.pb";
+option java_outer_classname = "DataTypeProtos";
+option java_generate_equals_and_hash = true;
+
+// Inspired by:
+// http://www.dataflow-software.com/files/dataflow-rpc.proto
+
+message ParamPB {
+    required string key = 1;
+    optional string value = 2;
+}
+
+message MapPB {
+    repeated ParamPB values = 1;
+}
+
+message DictionaryPB {
+	//reserved to return a hash
+	optional string key   = 1;
+	repeated string value = 2;
+	optional string type  = 3;
+}
+
+// Date
+message DatePB {
+        //[type=date]
+        optional sint64 time = 1;
+}
+message DateListPB {
+	//[type=date]
+	repeated sint64 times = 1;
+}
+
+// DateTime
+message DateTimePB {
+        //[type=datetime]
+        optional sint64 time = 1;
+}
+message DateTimeListPB {
+        //[type=datetime]
+	repeated sint64 times = 1;
+}
+
+
+// Bool
+message BoolPB {
+	optional bool value = 1;
+}
+message BoolListPB {
+	repeated bool values = 1;
+}
+
+// Int
+message IntPB {
+	optional sint32 value = 1;
+}
+message IntListPB {
+	repeated sint32 values = 1;
+}
+
+message UIntPB {
+	optional uint32 value = 1;
+}
+message UIntListPB {
+	repeated uint32 values = 1;
+}
+
+// Long
+message LongPB {
+	optional sint64 value = 1;
+}
+message LongListPB {
+	repeated sint64 values = 1;
+}
+
+message ULongPB {
+	optional uint64 value = 1;
+}
+message ULongListPB {
+	repeated uint64 values = 1;
+}
+
+// String
+message StringPB {
+	optional string value = 1;
+}
+message StringListPB {
+	repeated string values = 1;
+}
+
+// Float
+message FloatPB {
+	optional float value = 1;
+}
+message FloatListPB {
+	repeated float values = 1;
+}
+
+// Double
+message DoublePB {
+	optional double value = 1;
+}
+message DoubleListPB {
+	repeated double values = 1;
+}
+
+// Bytes
+message BytesPB {
+	optional bytes value = 1;
+}
+message BytesListPB {
+	repeated bytes values = 1;
+}

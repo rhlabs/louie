@@ -1,0 +1,25 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ *
+ * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+ */
+package ${info.packageName};
+
+public class ${className} implements ${baseName}Client {
+    private final ${baseName}Client delegate;
+    public ${className}(${baseName}Client delegate) {
+        this.delegate = delegate;
+    }
+#foreach($method in $info.methodInfos)
+
+#if ( $method.isDeprecated() )
+    @Deprecated
+#end
+    @Override
+    public ${method.convertedReturnType} ${method.name}(${method.convertedParamString}) throws ${method.throwsClause} {
+        return delegate.${method.name}(${method.paramNameString});
+    }
+#end
+}

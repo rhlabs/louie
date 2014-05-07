@@ -1,0 +1,234 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.rhythm.louie</groupId>
+        <artifactId>louie-parent</artifactId>
+        <version>1.3-SNAPSHOT</version>
+    </parent>
+    <artifactId>louie</artifactId>
+  
+    <packaging>jar</packaging>
+    <name>LoUIE</name>
+      
+    <properties>
+        <protobuf.home>/opt/randh/protobuf-2.4.0a</protobuf.home>
+        <proto.src>${basedir}/src/main/resources</proto.src>
+        <proto.gen>${basedir}/target/generated-sources/protobuf</proto.gen>
+        <java.pbdir>${proto.gen}-java</java.pbdir>
+        <python.pbdir>${proto.gen}-python</python.pbdir>
+        <cpp.pbdir>${proto.gen}-cpp</cpp.pbdir>
+        <skipTests>true</skipTests>
+    </properties>
+  
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>
+                                import java.io.File
+                                
+                                println "Compiling proto files"
+                                
+                                def protoSrc = new File("${proto.src}") 
+                                if (!protoSrc.exists()) {
+                                    println "ERROR! Could not find directory: ${proto.src}"
+                                    return
+                                }
+
+                                def protoFiles = ""
+                                protoSrc.eachFileRecurse() {
+                                    if (it.name =~ /\.proto$/) {
+                                        protoFiles+=it.canonicalPath+" "
+                                    }
+                                }
+                                
+                                new File("${java.pbdir}").mkdirs()
+                                new File("${cpp.pbdir}").mkdirs()  
+                                new File("${python.pbdir}").mkdirs()  
+                                
+                                def protoc = "${protobuf.home}/bin/protoc";
+                                protoc+=" --proto_path=${proto.src}"
+                                protoc+=" --proto_path=${protobuf.home}/include"
+                                protoc+=" --java_out=${java.pbdir}"
+                                protoc+=" --python_out=${python.pbdir}"
+                                protoc+=" --cpp_out=${cpp.pbdir}"
+                                protoc+=" "+protoFiles
+                                
+                                println "Executing "+protoc
+                                def sout = new StringBuffer(), serr = new StringBuffer()
+                                def proc = protoc.execute()
+                                proc.consumeProcessOutput(sout, serr)
+                                proc.waitFor()
+                                
+                                if (sout.length()>0) {
+                                    println sout
+                                }
+                                if (serr.length()>0) {
+                                    println "ERROR! "+serr
+                                }
+                            </source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>add-groovy-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${java.pbdir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <annotationProcessors>
+                        <annotationProcessor>
+                            com.rhythm.louie.process.ServiceProcessor
+                        </annotationProcessor>
+                    </annotationProcessors>
+                </configuration>
+            </plugin>
+        
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+        
+            <plugin>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*.proto</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+  
+    <dependencies>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>2.4.0a</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>2.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.protobuf-java-format</groupId>
+            <artifactId>protobuf-java-format</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>16.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.log4jdbc</groupId>
+            <artifactId>log4jdbc</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>louie-processor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms-api</artifactId>
+            <version>1.1-rev-1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ejb</groupId>
+            <artifactId>ejb-api</artifactId>
+            <version>3.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.28</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
