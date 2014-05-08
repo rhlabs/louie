@@ -50,10 +50,11 @@ public class Generator {
             }
 
             try {
-                Set<MethodInfo> methods = new TreeSet<MethodInfo>();
+                List<MethodInfo> methods = new ArrayList<MethodInfo>();
                 for (Method method : service.getMethods()) {
                     methods.add(new PerlMethodInfo(method));
                 }
+                Collections.sort(methods);
                 ServiceInfo info = new ServiceInfo(service, host, gateway, methods);
                 generatePerl(info);
             } catch (Exception e) {
@@ -68,10 +69,11 @@ public class Generator {
             }
 
             try {
-                Set<MethodInfo> methods = new TreeSet<MethodInfo>();
+                List<MethodInfo> methods = new ArrayList<MethodInfo>();
                 for (Method method : service.getMethods()) {
                     methods.add(new PythonMethodInfo(method));
                 }
+                Collections.sort(methods);
                 ServiceInfo info = new ServiceInfo(service, host, gateway, methods);
                 generatePython(info);
             } catch (Exception e) {

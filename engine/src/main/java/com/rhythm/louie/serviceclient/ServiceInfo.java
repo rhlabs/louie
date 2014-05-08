@@ -27,7 +27,7 @@ public class ServiceInfo {
 
     private final ServiceFacade service;
 
-    private final Set<MethodInfo> methods = new TreeSet<MethodInfo>();
+    private final List<MethodInfo> methods = new ArrayList<MethodInfo>();
     
     public ServiceInfo(Class<?> cl, String host, String gateway, Collection<MethodInfo> methods) throws Exception {
         this.host = host;
@@ -67,7 +67,7 @@ public class ServiceInfo {
         return importList;
     }
     
-    public Set<MethodInfo> getMethodInfos() {
+    public List<MethodInfo> getMethodInfos() {
         return methods;
     }
 
