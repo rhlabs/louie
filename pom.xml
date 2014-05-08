@@ -109,7 +109,8 @@
                 <version>1.4</version>
                 <executions>
                     <execution>
-                        <phase>generate-resources</phase>
+                        <id>buildstamp</id>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>execute</goal>
                         </goals>

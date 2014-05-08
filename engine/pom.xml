@@ -40,6 +40,7 @@
                 <version>1.4</version>
                 <executions>
                     <execution>
+                        <id>protoc</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>execute</goal>
