@@ -187,11 +187,11 @@ public class LouieConnectionFactory {
                 sslConfig = new LouieSSLClientConfig(server);
             } catch (Exception ex) {
                 LOGGER.error("Error creating SSL config", ex);
-                return new DefaultLouieConnection(id,server.getHostName(),null,server.getGateway());
+                return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
             }
             return new DefaultLouieConnection(id,sslConfig);
         }
         //else attempt a regular http connection, what the heck!
-        return new DefaultLouieConnection(id,server.getHostName(),null,server.getGateway());
+        return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
     }
 }

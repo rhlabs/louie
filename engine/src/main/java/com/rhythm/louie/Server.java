@@ -84,6 +84,8 @@ public class Server {
                         server.sslPass=value;
                     } else if (attribute.equals("ssl_ca_pass")) {
                         server.sslCAPass=value;
+                    } else if (attribute.equals("ip")){
+                        server.ip=value;
                     } else {
                         LOGGER.warn("Warning! Unknown Server Property: {}", key);
                     }
@@ -131,7 +133,7 @@ public class Server {
                     sb.append(" (SSL)");
                 }
                 sb.append("\n");
-                if (server.getHostName().equals(Constants.HOSTDOMAIN)) {
+                if (server.getIp().equals(Constants.IP)) {
                     Server.LOCAL = server;
                 }
             }

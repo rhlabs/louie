@@ -18,20 +18,25 @@ public class Constants {
     public static final String HOST;
     public static final String HOSTDOMAIN;
     public static final String DOMAIN;
+    public static final String IP;
     
     static {
         String host = "";
         String hostdomain = "";
         String domain = "";
+        String address = "";
         try {
             host = InetAddress.getLocalHost().getHostName();
             String[] components = host.split("\\.");
             host = components[0];
-            hostdomain = InetAddress.getLocalHost().getCanonicalHostName();
+            InetAddress me = InetAddress.getLocalHost();
+            hostdomain = me.getCanonicalHostName();
+            address = me.getHostAddress();
             domain = hostdomain.replaceFirst(".*?\\.", "");
         } catch (UnknownHostException ex) {}
         HOST=host;
         HOSTDOMAIN=hostdomain;
         DOMAIN=domain;
+        IP = address;
     }
 }
