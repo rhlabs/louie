@@ -32,15 +32,20 @@ public class Generator {
     public static void main(String[] args) {
         String host = "localhost";
         String gateway = "louie";
+        String prefix = null;
         
-        if (args[0] != null) {
+        if (args.length>0 && args[0] != null) {
             host = args[0];
         }
-        if (args[1] != null) {
+        if (args.length>1 && args[1] != null) {
             gateway = args[1];
         }
+        
+        if (args.length>2 && args[2] != null) {
+            prefix = args[2];
+        }
             
-        Reflections reflections = new Reflections("com.rhythm.louie");
+        Reflections reflections = new Reflections(prefix);
         Set<Class<?>> services = reflections.getTypesAnnotatedWith(com.rhythm.louie.process.ServiceFacade.class);
         
         // Perl
