@@ -174,6 +174,7 @@ public class Server {
         this.sslPass = null;
         this.sslPort = 0;
         this.sslGateway = null;
+        this.gateway = "louie";
     }
      
     public static List<Server> allServers() {
