@@ -5,12 +5,16 @@
  */
 package com.rhythm.louie.cache;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,6 +179,54 @@ public class CacheManager {
             }
 
             SingletonEhCache<V> cache = new SingletonEhCache<V>(cacheName,ehCacheManager);
+            caches.put(cacheName, cache);
+            return cache;
+        }
+    }
+    
+    public <K, V> GuavaCache<K,V> createGuavaCache(String cacheName, CacheBuilder bldr) {
+        synchronized (caches) {
+            if (caches.containsKey(cacheName)) {
+                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
+            }
+            
+            GuavaCache<K,V> cache = new GuavaBasicCache<K,V>(cacheName, bldr);
+            caches.put(cacheName, cache);
+            return cache;
+        }
+    }
+
+    public <K, V> GuavaCache<K,V> createGuavaLoadingCache(String cacheName, CacheBuilder bldr, CacheLoader loader) {
+        synchronized (caches) {
+            if (caches.containsKey(cacheName)) {
+                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
+            }
+            
+            GuavaCache<K,V> cache = new GuavaLoadingCache<K,V>(name, bldr, loader);
+            caches.put(cacheName, cache);
+            return cache;
+        }
+    }
+    
+    public <V> GuavaSingletonLoadingCache<V> createGuavaSingletonLoadingCache(String cacheName, CacheBuilder bldr, CacheLoader loader) {
+        synchronized (caches) {
+            if (caches.containsKey(cacheName)) {
+                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
+            }
+
+            GuavaSingletonLoadingCache<V> cache = new GuavaSingletonLoadingCache<V>(cacheName,bldr,loader);
+            caches.put(cacheName, cache);
+            return cache;
+        }
+    }
+    
+    public <V> GuavaSingletonCache<V> createGuavaSingletonCache(String cacheName, CacheBuilder bldr) {
+        synchronized (caches) {
+            if (caches.containsKey(cacheName)) {
+                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
+            }
+
+            GuavaSingletonCache<V> cache = new GuavaSingletonCache<V>(cacheName,bldr);
             caches.put(cacheName, cache);
             return cache;
         }
