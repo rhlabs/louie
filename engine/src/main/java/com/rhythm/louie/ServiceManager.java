@@ -77,13 +77,13 @@ public class ServiceManager {
         
         StringBuilder versionInfo = new StringBuilder();
         Map<String,String> gitVersions = ExternalProperties.getInstance().getGitVersionMap();
-            Map<String,String> compileDates = ExternalProperties.getInstance().getCompileDateMap();
-            for (String impl : gitVersions.keySet()) {
-                if("LoUIE Processor".equals(impl)) continue; //hardcoded processor skip
-                versionInfo.append("  ").append(impl).append("\n");
-                versionInfo.append("    Git Version: ").append(gitVersions.get(impl)).append("\n");
-                versionInfo.append("    Compile Date: ").append(gitVersions.get(impl)).append("\n");
-            }
+        Map<String,String> compileDates = ExternalProperties.getInstance().getCompileDateMap();
+        for (String impl : gitVersions.keySet()) {
+            if("LoUIE Processor".equals(impl)) continue; //hardcoded processor skip
+            versionInfo.append("  ").append(impl).append("\n");
+            versionInfo.append("    Git Version: ").append(gitVersions.get(impl)).append("\n");
+            versionInfo.append("    Compile Date: ").append(compileDates.get(impl)).append("\n");
+        }
         LOGGER.info("\n********************************************************\n"
                 + "LoUIE ServiceManager Initialization - \n{}"
                 + "\n********************************************************\n"
