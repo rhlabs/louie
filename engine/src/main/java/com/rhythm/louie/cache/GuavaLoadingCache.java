@@ -1,9 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * GuavaLoadingCache.java
+ * 
+ * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-
 package com.rhythm.louie.cache;
 
 import com.google.common.cache.CacheBuilder;
@@ -11,30 +10,54 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.google.common.cache.CacheBuilderSpec;
+
 import org.slf4j.LoggerFactory;
 
 /**
  * The Google Guava LoadingCache wrapper
  * @author eyasukoc
+ * @param <K> key type
+ * @param <V> value type
  */
-public class GuavaLoadingCache <K, V> implements GuavaCache<K, V> {
+public class GuavaLoadingCache<K, V> implements GuavaCache<K, V> {
 
     private final String cacheName;
     private final LoadingCache<K, V> cache;
-    
-    public GuavaLoadingCache(final String name, CacheBuilder bldr, CacheLoader loader) {
+
+    private GuavaLoadingCache(String name, CacheBuilder<K, V> bldr, CacheLoader<K, V> loader) {
         this.cacheName = name;
         this.cache = bldr.build(loader);
     }
     
+    @SuppressWarnings("unchecked")
+    public static <K, V> GuavaLoadingCache<K,V> nonCaching(String name, CacheLoader<K, V> loader) {
+        return new GuavaLoadingCache(name,CacheBuilder.from(CacheBuilderSpec.disableCaching()),loader);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <K, V> GuavaLoadingCache<K,V> permanent(String name, CacheLoader<K, V> loader) {
+        return new GuavaLoadingCache(name,CacheBuilder.newBuilder(),loader);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <K, V> GuavaLoadingCache<K,V> fromSpec(String name, CacheBuilderSpec spec, CacheLoader<K, V> loader) {
+        return new GuavaLoadingCache(name,CacheBuilder.from(spec),loader);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <K, V> GuavaLoadingCache<K,V> fromSpec(String name, String spec, CacheLoader<K, V> loader) {
+        return new GuavaLoadingCache(name,CacheBuilder.from(spec),loader);
+    }
+    
     @Override
-    public LoadingCache getGuava() {
+    public LoadingCache<K, V> getGuava() {
         return this.cache;
     }
     

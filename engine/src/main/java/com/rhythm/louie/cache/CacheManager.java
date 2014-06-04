@@ -5,16 +5,18 @@
  */
 package com.rhythm.louie.cache;
 
-import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Supplier;
+import com.google.common.cache.CacheBuilderSpec;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +34,7 @@ public class CacheManager {
     
     private net.sf.ehcache.CacheManager ehCacheManager;
     private final Map<String,Cache<?,?>> caches;
-    private String name;
+    private final String name;
     
     private CacheManager(String name) {
         caches = new TreeMap<String,Cache<?,?>>();
@@ -105,25 +107,37 @@ public class CacheManager {
 //        ehCacheManager = new net.sf.ehcache.CacheManager(configUrl);
 //    }
 //   
-    public <K, V> NoCache<K, V> noCache(String cacheName) {
+    /**
+     * Creates a non-caching basic cache
+     * 
+     * @param <K>
+     * @param <V>
+     * @param cacheName
+     * @return 
+     */
+    public <K, V> Cache<K, V> noCache(String cacheName) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
 
-            NoCache<K, V> cache = new NoCache<K, V>(cacheName);
+            GuavaBasicCache<K,V> cache = GuavaBasicCache.nonCaching(cacheName);
             caches.put(cacheName, cache);
             return cache;
         }
     }
 
-    public <K, V> SimpleCache<K, V> simpleCache(String cacheName) {
+    /**
+     * Creates a non-expiring basic cache
+     * 
+     * @param <K>
+     * @param <V>
+     * @param cacheName
+     * @return 
+     */
+    public <K, V> Cache<K, V> simpleCache(String cacheName) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
 
-            SimpleCache<K, V> cache = new SimpleCache<K, V>(cacheName);
+            GuavaBasicCache<K,V> cache = GuavaBasicCache.permanent(cacheName);
             caches.put(cacheName, cache);
             return cache;
         }
@@ -134,9 +148,7 @@ public class CacheManager {
             if (ehCacheManager == null) {
                 ehCacheManager = getDefaultEhcacheManager();
             }
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
 
             EhCache<K, V> cache = new EhCache<K, V>(cacheName, ehCacheManager);
             caches.put(cacheName, cache);
@@ -144,91 +156,192 @@ public class CacheManager {
         }
     }
     
+    /**
+     * Creates a non-expiring cache
+     * 
+     * @param <V>
+     * @param cacheName
+     * @return 
+     */
     public <V> SingletonCache<V> singletonCache(String cacheName) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
 
-            SingletonCache<V> cache = new SingletonCache<V>(cacheName);
+            SingletonCache<V> cache = SingletonCache.permanent(cacheName);
             caches.put(cacheName, cache);
             return cache;
         }
     }
     
-    public <V> SingletonNoCache<V> singletonNoCache(String cacheName) {
+    /**
+     * Creates a singleton cache from a CacheBuilderSpec
+     * 
+     * @param <V>
+     * @param cacheName
+     * @param spec
+     * @return 
+     */
+    public <V> SingletonCache<V> singletonCache(String cacheName, CacheBuilderSpec spec) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
 
-            SingletonNoCache<V> cache = new SingletonNoCache<V>(cacheName);
+            SingletonCache<V> cache = SingletonCache.fromSpec(cacheName,spec);
             caches.put(cacheName, cache);
             return cache;
         }
     }
     
-    public <V> SingletonEhCache<V> singletonEhCache(String cacheName) {
+    /**
+     * Creates a singleton cache from a CacheBuilderSpec
+     * 
+     * @param <V>
+     * @param cacheName
+     * @param spec
+     * @return 
+     */
+    public <V> SingletonCache<V> singletonCache(String cacheName, String spec) {
         synchronized (caches) {
-            if (ehCacheManager == null) {
-                ehCacheManager = getDefaultEhcacheManager();
-            }
+            checkName(cacheName);
+
+            SingletonCache<V> cache = SingletonCache.fromSpec(cacheName,spec);
+            caches.put(cacheName, cache);
+            return cache;
+        }
+    }
+    
+    /**
+     * Creates a basic cache from a CacheBuilderSpec
+     * 
+     * @param <K>
+     * @param <V>
+     * @param cacheName
+     * @param spec
+     * @return 
+     */
+    public <K, V> GuavaBasicCache<K,V> guavaCache(String cacheName, CacheBuilderSpec spec) {
+        synchronized (caches) {
+            checkName(cacheName);
             
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
-
-            SingletonEhCache<V> cache = new SingletonEhCache<V>(cacheName,ehCacheManager);
+            GuavaBasicCache<K,V> cache = GuavaBasicCache.fromSpec(cacheName, spec);
             caches.put(cacheName, cache);
             return cache;
         }
     }
-    
-    public <K, V> GuavaCache<K,V> createGuavaCache(String cacheName, CacheBuilder bldr) {
+    /**
+     * Creates a basic cache from a CacheBuilderSpec
+     * 
+     * @param <K>
+     * @param <V>
+     * @param cacheName
+     * @param spec
+     * @return 
+     */
+    public <K, V> GuavaBasicCache<K,V> guavaCache(String cacheName, String spec) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
             
-            GuavaCache<K,V> cache = new GuavaBasicCache<K,V>(cacheName, bldr);
+            GuavaBasicCache<K,V> cache = GuavaBasicCache.fromSpec(cacheName, spec);
             caches.put(cacheName, cache);
             return cache;
         }
     }
 
-    public <K, V> GuavaCache<K,V> createGuavaLoadingCache(String cacheName, CacheBuilder bldr, CacheLoader loader) {
+    /**
+     * Creates a cache populated by a CacheLoader based upon a CacheBuilderSpec
+     * 
+     * @param <K>
+     * @param <V>
+     * @param cacheName
+     * @param spec
+     * @param loader
+     * @return 
+     */
+    public <K, V> GuavaLoadingCache<K,V> guavaLoadingCache(String cacheName, CacheBuilderSpec spec, CacheLoader<K,V> loader) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
+            checkName(cacheName);
             
-            GuavaCache<K,V> cache = new GuavaLoadingCache<K,V>(name, bldr, loader);
+            GuavaLoadingCache<K,V> cache = GuavaLoadingCache.fromSpec(name, spec, loader);
+            caches.put(cacheName, cache);
+            return cache;
+        }
+    }
+    /**
+     * Creates a cache populated by a CacheLoader based upon a CacheBuilderSpec
+     * 
+     * @param <K>
+     * @param <V>
+     * @param cacheName
+     * @param spec
+     * @param loader
+     * @return 
+     */
+    public <K, V> GuavaLoadingCache<K,V> guavaLoadingCache(String cacheName, String spec, CacheLoader<K,V> loader) {
+        synchronized (caches) {
+            checkName(cacheName);
+            
+            GuavaLoadingCache<K,V> cache = GuavaLoadingCache.fromSpec(name, spec, loader);
             caches.put(cacheName, cache);
             return cache;
         }
     }
     
-    public <V> GuavaSingletonLoadingCache<V> createGuavaSingletonLoadingCache(String cacheName, CacheBuilder bldr, CacheLoader loader) {
+    /**
+     * Creates a permanent storage cache
+     * 
+     * @param <V>
+     * @param cacheName
+     * @param supplier
+     * @return 
+     */
+    public <V> SupplierCache<V> supplierCache(String cacheName, Supplier<V> supplier) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
-
-            GuavaSingletonLoadingCache<V> cache = new GuavaSingletonLoadingCache<V>(cacheName,bldr,loader);
+            checkName(cacheName);
+            
+            SupplierCache<V> cache = SupplierCache.permanent(name,supplier);
             caches.put(cacheName, cache);
             return cache;
         }
     }
     
-    public <V> GuavaSingletonCache<V> createGuavaSingletonCache(String cacheName, CacheBuilder bldr) {
+    /**
+     * Creates an expiring cache.
+     * if duration = 0 caching will be disabled
+     * if duration < 0 the cache will never expire
+     * 
+     * @param <V>
+     * @param cacheName
+     * @param supplier
+     * @param duration
+     * @param timeUnit
+     * @return 
+     */
+    public <V> SupplierCache<V> supplierCache(String cacheName, Supplier<V> supplier, long duration, TimeUnit timeUnit) {
         synchronized (caches) {
-            if (caches.containsKey(cacheName)) {
-                logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
-            }
-
-            GuavaSingletonCache<V> cache = new GuavaSingletonCache<V>(cacheName,bldr);
+            checkName(cacheName);
+            
+            SupplierCache<V> cache = SupplierCache.expiring(name,supplier, duration, timeUnit);
             caches.put(cacheName, cache);
             return cache;
+        }
+    }
+    
+    /**
+     * Registers a cache with the manager
+     * 
+     * @param cache
+     * @return true if cache was properly registered, false if that name already exists
+     */
+    public boolean registerCache(Cache<?,?> cache) {
+        synchronized (caches) {
+            checkName(cache.getCacheName());
+            caches.put(cache.getCacheName(), cache);
+            return true;
+        }
+    }
+    
+    private void checkName(String cacheName) {
+        if (caches.containsKey(cacheName)) {
+            logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
         }
     }
     

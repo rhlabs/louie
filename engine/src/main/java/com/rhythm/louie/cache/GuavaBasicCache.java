@@ -1,37 +1,59 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * GuavaBasicCache.java
+ * 
+ * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-
 package com.rhythm.louie.cache;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
 import com.google.common.collect.ImmutableMap;
+
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import org.slf4j.Logger;
+
+import com.google.common.cache.CacheBuilderSpec;
+
 import org.slf4j.LoggerFactory;
 
 /**
  * The basic Google Guava Cache wrapper
  * @author eyasukoc
  */
-public class GuavaBasicCache <K, V> implements GuavaCache<K, V>{
+public class GuavaBasicCache<K, V> implements GuavaCache<K, V> {
     
     private final String cacheName;
     private final com.google.common.cache.Cache<K,V> cache;
     
-    public GuavaBasicCache(final String name, CacheBuilder bldr) {
+    private GuavaBasicCache(String name, CacheBuilder<Object, Object> bldr) {
         this.cache = bldr.build();
         this.cacheName = name;
     }
     
+    @SuppressWarnings("unchecked")
+    public static <K,V> GuavaBasicCache<K,V> nonCaching(String name) {
+        return new GuavaBasicCache(name,CacheBuilder.from(CacheBuilderSpec.disableCaching()));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <K,V> GuavaBasicCache<K,V> permanent(String name) {
+        return new GuavaBasicCache(name,CacheBuilder.newBuilder());
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <K,V> GuavaBasicCache<K,V> fromSpec(String name, CacheBuilderSpec spec) {
+        return new GuavaBasicCache(name,CacheBuilder.from(spec));
+    }
+     
+    @SuppressWarnings("unchecked")
+    public static <K,V> GuavaBasicCache<K,V> fromSpec(String name, String spec) {
+        return new GuavaBasicCache(name,CacheBuilder.from(spec));
+    }
+    
     @Override
-    public com.google.common.cache.Cache getGuava() {
+    public com.google.common.cache.Cache<K,V> getGuava() {
         return this.cache;
     }
     
@@ -106,7 +128,7 @@ public class GuavaBasicCache <K, V> implements GuavaCache<K, V>{
 
     @Override
     public void refresh(K key) {
-        throw new UnsupportedOperationException("Only supported by GuavaLoadingCache."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Only supported by GuavaLoadingCache.");
     }
 
     /**

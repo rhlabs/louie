@@ -7,16 +7,42 @@ package com.rhythm.louie.cache;
 
 import java.util.Map;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheBuilderSpec;
+
 /**
  *  Purpose of this cache is to act as a means to put lists and other non-map
  *  style caches into the cache framework.
  */
 public class SingletonCache<V> implements Cache<Object, V> {
+    private static final Integer KEY = 1;
+    
     private final String cacheName;
-    private V value;
+    private final com.google.common.cache.Cache<Object,V> cache;
 
-    public SingletonCache(final String cacheName) {
+    private SingletonCache(String cacheName, CacheBuilder<Object, V> bldr) {
         this.cacheName = cacheName;
+        this.cache = bldr.build();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <V> SingletonCache<V> nonCaching(String name) {
+        return new SingletonCache(name,CacheBuilder.from(CacheBuilderSpec.disableCaching()));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <V> SingletonCache<V> permanent(String name) {
+        return new SingletonCache(name,CacheBuilder.newBuilder());
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <V> SingletonCache<V> fromSpec(String name, CacheBuilderSpec spec) {
+        return new SingletonCache(name,CacheBuilder.from(spec));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <V> SingletonCache<V> fromSpec(String name, String spec) {
+        return new SingletonCache(name,CacheBuilder.from(spec));
     }
 
     @Override
@@ -35,11 +61,11 @@ public class SingletonCache<V> implements Cache<Object, V> {
     }
     
     public V get() {
-        return value;
+        return cache.getIfPresent(KEY);
     }
     
     public void set(V value) {
-        this.value=value;
+        cache.put(KEY, value);
     }
 
     @Override
@@ -49,16 +75,16 @@ public class SingletonCache<V> implements Cache<Object, V> {
 
     @Override
     public void clear() throws Exception {
-        value = null;
+        cache.invalidateAll();
     }
 
     @Override
     public String getCacheName() {
         return cacheName;
     }
-    
+
     @Override
     public int getSize() {
-        return value==null?0:1;
+        return (int) cache.size();
     }
 }

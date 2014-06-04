@@ -1,14 +1,13 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * GuavaCache.java
+ * 
+ * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-
 package com.rhythm.louie.cache;
 
 import com.google.common.cache.CacheStats;
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
