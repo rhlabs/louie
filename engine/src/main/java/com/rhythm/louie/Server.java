@@ -8,9 +8,7 @@ package com.rhythm.louie;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.logging.Level;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -18,8 +16,6 @@ import org.slf4j.LoggerFactory;
  * @author cjohnson
  */
 public class Server {
-    private final static Logger LOGGER = LoggerFactory.getLogger(Server.class);
-    
     public static final Server UNKNOWN = new Server("Unknown");
     static {
         UNKNOWN.host = "localhost";
@@ -87,13 +83,15 @@ public class Server {
                     } else if (attribute.equals("ip")){
                         server.ip=value;
                     } else {
-                        LOGGER.warn("Warning! Unknown Server Property: {}", key);
+                        LoggerFactory.getLogger(Server.class)
+                                .warn("Warning! Unknown Server Property: {}", key);
                     }
                 }
             }
             
             if (SERVERS.isEmpty()) {
-                LOGGER.warn("No servers found, setting to localhost");
+                LoggerFactory.getLogger(Server.class)
+                        .warn("No servers found, setting to localhost");
                 Server server = new Server("LOCAL");
                 server.host = "localhost";
                 server.location="LOCAL";
@@ -107,12 +105,14 @@ public class Server {
             
             for (Server server : SERVERS.values()) {
                 if (server.getLocation().isEmpty()) {
-                    LOGGER.error("Server {} does not specify a location!  DISABLING!", server.getName());
+                    LoggerFactory.getLogger(Server.class)
+                            .error("Server {} does not specify a location!  DISABLING!", server.getName());
                     disabled.add(server.getName());
                 } else {
                     Server previous = SERVERS_BY_LOCATION.put(server.getLocation(),server);
                     if (previous!=null) {
-                        LOGGER.warn("WARNING! Multiple Servers have the same location: "+server.getLocation());
+                        LoggerFactory.getLogger(Server.class)
+                                .warn("WARNING! Multiple Servers have the same location: "+server.getLocation());
                     }
                 }
             }
@@ -142,10 +142,11 @@ public class Server {
             if (Server.LOCAL!=UNKNOWN) {
                 sb.append("Current Server: ").append(Server.LOCAL.getName());
             }
-            LOGGER.info(sb.toString());
+            LoggerFactory.getLogger(Server.class).info(sb.toString());
             
             if (Server.LOCAL==UNKNOWN) {
-                LOGGER.error("This Server: {} is UNKNOWN! Disabling all Services!", Constants.HOSTDOMAIN);
+                LoggerFactory.getLogger(Server.class)
+                        .error("This Server: {} is UNKNOWN! Disabling all Services!", Constants.HOSTDOMAIN);
             }
         }
     }
@@ -202,7 +203,8 @@ public class Server {
             try {
                 ip = InetAddress.getByName(host).getHostAddress();
             } catch (UnknownHostException ex) {
-                LOGGER.error("ERROR getting IP for " + host+" : "+ex.toString());
+                LoggerFactory.getLogger(Server.class)
+                        .error("ERROR getting IP for " + host+" : "+ex.toString());
             }
         }
         return ip;

@@ -32,10 +32,8 @@ import com.rhythm.pb.data.Result;
  Created: Jun 14, 2011 3:47:14 PM
  */
 public class RequestHandler {
-    private static final Logger REQUEST_LOGGER = LoggerFactory.getLogger("louie.request");
-    
     public static void logRequest(Request request,Result result) {
-        logRequest(request,result,REQUEST_LOGGER);
+        logRequest(request,result,LoggerFactory.getLogger("louie.request"));
     }
     public static void logRequest(Request request,Result<?,?> result,Logger log) {
         // Bail out of here if logging is turned off.

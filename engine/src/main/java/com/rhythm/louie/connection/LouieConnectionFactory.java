@@ -7,8 +7,8 @@ package com.rhythm.louie.connection;
 
 import com.google.protobuf.Message;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
@@ -20,7 +20,6 @@ import com.rhythm.louie.Server;
  * Created: Jan 17, 2012 2:21:54 PM
  */
 public class LouieConnectionFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LouieConnectionFactory.class);
             
     private static final String BETAHOST = "louiebeta";
     private static final String LOCALHOST = "localhost";
@@ -81,7 +80,8 @@ public class LouieConnectionFactory {
             try {
                 getDelegate().setMaxTimeout(seconds);
             } catch (Exception ex) {
-                LOGGER.error("Error setting MaxTimeout", ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error setting MaxTimeout", ex);
             }
         }
 
@@ -90,7 +90,8 @@ public class LouieConnectionFactory {
             try {
                 return getDelegate().getMaxTimeout();
             } catch (Exception ex) {
-                LOGGER.error("Error getting MaxTimeout", ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error getting MaxTimeout", ex);
             }
             return 0;
         }
@@ -100,7 +101,8 @@ public class LouieConnectionFactory {
             try {
                 getDelegate().setRetryEnable(enable);
             } catch (Exception ex) {
-                LOGGER.error("Error setting RetryEnable", ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error setting RetryEnable", ex);
             }
         }
 
@@ -109,7 +111,8 @@ public class LouieConnectionFactory {
             try {
                 return getDelegate().getRetryEnable();
             } catch (Exception ex) {
-                LOGGER.error("Error getting RetryEnable", ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error getting RetryEnable", ex);
             }
             return true; //default value
         }
@@ -119,7 +122,8 @@ public class LouieConnectionFactory {
             try {
                 getDelegate().setGateway(gateway);
             } catch (Exception ex) {
-                LOGGER.error("Error setting Gateway", ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error setting Gateway", ex);
             }
         }
     }
@@ -186,7 +190,8 @@ public class LouieConnectionFactory {
             try {
                 sslConfig = new LouieSSLClientConfig(server);
             } catch (Exception ex) {
-                LOGGER.error("Error creating SSL config", ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error creating SSL config", ex);
                 return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
             }
             return new DefaultLouieConnection(id,sslConfig);

@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.base.Supplier;
 import com.google.common.cache.CacheBuilderSpec;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -25,8 +24,6 @@ import org.slf4j.LoggerFactory;
  * @author cjohnson
  */
 public class CacheManager {
-    private static final Logger logger = LoggerFactory.getLogger(CacheManager.class);
-    
     private static net.sf.ehcache.CacheManager defaultEhcacheManager;
     
     private static final Map<String,CacheManager> cacheManagers =
@@ -61,7 +58,8 @@ public class CacheManager {
     
     public static synchronized CacheManager createCacheManager(String name) {
         if (cacheManagers.containsKey(name)) {
-            logger.warn("CacheManager \""+name+"\" already exists!");
+            LoggerFactory.getLogger(CacheManager.class)
+                    .warn("CacheManager \"{}\" already exists!",name);
             return cacheManagers.get(name);
         }
         
@@ -338,10 +336,11 @@ public class CacheManager {
             return true;
         }
     }
-    
+
     private void checkName(String cacheName) {
         if (caches.containsKey(cacheName)) {
-            logger.warn("Cache \"" + name + ":" + cacheName + "\" already exists!");
+            LoggerFactory.getLogger(CacheManager.class)
+                    .warn("Cache \"{}:{}\" already exists!", name, cacheName);
         }
     }
     

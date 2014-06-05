@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
  * @author cjohnson
  */
 public class ServiceProperties {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProperties.class);
     
     private static final String DEFAULT_NAME = "default";
     private static final String PROP_ENABLE = "enable";
@@ -118,7 +116,8 @@ public class ServiceProperties {
                 String serviceName = keyParts[0];
             
                 if (ServiceManager.isServiceReserved(serviceName)) {
-                    LOGGER.warn("Ignoring property for reserved service: {}={}", key, value);
+                     LoggerFactory.getLogger(ServiceProperties.class)
+                             .warn("Ignoring property for reserved service: {}={}", key, value);
                 } else if (!serviceName.equals(DEFAULT_NAME)) {
                     ServiceProperties service = SERVICES.get(serviceName);
                     if (service==null) {

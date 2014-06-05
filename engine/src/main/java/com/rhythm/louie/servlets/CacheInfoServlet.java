@@ -32,8 +32,8 @@ import com.rhythm.louie.cache.CacheManager;
  */
 public class CacheInfoServlet extends HttpServlet {
     
-    private static final Logger logger = LoggerFactory.getLogger(CacheManager.class);
-    private static final Pattern HOST = Pattern.compile("(\\w+):.*");
+    private final Logger logger = LoggerFactory.getLogger(CacheManager.class);
+    private final Pattern HOST = Pattern.compile("(\\w+):.*");
     
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -46,7 +46,6 @@ public class CacheInfoServlet extends HttpServlet {
             throws ServletException, IOException {
 
         List<String> cacheNames = new ArrayList<String>();
-        List<String> managerNames = new ArrayList<String>();
         
         String serverName = request.getHeader("Host");
         Matcher m = HOST.matcher(serverName);

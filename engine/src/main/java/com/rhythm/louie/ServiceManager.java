@@ -33,13 +33,10 @@ import com.rhythm.pb.command.ServiceFactory;
  * Created: Mar 1, 2011 4:16:04 PM
  */
 public class ServiceManager {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
-    
     private static final Map<String, Service> servicesByName =
         Collections.synchronizedMap(new TreeMap<String, Service>());
     private static boolean init = false;
     private static MessageManager mm;
-    
     
     private static final Set<String> reservedServices;
     private static final List<ServiceFactory> serviceFactories;
@@ -74,6 +71,8 @@ public class ServiceManager {
     
     public static synchronized void initialize(ServletContext context) {
         if (init) return;
+        
+        Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
         
         StringBuilder versionInfo = new StringBuilder();
         Map<String,String> gitVersions = ExternalProperties.getInstance().getGitVersionMap();
@@ -187,14 +186,14 @@ public class ServiceManager {
             in = new FileInputStream(file);
             props.load(in);
         } catch (IOException ex) {
-            LOGGER.warn(ex.getMessage());
+            LoggerFactory.getLogger(ServiceManager.class).warn(ex.getMessage());
             return props;
         } finally {
             if (in!=null)  {
                 try {
                     in.close();
                 } catch (IOException ex) {
-                    LOGGER.warn(ex.getMessage());
+                    LoggerFactory.getLogger(ServiceManager.class).warn(ex.getMessage());
                 }
             }
         }
@@ -222,6 +221,8 @@ public class ServiceManager {
     }
 
     public static synchronized void shutdown() {
+        Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
+        
         LOGGER.info("RequestFactory - Shutdown");
         
         if (mm!=null) {
