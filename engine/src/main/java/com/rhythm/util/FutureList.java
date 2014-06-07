@@ -18,7 +18,12 @@ import java.util.logging.Logger;
  * @param <E>
  */
 public class FutureList<E> implements Collection<E>, List<E> {
-    List<Future<E>> futures;
+    private final List<Future<E>> futures;
+    
+    public FutureList() {
+        futures = new ArrayList<Future<E>>();
+    }
+    
     public FutureList(List<Future<E>> futures) {
         this.futures = futures;
     }
@@ -31,11 +36,6 @@ public class FutureList<E> implements Collection<E>, List<E> {
     @Override
     public boolean isEmpty() {
         return futures.isEmpty();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -52,14 +52,23 @@ public class FutureList<E> implements Collection<E>, List<E> {
     
     @Override
     public E remove(int index) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Future<E> current = futures.remove(index);
+        if (current!=null&&current.isDone()) {
+            try {
+                return current.get();
+            } catch (Exception e) {}
+        }
+        return null;
     }
     
     @Override
     public Iterator<E> iterator() {
-        return new Itr();
+        return new CompletedItr();
     }
 
+    /**
+     * An iterator that returns the items in their original order, but blocks if necessary
+     */
     private class Itr implements Iterator<E> {
         Iterator<Future<E>> futureIter = futures.iterator();
         
@@ -86,6 +95,106 @@ public class FutureList<E> implements Collection<E>, List<E> {
         }
     }
     
+    /**
+     * Returns items that are completed first
+     */
+    private class CompletedItr implements Iterator<E> {
+        LinkedList<Future<E>> processing;
+        public CompletedItr() {
+            processing = new LinkedList<Future<E>>(futures);
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return !processing.isEmpty();
+        }
+
+        @Override
+        public E next() {
+            if (processing.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+            try {
+                while (true) {
+                    Iterator<Future<E>> pIter = processing.iterator();
+                    while (pIter.hasNext()) {
+                        Future<E> item = pIter.next();
+                        if (item.isDone()) {
+                            pIter.remove();
+                            return item.get();
+                        }
+                    }
+                    Thread.sleep(10);
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove items from a FutureList is not supported");
+        }
+    }
+
+    @Override
+    public boolean add(E e) {
+        return futures.add(new FutureFaker<E>(e));
+    }
+    
+    public boolean addFuture(Future<E> futureItem) {
+        return futures.add(futureItem);
+    }
+
+    @Override
+    public E set(int index, E element) {
+        futures.set(index, new FutureFaker<E>(element));
+        // not sure what to return here
+        return element;
+    }
+
+    @Override
+    public void add(int index, E element) {
+        futures.add(index, new FutureFaker<E>(element));
+    }
+    
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        if (c.isEmpty()) {
+            return false;
+        }
+        for (E item : c) {
+            add(item);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends E> c) {
+        if (index < 0 || index > size())
+            throw new IndexOutOfBoundsException("Index "+index+" is out of bounds");
+        if (c.isEmpty()) {
+            return false;
+        }
+        for (E e : c) {
+            add(index++, e);
+        }
+        return true;
+    }
+
+    @Override
+    public void clear() {
+        futures.clear();
+    }
+    
+    @Override
+    public boolean contains(Object o) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
     @Override
     public Object[] toArray() {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -95,9 +204,14 @@ public class FutureList<E> implements Collection<E>, List<E> {
     public <T> T[] toArray(T[] a) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    @Override
+    public boolean removeAll(Collection c) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     @Override
-    public boolean add(Object e) {
+    public boolean retainAll(Collection c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -110,32 +224,7 @@ public class FutureList<E> implements Collection<E>, List<E> {
     public boolean containsAll(Collection c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    @Override
-    public boolean addAll(Collection c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean addAll(int index, Collection c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean removeAll(Collection c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean retainAll(Collection c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+    
     @Override
     public boolean equals(Object o) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -143,16 +232,6 @@ public class FutureList<E> implements Collection<E>, List<E> {
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public E set(int index, E element) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void add(int index, E element) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

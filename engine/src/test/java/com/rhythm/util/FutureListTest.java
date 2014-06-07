@@ -8,6 +8,7 @@ package com.rhythm.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,6 +69,48 @@ public class FutureListTest {
         
         List<String> fList = new FutureList<String>(results);
         for (String s : fList) {
+            System.out.println("Item : "+s);
+        }
+    }
+    
+    
+    private class SleeperCall implements Callable<Integer> {
+        int sleepTime;
+        public SleeperCall(int sleepTime) {
+            this.sleepTime=sleepTime;
+        }
+        
+        @Override
+        public Integer call() {
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(FutureListTest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return sleepTime;
+        }
+    };
+
+    @Test
+    public void testIter2() {
+        FutureList<Integer> futures = new FutureList<Integer>();
+        
+        Random rand = new Random(System.currentTimeMillis());
+        int number = 20;
+        ExecutorService es = Executors.newFixedThreadPool(number);
+        for (int i=0;i<number;i++) {
+            int sleepTime = rand.nextInt(100)*100;
+            System.out.println("Submitting: "+sleepTime);
+            
+            futures.addFuture(es.submit(new SleeperCall(sleepTime)));
+        }
+        
+        // Add some raw values that I do not need to compute
+        futures.add(-3);
+        futures.add(-1);
+        futures.add(-2);
+        
+        for (Integer s : futures) {
             System.out.println("Item : "+s);
         }
     }
