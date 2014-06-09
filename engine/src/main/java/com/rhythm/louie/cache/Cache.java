@@ -14,17 +14,17 @@ import java.util.Map;
  */
 public interface Cache<K, V> {
 
-    public void put(K key, V value) throws Exception;
+    void put(K key, V value) throws Exception;
 
-    public V get(K key);
+    V get(K key);
 
-    public void remove(K key) throws Exception;
+    void remove(K key) throws Exception;
 
-    public void clear() throws Exception;
+    void clear() throws Exception;
 
-    public String getCacheName();
+    String getCacheName();
     
-    public void putAll(Map<K,V> map) throws Exception;
+    void putAll(Map<K,V> map) throws Exception;
     
-    public int getSize();
+    int getSize();
 }

@@ -20,19 +20,21 @@ import java.util.concurrent.ExecutionException;
  */
 public interface GuavaCache <K, V> extends Cache <K, V>{
 
-    public com.google.common.cache.Cache getGuava();
+    com.google.common.cache.Cache getGuava();
     
-    public V get(K key, Callable<? extends V> valueLoader);
+    V get(K key, Callable<? extends V> valueLoader);
     
-    public void refresh(K key);
+    V getIfPresent(K key);
     
-    public void cleanUp();
+    void refresh(K key);
     
-    public ConcurrentMap<K,V> asMap();
+    void cleanUp();
     
-    public ImmutableMap<K,V> getAllPresent(Iterable<?> keys);
+    ConcurrentMap<K,V> asMap();
     
-    public CacheStats getStats();
+    ImmutableMap<K,V> getAllPresent(Iterable<?> keys);
+    
+    CacheStats getStats();
     
     ImmutableMap<K,V> getAll(Iterable<? extends K> keys) throws ExecutionException;
 }

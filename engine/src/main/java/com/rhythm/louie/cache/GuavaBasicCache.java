@@ -62,11 +62,21 @@ public class GuavaBasicCache<K, V> implements GuavaCache<K, V> {
         cache.put(key, value);
     }
 
+    /**
+     * Returns the value if present, null otherwise
+     * @param key
+     * @return 
+     */
     @Override
     public V get(K key) {
         return cache.getIfPresent(key);
     }
 
+    @Override
+    public V getIfPresent(K key) {
+        return cache.getIfPresent(key);
+    }
+    
     @Override
     public V get(K key, Callable<? extends V> valueLoader) {
         try {

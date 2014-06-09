@@ -66,6 +66,12 @@ public class GuavaLoadingCache<K, V> implements GuavaCache<K, V> {
         cache.put(key, value);
     }
 
+    /**
+     * Returns the value if present, otherwise loads the value
+     * 
+     * @param key
+     * @return 
+     */
     @Override
     public V get(K key) {
         try {
@@ -77,6 +83,12 @@ public class GuavaLoadingCache<K, V> implements GuavaCache<K, V> {
         }
     }
 
+     @Override
+    public V getIfPresent(K key) {
+        return cache.getIfPresent(key);
+    }
+
+    
     /**
      * Loads a new value for key key, possibly asynchronously. While the new 
      * value is loading the previous value (if any) will continue to be returned 
