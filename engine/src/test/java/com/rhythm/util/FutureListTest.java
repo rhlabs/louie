@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.Test;
 
@@ -57,9 +59,9 @@ public class FutureListTest {
 
     @Test
     public void testIter() {
-        List<Future<String>> results = new ArrayList<Future<String>>();
+        List<ListenableFuture<String>> results = new ArrayList<ListenableFuture<String>>();
         
-        ExecutorService es = Executors.newFixedThreadPool(2);
+        ListeningExecutorService es = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
         results.add(es.submit(new TestCall("cat")));
         results.add(es.submit(new TestCall("dog")));
         results.add(es.submit(new TestCall("blah")));
@@ -97,7 +99,7 @@ public class FutureListTest {
         
         Random rand = new Random(System.currentTimeMillis());
         int number = 20;
-        ExecutorService es = Executors.newFixedThreadPool(number);
+        ListeningExecutorService es = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(number));
         for (int i=0;i<number;i++) {
             int sleepTime = rand.nextInt(100)*100;
             System.out.println("Submitting: "+sleepTime);

@@ -12,20 +12,24 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 /**
  *
  * @author cjohnson
  * @param <E>
  */
 public class FutureList<E> implements Collection<E>, List<E> {
-    private final List<Future<E>> futures;
+    private final List<ListenableFuture<E>> futures;
     
     public FutureList() {
-        futures = new ArrayList<Future<E>>();
+        futures = new ArrayList<ListenableFuture<E>>();
     }
     
-    public FutureList(List<Future<E>> futures) {
-        this.futures = futures;
+    public FutureList(List<? extends ListenableFuture<E>> futures) {
+        this();
+        this.futures.addAll(futures);
     }
 
     @Override
@@ -69,8 +73,11 @@ public class FutureList<E> implements Collection<E>, List<E> {
     /**
      * An iterator that returns the items in their original order, but blocks if necessary
      */
-    private class Itr implements Iterator<E> {
-        Iterator<Future<E>> futureIter = futures.iterator();
+    private class CompletedItr implements Iterator<E> {
+        Iterator<ListenableFuture<E>> futureIter;
+        public CompletedItr() {
+            futureIter = Futures.inCompletionOrder(futures).iterator();
+        }
         
         @Override
         public boolean hasNext() {
@@ -98,9 +105,9 @@ public class FutureList<E> implements Collection<E>, List<E> {
     /**
      * Returns items that are completed first
      */
-    private class CompletedItr implements Iterator<E> {
+    private class ExpermimentalCompletedItr implements Iterator<E> {
         LinkedList<Future<E>> processing;
-        public CompletedItr() {
+        public ExpermimentalCompletedItr() {
             processing = new LinkedList<Future<E>>(futures);
         }
         
@@ -142,23 +149,23 @@ public class FutureList<E> implements Collection<E>, List<E> {
 
     @Override
     public boolean add(E e) {
-        return futures.add(new FutureFaker<E>(e));
+        return futures.add(Futures.immediateFuture(e));
     }
     
-    public boolean addFuture(Future<E> futureItem) {
+    public boolean addFuture(ListenableFuture<E> futureItem) {
         return futures.add(futureItem);
     }
 
     @Override
     public E set(int index, E element) {
-        futures.set(index, new FutureFaker<E>(element));
+        futures.set(index, Futures.immediateFuture(element));
         // not sure what to return here
         return element;
     }
 
     @Override
     public void add(int index, E element) {
-        futures.add(index, new FutureFaker<E>(element));
+        futures.add(index, Futures.immediateFuture(element));
     }
     
     @Override
