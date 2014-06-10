@@ -50,7 +50,7 @@ public class HttpProcessor {
                 List<Result> results = processor.processRequest(req.getInputStream(),resp.getOutputStream(),props);
                 sendHttpError(results,resp);
         } catch (UnauthorizedSessionException ex) {
-            LOGGER.error("Invalid Session Key",ex);
+            LOGGER.error(ex.toString());
             resp.sendError(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED,"Invalid Session Key");
         } catch(Exception e) {
             String errorMessage = e.getMessage()==null ? e.toString(): e.getMessage();

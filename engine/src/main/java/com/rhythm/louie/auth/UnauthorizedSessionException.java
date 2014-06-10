@@ -13,6 +13,6 @@ import com.rhythm.pb.RequestProtos.SessionKey;
  */
 public class UnauthorizedSessionException extends Exception {
     public UnauthorizedSessionException(SessionKey key) {
-        super("Invalid Session Key: "+key);
+        super("Invalid Session Key: "+(key==null?null:key.getKey()));
     }
 }
