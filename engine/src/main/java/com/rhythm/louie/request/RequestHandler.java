@@ -243,7 +243,7 @@ public class RequestHandler {
             Result result =  service.executeCommand(pbreq);
             if (result == null) {
                 LoggerFactory.getLogger("").error("Result is null!?");
-                result = new Result(true);
+                result = Result.emptyResult();
             }
             return result;
         } catch (Exception e) {

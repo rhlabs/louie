@@ -104,7 +104,7 @@ public class ProtoProcessor {
                 if (result != null) {
                     result.addError(e);
                 } else {
-                    result = new Result(false);
+                    result = Result.errorResult(e);
                 }
             } finally {
                 long end = System.currentTimeMillis();
@@ -112,7 +112,7 @@ public class ProtoProcessor {
                     LOGGER.error("Unknown Error, Request is null");
                 } else {
                     if (result == null) {
-                        result = new Result(false);
+                        result = Result.errorResult(null);
                     }
                     result.setDuration(end - start);
                     try {

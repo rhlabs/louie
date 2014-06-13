@@ -12,7 +12,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.protobuf.AbstractMessage.Builder;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -35,6 +37,7 @@ import com.rhythm.louie.process.Updating;
 /**
  * @author cjohnson
  * Created: Oct 21, 2011 5:01:49 PM
+ * @param <R>
  */
 public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     private final Logger LOGGER = LoggerFactory.getLogger(ReflectCommand.class);
@@ -157,18 +160,32 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     @Override
     @SuppressWarnings("unchecked")
     public Result<Param, R> execute(Request request) throws Exception {
-        Result<Param, R> result = new Result<Param, R>();
-        
-        if (request.getParams().isEmpty() && params.getTypes().isEmpty()) {
-            Object o = method.invoke(service, new Object[]{});
-            if (o != null && o instanceof Collection) {
-                result.addMessages((Collection) o);
+        if ((request.getParams().isEmpty() && params.getTypes().isEmpty()) || request.getParams().size()==1) {
+            Param param = request.getParams().isEmpty()?Param.EMPTY:request.getParams().get(0);
+            
+            Object[] args;
+            if (request.getParams().isEmpty()) {
+                args = new Object[]{};
+            } else {
+                args = new Object[params.count()];
+                for (int i = 0; i < params.getTypes().size(); i++) {
+                    args[i] = param.parseData(parsers.get(i), i);
+                }
+            }
+            
+            Object o = method.invoke(service, args);
+            if (o != null && o instanceof List) {
+                return Result.results(param, (List<R>) o);
             } else if (o == null || o instanceof Message) {
-                result.addMessage((R) o);
+                return Result.results(param,Collections.singletonList((R) o));
             } else {
                 throw new Exception("Unknown return type!");
             }
+            
         } else {
+            LOGGER.warn("Multi Arg Request({}) {}:{}",request.getParams().size(),
+                    request.getRequest().getSystem(), request.getRequest().getMethod());
+            Map<Param,List<R>> results = new HashMap<Param,List<R>>();
             for (Param param : request.getParams()) {
                 Object[] args = new Object[params.count()];
                 for (int i=0;i<params.getTypes().size();i++) {
@@ -176,16 +193,16 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
                 }
 
                 Object o = method.invoke(service, args);
-                if (o!=null && o instanceof Collection) {
-                    result.addResults(param, (Collection) o);
+                if (o!=null && o instanceof List) {
+                    results.put(param, (List<R>) o);
                 } else if (o == null || o instanceof Message) {
-                    result.addResult(param, (R) o);                
+                    results.put(param, Collections.singletonList((R) o));
                 } else {
                     throw new Exception("Unknown return type!");
                 }
             }
+            return Result.multiArgResults(results);
         }
-        return result;
     }
     
     @Override

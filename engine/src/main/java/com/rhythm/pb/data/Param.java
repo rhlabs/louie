@@ -22,6 +22,12 @@ import com.google.common.base.Joiner;
  */
 
 public class Param {
+    public static final Param EMPTY;
+    static {
+        List<Data> emptyData = Collections.emptyList();
+        EMPTY = new Param(emptyData);
+    }
+    
     private final List<Data> args;
     private final Object[] parsed;
 

@@ -9,13 +9,18 @@ package com.rhythm.pb.data;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import com.google.common.collect.Collections2;
 import com.google.protobuf.Message;
 
 /**
  * @author cjohnson
  * Created: Mar 1, 2011 5:12:38 PM
+ * @param <A>
+ * @param <R>
  */
 public class Result<A,R extends Message> {
     private final List<R> messages;
@@ -27,35 +32,95 @@ public class Result<A,R extends Message> {
     private long size;
     private Exception ex;
     
-    public Result() {
-        this(true);
+    
+    public static <A,R extends Message> Result<A,R> emptyResult() {
+        List<A> args = Collections.emptyList();
+        List<R> results = Collections.emptyList();
+        return new Result<A,R>(true, args, results);
     }
     
-    public static Result errorResult(Exception e) {
-        StringBuilder stack = new StringBuilder();
-        while (e.getCause() != null && e.getCause() instanceof Exception) {
-            if (!(e instanceof InvocationTargetException)) {
-                stack.append(e.toString()).append("\n");
-            }
-            e = (Exception) e.getCause();
+    public static <A,R extends Message> Result<A,R> results(A arg, List<R> results) {
+        return new Result<A,R>(true, Collections.singletonList(arg), results);
+    }
+    
+    // TODO should deprecate/remove this as it is not a supported workflow
+    public static <A,R extends Message> Result<A,R> multiArgResults(Map<A,List<R>> results) {
+        List<R> messages = new ArrayList<R>();
+        for (List<R> values : results.values()) {
+            messages.addAll(values);
         }
-
-        Result result = new Result(false);
-        result.setException(e);
-        result.setInfo(stack.toString());
+        
+        return new Result<A,R>(true, new ArrayList<A>(results.keySet()), messages);
+    }
+    
+    public static <A,R extends Message> Result<A,R> errorResult(Exception e) {
+        List<A> args = Collections.emptyList();
+        List<R> results = Collections.emptyList();
+        
+        Result<A,R> result = new Result<A,R>(false, args, results);
+        if (e != null) {
+            result.setException(e);
+            StringBuilder stack = new StringBuilder();
+            while (e.getCause() != null && e.getCause() instanceof Exception) {
+                if (!(e instanceof InvocationTargetException)) {
+                    stack.append(e.toString()).append("\n");
+                }
+                e = (Exception) e.getCause();
+            }
+            result.setInfo(stack.toString());
+        }
 
         return result;
     }
     
-    public Result(boolean success) {
+    private Result(boolean success, List<A> args, List<R> messages) {
         this.success = success;
-        messages = new ArrayList<R>();
-        arguments = new ArrayList<A>();
+        this.messages = messages;
+        this.arguments = args;
         
         size=0;
         duration=0;
         execTime=0;
     }
+    
+//     public void addArgument(A arg) {
+//        if (arg!=null) {
+//            arguments.add(arg);
+//        }
+//    }
+//    public void addArguments(Collection<? extends A> args) {
+//        if (args!=null) {
+//            arguments.addAll(args);
+//        }
+//    }
+//    public void addResult(A arg,R message) {
+//        addArgument(arg);
+//        addMessage(message);
+//    }
+//    public void addResults(Collection<? extends A> args,
+//            Collection<? extends R> messages) {
+//        addArguments(args);
+//        addMessages(messages);
+//    }
+//    public void addResults(A arg,
+//            Collection<? extends R> messages) {
+//        addArgument(arg);
+//        addMessages(messages);
+////    }
+//     public void addMessages(List<? extends R> messages) {
+//        if (messages != null) {
+//            for (R msg : messages) {
+//                if (msg != null) {
+//                    this.messages.add(msg);
+//                }
+//            }
+//        }
+////    }
+//     public void addMessage(R msg) {
+//        if (msg!=null) {
+//            messages.add(msg);
+//        }
+//    }
     
     public void setInfo(String info) {
         this.info=info;
@@ -73,59 +138,14 @@ public class Result<A,R extends Message> {
         return info;
     }
     
-    public Collection<R> getMessages() {
+    public List<R> getMessages() {
         return messages;
     }
 
-    public void addMessage(R msg) {
-        if (msg!=null) {
-            messages.add(msg);
-        }
-    }
-
-    public void addMessages(Collection<? extends R> messages) {
-        if (messages != null) {
-            for (R msg : messages) {
-                if (msg != null) {
-                    this.messages.add(msg);
-                }
-            }
-        }
-    }
-    
     public List<A> getArguments() {
         return arguments;
     }
 
-    public void addArgument(A arg) {
-        if (arg!=null) {
-            arguments.add(arg);
-        }
-    }
-
-    public void addArguments(Collection<? extends A> args) {
-        if (args!=null) {
-            arguments.addAll(args);
-        }
-    }
-
-    public void addResult(A arg,R message) {
-        addArgument(arg);
-        addMessage(message);
-    }
-    
-    public void addResults(Collection<? extends A> args,
-            Collection<? extends R> messages) {
-        addArguments(args);
-        addMessages(messages);
-    }
-    
-    public void addResults(A arg,
-            Collection<? extends R> messages) {
-        addArgument(arg);
-        addMessages(messages);
-    }
-    
     /**
      * @return the duration
      */
