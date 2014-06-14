@@ -88,7 +88,11 @@ public class RequestHandler {
         if (result.isError()) {
             log.error(logtext.toString());
         } else {
-            log.info(logtext.toString());
+            if (request.getParams().size()>1) {
+                log.warn(logtext.toString());
+            } else {
+                log.info(logtext.toString());
+            }
         }
     }
     
