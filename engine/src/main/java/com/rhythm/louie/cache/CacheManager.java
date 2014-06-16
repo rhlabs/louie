@@ -31,11 +31,11 @@ public class CacheManager {
     
     private net.sf.ehcache.CacheManager ehCacheManager;
     private final Map<String,Cache<?,?>> caches;
-    private final String name;
+    private final String managerName;
     
     private CacheManager(String name) {
         caches = new TreeMap<String,Cache<?,?>>();
-        this.name = name;
+        this.managerName = name;
     }
     
     public synchronized static void shutdown() {
@@ -94,7 +94,7 @@ public class CacheManager {
     }
     
     public String getName() {
-        return name;
+        return managerName;
     }
     
     // Unsafe, must cleanup all managers
@@ -258,7 +258,7 @@ public class CacheManager {
         synchronized (caches) {
             checkName(cacheName);
             
-            GuavaLoadingCache<K,V> cache = GuavaLoadingCache.fromSpec(name, spec, loader);
+            GuavaLoadingCache<K,V> cache = GuavaLoadingCache.fromSpec(cacheName, spec, loader);
             caches.put(cacheName, cache);
             return cache;
         }
@@ -277,7 +277,7 @@ public class CacheManager {
         synchronized (caches) {
             checkName(cacheName);
             
-            GuavaLoadingCache<K,V> cache = GuavaLoadingCache.fromSpec(name, spec, loader);
+            GuavaLoadingCache<K,V> cache = GuavaLoadingCache.fromSpec(cacheName, spec, loader);
             caches.put(cacheName, cache);
             return cache;
         }
@@ -295,7 +295,7 @@ public class CacheManager {
         synchronized (caches) {
             checkName(cacheName);
             
-            SupplierCache<V> cache = SupplierCache.permanent(name,supplier);
+            SupplierCache<V> cache = SupplierCache.permanent(cacheName,supplier);
             caches.put(cacheName, cache);
             return cache;
         }
@@ -317,7 +317,7 @@ public class CacheManager {
         synchronized (caches) {
             checkName(cacheName);
             
-            SupplierCache<V> cache = SupplierCache.expiring(name,supplier, duration, timeUnit);
+            SupplierCache<V> cache = SupplierCache.expiring(cacheName,supplier, duration, timeUnit);
             caches.put(cacheName, cache);
             return cache;
         }
@@ -327,7 +327,7 @@ public class CacheManager {
      * Registers a cache with the manager
      * 
      * @param cache
-     * @return true if cache was properly registered, false if that name already exists
+     * @return true if cache was properly registered, false if that managerName already exists
      */
     public boolean registerCache(Cache<?,?> cache) {
         synchronized (caches) {
@@ -340,7 +340,7 @@ public class CacheManager {
     private void checkName(String cacheName) {
         if (caches.containsKey(cacheName)) {
             LoggerFactory.getLogger(CacheManager.class)
-                    .warn("Cache \"{}:{}\" already exists!", name, cacheName);
+                    .warn("Cache \"{}:{}\" already exists!", managerName, cacheName);
         }
     }
     
