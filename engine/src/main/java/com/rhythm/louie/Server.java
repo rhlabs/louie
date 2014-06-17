@@ -23,6 +23,11 @@ public class Server {
         UNKNOWN.timezone = TimeZone.getDefault().getDisplayName();
     }
     
+    public static String DEFAULT_GATEWAY = "louie";
+    public static void setDefaultGateway(String gateway) {
+        DEFAULT_GATEWAY = gateway;
+    }
+    
     public static Server LOCAL = UNKNOWN;
     
     private static final Map<String,Server> SERVERS = 
@@ -175,7 +180,7 @@ public class Server {
         this.sslPass = null;
         this.sslPort = 0;
         this.sslGateway = null;
-        this.gateway = "louie";
+        this.gateway = DEFAULT_GATEWAY;
     }
      
     public static List<Server> allServers() {

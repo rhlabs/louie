@@ -167,6 +167,7 @@ public class ServiceManager {
     
     private static void configureServers(ServletContext context) {
         Properties serverProps = loadProperties(context,CONF_DIR,SERVER_PROPERTIES);
+        Server.setDefaultGateway(context.getContextPath().replaceFirst("/", ""));
         Server.processServerProperties(serverProps);
     }
     
