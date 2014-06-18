@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.rhythm.louie</groupId>
         <artifactId>louie-parent</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.5</version>
     </parent>
     
     <artifactId>service-template</artifactId>
@@ -20,7 +20,7 @@
         <python.pbdir>${proto.gen}-python</python.pbdir>
         <cpp.pbdir>${proto.gen}-cpp</cpp.pbdir>
         <skipTests>true</skipTests>
-        <louie.version>1.5-SNAPSHOT</louie.version>
+        <louie.version>1.5</louie.version>
     </properties>
   
     <build>
