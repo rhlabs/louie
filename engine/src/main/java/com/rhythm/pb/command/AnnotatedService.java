@@ -10,10 +10,11 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.rhythm.louie.ServiceProperties;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.process.CommandDescriptor;
@@ -35,29 +36,25 @@ public class AnnotatedService implements Service {
     
     protected AnnotatedService(String name) {
         this.name = name;
-        Map<PBCommandType,PBCommand<?,?>> tmpMap = new TreeMap<PBCommandType,PBCommand<?,?>>();
-        
-        processClass(this.getClass(),tmpMap);
-        
-        commandMap = Collections.synchronizedMap(tmpMap);
+        commandMap = new ConcurrentHashMap<PBCommandType,PBCommand<?,?>>();
+        processClass(this.getClass());
     }
     
-    private void processClass(Class<?> cl, Map<PBCommandType,PBCommand<?,?>> map) {
-        getCommandsForClass(cl,map);
+    private void processClass(Class<?> cl) {
+        getCommandsForClass(cl);
         
         for (Class<?> facade : cl.getInterfaces()) {
             if (facade.isAnnotationPresent(ServiceFacade.class)) {
-                getCommandsForClass(facade,map);
+                getCommandsForClass(facade);
             }
         }
         
         if (cl.getSuperclass()!=Object.class) {
-            processClass(cl.getSuperclass(),map);
+            processClass(cl.getSuperclass());
         }
     }
     
-    
-    private void getCommandsForClass(Class cl,Map<PBCommandType,PBCommand<?,?>> tmpMap) {
+    private void getCommandsForClass(Class cl) {
         for (Method meth : cl.getDeclaredMethods()) {
             try {
                 if (!Modifier.isStatic(meth.getModifiers())
@@ -65,8 +62,8 @@ public class AnnotatedService implements Service {
                         && meth.isAnnotationPresent(CommandDescriptor.class)
                         && !meth.isAnnotationPresent(Disabled.class)) {
                     ReflectCommand command = new ReflectCommand(this, meth);
-                    if (!tmpMap.containsKey(command.getCommandType())) {
-                        tmpMap.put(command.getCommandType(),command);
+                    if (!commandMap.containsKey(command.getCommandType())) {
+                        commandMap.put(command.getCommandType(),command);
                     }
                 }
             } catch (Exception ex) {

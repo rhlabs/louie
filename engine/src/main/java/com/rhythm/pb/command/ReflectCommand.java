@@ -5,6 +5,7 @@
  */
 package com.rhythm.pb.command;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -160,48 +161,56 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     @Override
     @SuppressWarnings("unchecked")
     public Result<Param, R> execute(Request request) throws Exception {
-        if ((request.getParams().isEmpty() && params.getTypes().isEmpty()) || request.getParams().size()==1) {
-            Param param = request.getParams().isEmpty()?Param.EMPTY:request.getParams().get(0);
-            
-            Object[] args;
-            if (request.getParams().isEmpty()) {
-                args = new Object[]{};
-            } else {
-                args = new Object[params.count()];
-                for (int i = 0; i < params.getTypes().size(); i++) {
-                    args[i] = param.parseData(parsers.get(i), i);
-                }
-            }
-            
-            Object o = method.invoke(service, args);
-            if (o != null && o instanceof List) {
-                return Result.results(param, (List<R>) o);
-            } else if (o == null || o instanceof Message) {
-                return Result.results(param,Collections.singletonList((R) o));
-            } else {
-                throw new Exception("Unknown return type!");
-            }
-            
-        } else {
-            LOGGER.warn("Multi Arg Request({}) {}:{}",request.getParams().size(),
-                    request.getRequest().getSystem(), request.getRequest().getMethod());
-            Map<Param,List<R>> results = new HashMap<Param,List<R>>();
-            for (Param param : request.getParams()) {
-                Object[] args = new Object[params.count()];
-                for (int i=0;i<params.getTypes().size();i++) {
-                    args[i] = param.parseData(parsers.get(i), i);
+        try {
+            if ((request.getParams().isEmpty() && params.getTypes().isEmpty()) || request.getParams().size() == 1) {
+                Param param = request.getParams().isEmpty() ? Param.EMPTY : request.getParams().get(0);
+
+                Object[] args;
+                if (request.getParams().isEmpty()) {
+                    args = new Object[]{};
+                } else {
+                    args = new Object[params.count()];
+                    for (int i = 0; i < params.getTypes().size(); i++) {
+                        args[i] = param.parseData(parsers.get(i), i);
+                    }
                 }
 
                 Object o = method.invoke(service, args);
-                if (o!=null && o instanceof List) {
-                    results.put(param, (List<R>) o);
+                if (o != null && o instanceof List) {
+                    return Result.results(param, (List<R>) o);
                 } else if (o == null || o instanceof Message) {
-                    results.put(param, Collections.singletonList((R) o));
+                    return Result.results(param, Collections.singletonList((R) o));
                 } else {
                     throw new Exception("Unknown return type!");
                 }
+
+            } else {
+                LOGGER.warn("Multi Arg Request({}) {}:{}", request.getParams().size(),
+                        request.getRequest().getSystem(), request.getRequest().getMethod());
+                Map<Param, List<R>> results = new HashMap<Param, List<R>>();
+                for (Param param : request.getParams()) {
+                    Object[] args = new Object[params.count()];
+                    for (int i = 0; i < params.getTypes().size(); i++) {
+                        args[i] = param.parseData(parsers.get(i), i);
+                    }
+
+                    Object o = method.invoke(service, args);
+                    if (o != null && o instanceof List) {
+                        results.put(param, (List<R>) o);
+                    } else if (o == null || o instanceof Message) {
+                        results.put(param, Collections.singletonList((R) o));
+                    } else {
+                        throw new Exception("Unknown return type!");
+                    }
+                }
+                return Result.multiArgResults(results);
             }
-            return Result.multiArgResults(results);
+        } catch (InvocationTargetException ie) {
+            if (ie.getCause() != null && ie.getCause() instanceof Exception) {
+                throw (Exception) ie.getCause();
+            } else {
+                throw ie;
+            }
         }
     }
     
