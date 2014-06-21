@@ -53,7 +53,7 @@ public class ProtoProcessor {
     }
     
     public List<Result> processRequest(InputStream input, OutputStream output, RequestProperties props) throws UnauthorizedSessionException, IOException, Exception {
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         List<Result> results = new ArrayList<Result>();
         
@@ -96,7 +96,7 @@ public class ProtoProcessor {
                 pbReq.setLocalPort(props.getLocalPort());
                 pbReq.setRoute(localRoute);
                 result = RequestHandler.processSingleRequest(pbReq);
-                result.setExecTime(System.currentTimeMillis()-start);
+                result.setExecTime((System.nanoTime()-start) / 1000000);
                 handleResult(pbReq, result, output);
             } catch (Exception e) {
                 String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
@@ -107,14 +107,14 @@ public class ProtoProcessor {
                     result = Result.errorResult(e);
                 }
             } finally {
-                long end = System.currentTimeMillis();
+                long end = System.nanoTime();
                 if (pbReq == null) {
                     LOGGER.error("Unknown Error, Request is null");
                 } else {
                     if (result == null) {
                         result = Result.errorResult(null);
                     }
-                    result.setDuration(end - start);
+                    result.setDuration((end - start) / 1000000);
                     try {
                         RequestHandler.logRequest(pbReq, result);
                     } catch (Exception le) {

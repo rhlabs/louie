@@ -126,7 +126,7 @@ public class ServiceManager {
         sb.append("\nServices:\n\n");
         
         for (ServiceFactory factory : serviceFactories) {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             String serviceName = factory.getServiceName().toLowerCase();
             try {
                 ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
@@ -140,7 +140,7 @@ public class ServiceManager {
                         sb.append(" || Read-Only");
                     }
                     sb.append("  (");
-                    long time = System.currentTimeMillis()-start;
+                    long time = (System.nanoTime()-start) / 1000000;
                     sb.append(time);
                     sb.append(" ms)\n");
                 } else {

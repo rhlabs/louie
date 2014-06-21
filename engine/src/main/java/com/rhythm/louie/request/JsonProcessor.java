@@ -81,7 +81,7 @@ public class JsonProcessor {
         resp.setContentType("application/json");
         
         try {
-            long start=System.currentTimeMillis();
+            long start=System.nanoTime();
             
             StringBuilder sb = new StringBuilder();
             String line;
@@ -205,11 +205,9 @@ public class JsonProcessor {
             }
             
             Result result = RequestHandler.processSingleRequest(pbReq);
-            result.setExecTime(System.currentTimeMillis()-start);
+            result.setExecTime((System.nanoTime()-start) / 1000000);
             handleResult(result,resp);
-                
-            long end=System.currentTimeMillis();
-            result.setDuration(end-start);
+            result.setDuration((System.nanoTime()-start) / 1000000);
             
             RequestHandler.logRequest(pbReq, result);
         } catch(Exception e) {
@@ -229,7 +227,7 @@ public class JsonProcessor {
         try {
             LOGGER.info("processFormRequest");
             
-            long start=System.currentTimeMillis();
+            long start=System.nanoTime();
             
             String user = Strings.nullToEmpty(req.getParameter("user"));
             String system = req.getParameter("system");
@@ -270,10 +268,9 @@ public class JsonProcessor {
             pbReq.setUserAgent(Strings.nullToEmpty(req.getHeader("user-agent")));
             
             Result result = RequestHandler.processSingleRequest(pbReq);
-            result.setExecTime(System.currentTimeMillis()-start);
-            
+            result.setExecTime((System.nanoTime()-start) / 1000000);
             handleResult(result,resp);
-            result.setDuration(System.currentTimeMillis()-start);
+            result.setDuration((System.nanoTime()-start) / 1000000);
             
             RequestHandler.logRequest(pbReq, result);
         } catch(Exception e) {
