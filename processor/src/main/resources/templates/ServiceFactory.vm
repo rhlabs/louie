@@ -97,16 +97,16 @@ public class ${className} implements ServiceFactory {
         public void initialize() throws Exception {
             ServiceProperties props = ServiceProperties.getServiceProperties(getServiceName());
 
-            Server MAIN = Server.getServer(props.getMain());
-            if (MAIN == null) {
+            Server PRIMARY = Server.getServer(props.getMain());
+            if (PRIMARY == null) {
                 throw new Exception("Cannot establish service!  Unknown MAIN server: " + props.getMain());
             }
 
-            if (Server.LOCAL == MAIN) {
+            if (Server.LOCAL.getLocation().equals(PRIMARY.getLocation())) {
                 ${baseName}Client dao = getConfiguredDAO(props);
                 client = new ${baseName}CacheDelegate(dao);
             } else {
-                LouieConnection connection = LouieConnectionFactory.getConnectionForServer(MAIN);
+                LouieConnection connection = LouieConnectionFactory.getConnectionForServer(PRIMARY);
                 client = new ${baseName}CacheDelegate(${baseName}ClientFactory.getClient(connection));
             }
 

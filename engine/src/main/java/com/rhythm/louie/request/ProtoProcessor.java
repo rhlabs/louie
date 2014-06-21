@@ -39,7 +39,7 @@ import com.rhythm.pb.data.Result;
  *
  * @author cjohnson
  */
-public class ProtoProcessor {
+public class ProtoProcessor implements ProtoProcess{
     private final Logger LOGGER = LoggerFactory.getLogger(ProtoProcessor.class);
 
     public static void main(String args[]) {
@@ -49,9 +49,9 @@ public class ProtoProcessor {
         } catch (UnknownHostException ex) {
             java.util.logging.Logger.getLogger(ProtoProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
     
+    @Override
     public List<Result> processRequest(InputStream input, OutputStream output, RequestProperties props) throws UnauthorizedSessionException, IOException, Exception {
         long start = System.nanoTime();
 
@@ -75,7 +75,7 @@ public class ProtoProcessor {
         for (int r = 0; r < header.getCount(); r++) {
             RequestPB request = RequestPB.parseDelimitedFrom(input);
             if (request == null) {
-                throw new Exception("Improper Request format!  Reached EOF prematurely!");
+                throw new Exception("Improper Request format! Reached EOF prematurely! @ProtoProcessor.processRequest()");
             }
             if (request.hasRouteUser() && (identity == null || !"LoUIE".equals(identity.getUser()))) {
                 throw new Exception("User Route Permission Denied!");
@@ -103,7 +103,7 @@ public class ProtoProcessor {
                 handleResult(pbReq, result, output);
             } catch (Exception e) {
                 String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
-                LOGGER.error(errorMessage);
+                LOGGER.error("ProtoProcessor caught error: {}",errorMessage);
                 if (result != null) {
                     result.addError(e);
                 } else {

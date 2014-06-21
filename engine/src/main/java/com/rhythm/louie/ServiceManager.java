@@ -25,10 +25,20 @@ import com.rhythm.louie.jms.ActiveMQUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
 import com.rhythm.louie.server.LouieServiceFactory;
+import com.rhythm.louie.topology.Route;
 import com.rhythm.louie.testservice.TestServiceFactory;
 
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.command.ServiceFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
+import javax.servlet.ServletContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author cjohnson
@@ -105,6 +115,11 @@ public class ServiceManager {
             return;
         }
         
+        if (Server.LOCAL.isARouter()) {
+            LOGGER.info("This Server started as a router.");
+            configureRoutes(context);
+        }
+        
         // Services
         if(context !=null) {
             configureServices(context);
@@ -167,6 +182,7 @@ public class ServiceManager {
     private static final String CONF_DIR = "/WEB-INF/conf/";
     private static final String SERVICE_PROPERTIES = "services";
     private static final String SERVER_PROPERTIES = "servers";
+    private static final String ROUTE_PROPERTIES = "routing";
     
     private static void configureServers(ServletContext context) {
         Properties serverProps = loadProperties(context,CONF_DIR,SERVER_PROPERTIES);
@@ -177,6 +193,11 @@ public class ServiceManager {
     private static void configureServices(ServletContext context) {
         Properties serviceProps = loadProperties(context,CONF_DIR,SERVICE_PROPERTIES);
         ServiceProperties.processServiceProperties(serviceProps);
+    }
+    
+    private static void configureRoutes(ServletContext context) {
+        Properties routeProps = loadProperties(context, CONF_DIR, ROUTE_PROPERTIES);
+        Route.initialize(routeProps);
     }
     
     private static Properties loadProperties(ServletContext context,String dir,String propFile) {

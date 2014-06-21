@@ -40,11 +40,10 @@ import com.rhythm.pb.data.Request;
 public class DefaultLouieConnection implements LouieConnection {
     private final Logger LOGGER = LoggerFactory.getLogger(DefaultLouieConnection.class);
             
-    public static final int PORT = 8080;
+    private static int PORT = 8080;
     public static final int AUTH_PORT = 8787;
     private static int SSL_PORT = 8181;
     
-    private static final boolean AUTH_ENABLED = true;
     private static final String AUTH_SERVICE = "auth";
     private static final AtomicInteger txId = new AtomicInteger(0);
     
@@ -54,13 +53,9 @@ public class DefaultLouieConnection implements LouieConnection {
     private URL louieURL;
     private URL authURL;
     private URL sslURL;
-//    private String SSLCert;
-//    private String SSLCACert;
+    
     private boolean requestOnSSL = false;
     private SSLConfig sslConfig;
-//    private SSLSocketFactory sslSocketFactory = null;
-//    private String sslCertPass = null;
-//    private String sslCAPass = null;
     
     private int retryWait = 2000; //milliseconds
     private int maxTimeout = 30; //seconds
@@ -91,9 +86,9 @@ public class DefaultLouieConnection implements LouieConnection {
         if (gateway != null) {
             this.gateway = gateway;
         }
-        this.louieURL = getLouieURL(this.host, PORT);
-        this.authURL = getLouieURL(this.host, AUTH_PORT);
-        this.sslURL = getSecureLouieURL(this.host, SSL_PORT);
+        this.louieURL = getPBURL();
+        this.authURL = getAuthURL();
+        this.sslURL = getSecurePBURL();
         if (key != null) {
             this.key = SessionKey.newBuilder().setKey(key).build();
         }
@@ -102,23 +97,6 @@ public class DefaultLouieConnection implements LouieConnection {
     static public int sslPort() {
         return SSL_PORT;
     }
-
-//    protected DefaultLouieConnection(IdentityPB identity, String host, String SSLCert, String SSLCACert, String sslPass, String sslCAPass, int sslPort) {
-//        this(identity,host,null);
-//        this.SSLCert = SSLCert;
-//        this.SSLCACert = SSLCACert;
-//        this.requestOnSSL = true;
-//        if (sslCertPass != null) {
-//            this.sslCertPass = sslPass;
-//        }
-//        if (sslCAPass != null) {
-//            this.sslCAPass = sslCAPass;
-//        }
-//        if (sslPort != 0) {
-//            SSL_PORT = sslPort;
-//            setSSLURL(sslPort);
-//        }
-//    }
     
     protected DefaultLouieConnection(IdentityPB identity, SSLConfig sslConfig) {
         this(identity,sslConfig.getHost(),null);
@@ -135,7 +113,7 @@ public class DefaultLouieConnection implements LouieConnection {
         this.sslConfig = sslConfig;
         if(sslConfig.getPort() != 0) {
             SSL_PORT = sslConfig.getPort();
-            sslURL = getSecureLouieURL(host, SSL_PORT);
+            sslURL = getSecurePBURL();
         }
         if(sslConfig.getGateway() != null) {
             setGateway(sslConfig.getGateway());
@@ -145,31 +123,37 @@ public class DefaultLouieConnection implements LouieConnection {
     @Override
     public void setGateway(String gateway) {
         this.gateway = gateway;
-        louieURL = getLouieURL(host, PORT);
-        authURL = getLouieURL(host, AUTH_PORT);
-        sslURL = getSecureLouieURL(host, SSL_PORT);
+        louieURL = getPBURL();
+        authURL = getAuthURL();
+        sslURL = getSecurePBURL();
     }
     
-//    private void setSSLURL(int port) {
-//        sslURL = getSecureLouieURL(host, port);
-//    }
-    
-    private URL getLouieURL(String host, int port) {
-        String url = "http://"+host+":"+port+"/"+gateway+"/pb";
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            LOGGER.error("Error creating Secure LoUIE URL!!!!! "+url, e);
-            return null;
-        }
+
+    private URL getAuthURL() {
+        return getUrl("http://"+this.host+":"+AUTH_PORT+"/"+this.gateway+"/pb");
     }
     
-    private URL getSecureLouieURL(String host, int port) {
-        String url = "https://"+host+":"+port+"/"+gateway+"/pb";
+    private URL getPBURL() {
+        return getUrl("http://"+this.host+":"+PORT+"/"+this.gateway+"/pb");
+    }
+    
+    private URL getSecurePBURL() {
+        return getUrl("https://"+this.host+":"+SSL_PORT+"/"+this.gateway+"/pb");
+    }
+    
+    private URL getJsonURL() {
+        return getUrl("http://"+this.host+":"+PORT+"/"+this.gateway+"/json");
+    }
+    
+    private URL getSecureJsonURL() {
+        return getUrl("https://"+this.host+":"+SSL_PORT+"/"+this.gateway+"/json");
+    }
+    
+    private URL getUrl(String urlStr) {
         try {
-            return new URL(url);
+            return new URL(urlStr);
         } catch (MalformedURLException e) {
-            LOGGER.error("Error creating Secure LoUIE URL!!!!! "+url, e);
+            LOGGER.error("Error creating URL: {}\n{}",urlStr, e);
             return null;
         }
     }
@@ -191,7 +175,7 @@ public class DefaultLouieConnection implements LouieConnection {
         connection.setReadTimeout(30*1000);
         connection.setConnectTimeout(15*1000);
         
-        connection.connect();
+        
         
         return connection;
     }
@@ -205,31 +189,7 @@ public class DefaultLouieConnection implements LouieConnection {
         connection.setRequestProperty("Content-Type", "application/x-protobuf");
         connection.setReadTimeout(30*1000);
         connection.setConnectTimeout(15*1000);
-        
-//        if (sslSocketFactory == null) {
-//            char[] password,caPassword;
-//            if (sslCertPass != null) {
-//                password = sslCertPass.toCharArray();
-//            } else {
-//                password = "cbgbomfug".toCharArray();
-//            }
-//            if (sslCAPass != null) {
-//                caPassword = sslCAPass.toCharArray();
-//            } else {
-//                caPassword = "cbgbomfug".toCharArray();
-//            }
-//            KeyStore ksClient = KeyStore.getInstance("pkcs12"); 
-//            ksClient.load(new FileInputStream(SSLCert), password); 
-//            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm()); 
-//            kmf.init(ksClient, password); 
-//            KeyStore ksCACert = KeyStore.getInstance(KeyStore.getDefaultType()); 
-//            ksCACert.load(new FileInputStream(SSLCACert), caPassword); 
-//            TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
-//            tmf.init(ksCACert); 
-//            SSLContext context = SSLContext.getInstance("TLS"); 
-//            context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null); 
-//            sslSocketFactory = context.getSocketFactory(); 
-//        }
+
         connection.setSSLSocketFactory(sslConfig.getSSLSocketFactory());
         
         connection.connect();
@@ -299,21 +259,22 @@ public class DefaultLouieConnection implements LouieConnection {
         try{
             if (requestOnSSL) {
                 try {
-                    connection = getSecureConnection(sslURL);
+                    connection = getSecureConnection(getSecurePBURL());
                 } catch (Exception e) {
                     LOGGER.error("Error creating secure connection", e);
                     throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords.");
                 }
             } else if (service.equals(AUTH_SERVICE)) {
                 try {
-                    connection = getConnection(authURL);
+                    connection = getConnection(getAuthURL());
                 } catch (Exception e) {
                     LOGGER.warn("Error Connecting to Auth Port, Falling back to louieport");
-                    connection = getConnection(louieURL);
+                    connection = getConnection(getPBURL());
                 }
             } else {
-                connection = getConnection(louieURL);
+                connection = getConnection(getPBURL());
             }
+            connection.connect();
         } catch (HttpsException e) {
             throw e;
         } catch (Exception e) {
@@ -324,7 +285,7 @@ public class DefaultLouieConnection implements LouieConnection {
         RequestHeaderPB.Builder headerBuilder = RequestHeaderPB.newBuilder();
         headerBuilder.setCount(1);
         //headerBuilder.setAgent("Unknown");
-        if (AUTH_ENABLED && !service.equals(AUTH_SERVICE)) {
+        if (!service.equals(AUTH_SERVICE) || !cmd.equals("createSession")) {
             headerBuilder.setKey(getSessionKey()); 
         }
         headerBuilder.build().writeDelimitedTo(connection.getOutputStream()); 
@@ -430,6 +391,63 @@ public class DefaultLouieConnection implements LouieConnection {
     @Override
     public boolean getRetryEnable(){
         return enableRetry;
+    }
+
+    @Override
+    public URLConnection getJsonForwardingConnection() throws BouncedException, HttpsException {
+        URLConnection connection;                                                                                                
+        try{                                                                                                                     
+            if (requestOnSSL) {                                                                                                  
+                try {                                                                                                            
+                    connection = getSecureConnection(getSecureJsonURL());                                                        
+                } catch (Exception e) {                                                                                          
+                    e.printStackTrace();                                                                                         
+                    throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords and incoming/outgoing ports.");
+                }                                                                                                                                 
+            } else {                                                                                                                              
+                connection = getConnection(getJsonURL());                                                                                         
+            }                                                                                                                                     
+        } catch (HttpsException e) {                                                                                                              
+            throw e;                                                                                                                              
+        } catch (Exception e) {                                                                                                                   
+            throw new BouncedException(e);                                                                                                        
+        }                                                                                                                                         
+
+        return connection;
+    }
+
+    @Override
+    public URLConnection getForwardingConnection() throws BouncedException, HttpsException {
+                                                                     
+        URLConnection connection;                                   
+        try{                                                         
+            if (requestOnSSL) {                                      
+                try {                                                
+                    connection = getSecureConnection(getSecurePBURL());
+                } catch (Exception e) {                              
+                    e.printStackTrace();                             
+                    throw new HttpsException("Error Connecting "
+                            + "via HTTPS. Please verify certificates and passwords and incoming/outgoing ports.");
+                }                                                                                                                                 
+            } else {                                                                                                                              
+                connection = getConnection(getPBURL());                                                                                             
+            }                                                                                                                                     
+        } catch (HttpsException e) {                                                                                                              
+            throw e;                                                                                                                              
+        } catch (Exception e) {                                                                                                                   
+            throw new BouncedException(e);                                                                                                        
+        }                                                                                                                                         
+
+        return connection;
+
+    }
+
+    @Override
+    public void setPort(int port) {
+        PORT = port;
+        louieURL = getPBURL();
+        authURL = getAuthURL();
+        sslURL = getSecurePBURL();
     }
     
     class HttpException extends Exception {

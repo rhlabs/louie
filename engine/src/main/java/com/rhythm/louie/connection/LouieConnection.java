@@ -6,10 +6,10 @@
 package com.rhythm.louie.connection;
 
 import com.google.protobuf.Message;
-
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
+import java.net.URLConnection;
 
 /**
  *
@@ -32,4 +32,11 @@ public interface LouieConnection {
     public boolean getRetryEnable();
     
     public void setGateway(String gateway);
+    
+    public void setPort(int port);
+    
+    public URLConnection getJsonForwardingConnection() throws Exception;
+
+    public URLConnection getForwardingConnection() throws Exception;
+    
 }

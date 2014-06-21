@@ -5,20 +5,22 @@
  */
 package com.rhythm.louie.auth;
 
+import com.rhythm.louie.Server;
+import com.rhythm.louie.cache.CacheManager;
+import com.rhythm.louie.cache.EhCache;
+import com.rhythm.louie.connection.DefaultLouieConnection;
+import com.rhythm.louie.connection.Identity;
+import com.rhythm.louie.connection.LouieConnection;
+import com.rhythm.louie.connection.LouieConnectionFactory;
+import com.rhythm.pb.RequestProtos.IdentityPB;
+import com.rhythm.pb.RequestProtos.SessionBPB;
+import com.rhythm.pb.RequestProtos.SessionKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.rhythm.louie.cache.CacheManager;
-import com.rhythm.louie.cache.EhCache;
-
-import com.rhythm.pb.RequestProtos.IdentityPB;
-import com.rhythm.pb.RequestProtos.SessionBPB;
-import com.rhythm.pb.RequestProtos.SessionKey;
 
 /**
  *
@@ -29,12 +31,36 @@ public class AuthDMO implements AuthClient {
     private final CacheManager cacheManager;
     
     private final EhCache<String,SessionStat> SESSION_STATS;
-
+    
+    private Boolean centralAuthProvider = null;
+    private AuthClient authClient = null;
+    
     private AuthDMO() {
         cacheManager = CacheManager.createCacheManager("auth");
-        
         SESSION_STATS = cacheManager.createEHCache("Auth_SessionStats");
     }
+    
+    /**
+     * Centralized Auth control. If a host was specified to be central auth in 
+     * the server config file, we will check it against the LOCAL server. Else we 
+     * function as though we are the central auth, to accommodate the basic/original behavior
+     * @return 
+     */
+    private boolean isCentralAuth() {                                                           
+        if (centralAuthProvider == null) {                 
+            if (Server.getCentralAuth() != null) {
+                centralAuthProvider = Server.LOCAL.equals(Server.getCentralAuth());
+            } else { // there is no configured central auth, revert to basic behavior
+                centralAuthProvider = true;
+            }
+            if (centralAuthProvider) {
+                LOGGER.debug("This host determined to be a central auth");
+            } else {
+                LOGGER.debug("Central auth determined to be located elsewhere");
+            }
+        }
+        return centralAuthProvider;                                                                                                                 
+    } 
     
     public static AuthDMO getInstance() {
         return AuthDMOHolder.INSTANCE;
@@ -42,6 +68,15 @@ public class AuthDMO implements AuthClient {
     
     private static class AuthDMOHolder {
         private static final AuthDMO INSTANCE = new AuthDMO();
+    }
+    
+    private AuthClient getAuthClient() {                                          
+        if (authClient == null) {                                                 
+            LouieConnection authConnection = LouieConnectionFactory.getConnectionForServer(Server.getCentralAuth(), 
+                    Identity.createIdentity("LoUIE", "LoUIE-"+Server.LOCAL.getHostName()+"/"+Server.LOCAL.getGateway()));
+            authClient = new AuthServiceClient(new AuthFacade(authConnection));                 
+        }                                                                                       
+        return authClient;                                                                      
     }
     
     private static String nextSessionId() {
@@ -66,20 +101,36 @@ public class AuthDMO implements AuthClient {
     }
     
     public SessionStat getSessionStat(SessionKey sessionKey) throws Exception {
-        return SESSION_STATS.get(sessionKey.getKey());
+        SessionStat stat = SESSION_STATS.get(sessionKey.getKey());                                                                                  
+        if (stat == null && !isCentralAuth()) {
+            LOGGER.debug("getSessionStat found a null key locally, gonna go look to central auth");
+            SessionBPB statBPB = getAuthClient().getSession(sessionKey);                                                                            
+            if (statBPB.hasKey()) { //check that this is not an empty instance                  
+                LOGGER.debug("getSession from central auth found something!");
+                stat = new SessionStat(statBPB.getKey(), statBPB.getIdentity());
+                SESSION_STATS.put(sessionKey.getKey(), stat);                                                                   
+                return stat;                                                                                                    
+            }                                                                                                                                       
+        }                   
+        return stat;
     }
     
     @Override
     public SessionKey createSession(IdentityPB identity) throws Exception {
-        String key = nextSessionId();
-        while (SESSION_STATS.get(key)!=null) {
-            LOGGER.warn("YOU HIT THE LOTTERY!!!!!");
-            key = nextSessionId();
-        }
-        
-        SessionKey skey = SessionKey.newBuilder().setKey(key).build();
-        addSessionStat(skey, identity);
-        return skey;
+        if (!isCentralAuth()) {                                                                                                                     
+            SessionKey sessionKey = getAuthClient().createSession(identity);                                                                        
+            addSessionStat(sessionKey, identity);                                                                                                   
+            return sessionKey;                                                                                                                      
+        }                                                                                                                                           
+        String key = nextSessionId();                                                                                                               
+        while (SESSION_STATS.get(key)!=null) {                                                                                                      
+            LOGGER.warn("YOU HIT THE LOTTERY!!!!!");                                                                                         
+            key = nextSessionId();                                                                                                                  
+        }                                                                                                                                           
+                                                                                                                                                    
+        SessionKey skey = SessionKey.newBuilder().setKey(key).build();                                                                              
+        addSessionStat(skey, identity);                                                                                                             
+        return skey;                                                                                                                                
     }
     
     @Override
@@ -88,7 +139,15 @@ public class AuthDMO implements AuthClient {
         if (stat!=null) {
             return stat.toPB();
         }
-        return null;
+        if (!isCentralAuth()) {                                                                                                                     
+            SessionBPB statBPB = getAuthClient().getSession(sessionKey);              
+            if (statBPB.hasKey()) {
+                LOGGER.debug("getSession found a non null stat from Central!");
+                SESSION_STATS.put(sessionKey.getKey(), new SessionStat(statBPB.getKey(), statBPB.getIdentity()));                                                                   
+                return statBPB;                                                                                                                     
+            }
+        } 
+        return SessionBPB.getDefaultInstance();
     }
     
     @Override
@@ -110,6 +169,9 @@ public class AuthDMO implements AuthClient {
                     }
                 }
             }
+            if (found.isEmpty() && !isCentralAuth()) {
+                return getAuthClient().findSessions(sessionKey);
+            }
             return found;
         }
     }
@@ -117,7 +179,14 @@ public class AuthDMO implements AuthClient {
     
     @Override
     public IdentityPB getSessionIdentity(SessionKey sessionKey) throws Exception {
-        return getIdentity(sessionKey);
+        IdentityPB ident = getIdentity(sessionKey);
+        if (ident == null && !isCentralAuth()) {
+            ident = getAuthClient().getSessionIdentity(sessionKey);
+            if (ident != null) {
+                addSessionStat(sessionKey, ident);
+            }
+        }
+        return ident;
     }
     
     @Override
@@ -126,6 +195,14 @@ public class AuthDMO implements AuthClient {
         LOGGER.debug("isValidSession: {} : {}", sessionKey.getKey(), (stat!=null));
         if (stat!=null) {
             return Boolean.TRUE;
+        }
+        if (!isCentralAuth()) {
+            SessionBPB remoteSession = getAuthClient().getSession(sessionKey);
+            SessionStat remoteStat = new SessionStat(remoteSession.getKey(), remoteSession.getIdentity());
+            if (remoteStat.getLastRequestTime()!=null) { // Need to somehow check that the returned object was valid
+                SESSION_STATS.put(null, stat);
+                return Boolean.TRUE;
+            }
         }
         return Boolean.FALSE;
     }

@@ -40,7 +40,7 @@ import java.net.InetAddress;
  *
  * @author cjohnson
  */
-public class JsonProcessor {
+public class JsonProcessor implements JsonProcess{
     private final Logger LOGGER = LoggerFactory.getLogger(JsonProcessor.class);
     
     private static final String VERSION = "version";
@@ -50,6 +50,7 @@ public class JsonProcessor {
     private static final String METHOD = "method";
     private static final String PARAMS = "params";
     
+    @Override
     public void processRequest(HttpServletRequest req,
             HttpServletResponse resp) throws ServletException, IOException {
         //resp.setHeader("Server","Louie");

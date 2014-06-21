@@ -5,25 +5,31 @@
  */
 package com.rhythm.louie.servlets;
 
+import com.rhythm.louie.Server;
+import com.rhythm.louie.request.JsonProcess;
+import com.rhythm.louie.request.JsonProcessor;
+import com.rhythm.louie.request.JsonRouter;
 import java.io.IOException;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.rhythm.louie.request.JsonProcessor;
-
 /**
  *
  * @author cjohnson
  */
 public class JsonServlet extends HttpServlet {
-    JsonProcessor processor = new JsonProcessor();
+    private JsonProcess processor;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
+        if (Server.LOCAL.isARouter()) {
+            processor = new JsonRouter();
+        } else {
+            processor = new JsonProcessor();
+        }
          super.init(config);
     }
     

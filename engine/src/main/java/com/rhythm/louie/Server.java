@@ -30,6 +30,11 @@ public class Server {
     
     public static Server LOCAL = UNKNOWN;
     
+    private static Server CENTRAL_AUTH = null;
+    private static Server ROUTER = null;
+    
+    private static final Map<ServerKey,Server> SERVERS_BY_ADDRESS = 
+            Collections.synchronizedMap(new HashMap<ServerKey,Server>());
     private static final Map<String,Server> SERVERS = 
             Collections.synchronizedMap(new HashMap<String,Server>());
      private static final Map<String,Server> SERVERS_BY_LOCATION = 
@@ -48,6 +53,7 @@ public class Server {
     private int sslPort;
     private String sslGateway;
     private String ip;
+    private boolean router;
     
     public static void processServerProperties(Properties props) {
         synchronized(SERVERS) {
@@ -87,6 +93,13 @@ public class Server {
                         server.sslCAPass=value;
                     } else if (attribute.equals("ip")){
                         server.ip=value;
+                    } else if (attribute.equals("router")) {
+                        server.router=Boolean.parseBoolean(value);
+                        if (server.router) {
+                            ROUTER = server;
+                        }
+                     }else if (attribute.equals("central_auth")) {
+                        CENTRAL_AUTH = server;
                     } else {
                         LoggerFactory.getLogger(Server.class)
                                 .warn("Warning! Unknown Server Property: {}", key);
@@ -109,16 +122,38 @@ public class Server {
             List<String> disabled = new ArrayList<String>();
             
             for (Server server : SERVERS.values()) {
-                if (server.getLocation().isEmpty()) {
+                try {
+                    String addr = InetAddress.getByName(server.getHostName()).getHostAddress();
+                    SERVERS_BY_ADDRESS.put(new ServerKey(addr,server.getGateway()), server);
+                } catch (UnknownHostException ex) {
+                    LoggerFactory.getLogger(Server.class)
+                            .warn("Failed to resolve hostname {} into ip, will "
+                            + "try to put any specified IP.",server.getHostName());
+                    if (server.getIp() != null) {
+                        SERVERS_BY_ADDRESS.put(new ServerKey(server.getIp(), server.getGateway()), server);
+                    }
+                }
+                String location = server.getLocation();
+                if (location.isEmpty()) {
                     LoggerFactory.getLogger(Server.class)
                             .error("Server {} does not specify a location!  DISABLING!", server.getName());
                     disabled.add(server.getName());
                 } else {
-                    Server previous = SERVERS_BY_LOCATION.put(server.getLocation(),server);
-                    if (previous!=null) {
-                        LoggerFactory.getLogger(Server.class)
-                                .warn("WARNING! Multiple Servers have the same location: "+server.getLocation());
+                    if (LOCAL != null) {
+                        if (LOCAL.getLocation().equals(location)) {
+                            if (LOCAL.getHostName().equals(server.getHostName())) {     //lame way to ensure only THIS server is keyed for THIS location (routing machinery)
+                                SERVERS_BY_LOCATION.put(server.getLocation(),server);                            
+                            } else {
+                                LoggerFactory.getLogger(Server.class)
+                                        .info("Additional server {} found for location {}",server.getHostName(),location);
+                            }
+                        } else {
+                            SERVERS_BY_LOCATION.put(server.getLocation(),server);
+                        }
                     }
+//                    if (previous!=null) {
+//                        LOGGER.warn("WARNING! Multiple Servers have the same location: "+server.getLocation());
+//                    }
                 }
             }
             
@@ -156,6 +191,37 @@ public class Server {
         }
     }
     
+    /**
+     * The preferred server lookup, this accommodates gateways properly, as well
+     * as fully resolving the provided hostname into an IP to avoid naming issues.
+     * @param host
+     * @param gateway
+     * @return
+     * @throws UnknownHostException 
+     */
+    public static Server getResolvedServer(String host, String gateway) throws UnknownHostException {
+        String addr;
+        try { 
+            addr = InetAddress.getByName(host).getHostAddress();
+        } catch (UnknownHostException ex) {
+            LoggerFactory.getLogger(Server.class.getName()).error("Could not resolve host name: {} via Server.getResolvedServer()", host);
+            throw ex;
+        }
+        return SERVERS_BY_ADDRESS.get(new ServerKey(addr,gateway));
+    }
+    
+    /**
+     * Similar to getResolvedServer, but assumes you have already collected 
+     * the valid IP address of the target host
+     * @param ipAddress
+     * @param gateway
+     * @return
+     * @throws UnknownHostException 
+     */
+    public static Server getServer(String ipAddress, String gateway) throws UnknownHostException {
+        return SERVERS_BY_ADDRESS.get(new ServerKey(ipAddress,gateway));
+    }
+    
     public static Server getServer(String name) {
         return SERVERS.get(name);
     }
@@ -171,7 +237,7 @@ public class Server {
     private Server(String name) {
         this.name = name;
         this.host = "";
-        this.ip = "";
+        this.ip = null;
         this.display = "";
         this.timezone = "";
         this.location = "";
@@ -181,10 +247,15 @@ public class Server {
         this.sslPort = 0;
         this.sslGateway = null;
         this.gateway = DEFAULT_GATEWAY;
+        this.router = false;
     }
      
     public static List<Server> allServers() {
         return ALL_SERVERS;
+    }
+    
+    public boolean isARouter() {
+        return router;
     }
     
     public String getName() {
@@ -204,7 +275,7 @@ public class Server {
     }
     
     public String getIp() {
-        if (ip == null || ip.isEmpty()) {
+        if (ip == null) {
             try {
                 ip = InetAddress.getByName(host).getHostAddress();
             } catch (UnknownHostException ex) {
@@ -242,4 +313,50 @@ public class Server {
     public String getSSLGateway() {
         return sslGateway;
     }
+    
+    public static Server getCentralAuth() {
+        return CENTRAL_AUTH;
+    }
+    
+    public static Server getRouter() {
+        return ROUTER;
+    }
+    
+    private static class ServerKey {
+        String address;
+        String gateway;
+
+        public ServerKey(String address, String gateway) {
+            this.address = address;
+            this.gateway = gateway;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 59 * hash + (this.address != null ? this.address.hashCode() : 0);
+            hash = 59 * hash + (this.gateway != null ? this.gateway.hashCode() : 0);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final ServerKey other = (ServerKey) obj;
+            if ((this.address == null) ? (other.address != null) : !this.address.equals(other.address)) {
+                return false;
+            }
+            if ((this.gateway == null) ? (other.gateway != null) : !this.gateway.equals(other.gateway)) {
+                return false;
+            }
+            return true;
+        }
+        
+    }
+    
 }
