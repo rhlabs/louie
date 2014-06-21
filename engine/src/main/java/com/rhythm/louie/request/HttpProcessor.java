@@ -68,7 +68,13 @@ public class HttpProcessor {
                     if (e instanceof NoSuchMethodException) {
                         errorcode = HttpServletResponse.SC_METHOD_NOT_ALLOWED;
                     }
-                    resp.sendError(errorcode, (e.getMessage() == null ? e.toString() : e.getMessage()));
+                    
+                    String message = "Unknown Error";
+                    if (e!=null) {
+                        message = e.getMessage() == null ? e.toString() : e.getMessage();
+                    }
+                    
+                    resp.sendError(errorcode, message);
                 } catch (Exception e2) {
                     LOGGER.error("Error Writing - Exception: {}", e2.toString());
                 }

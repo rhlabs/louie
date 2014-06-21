@@ -7,13 +7,12 @@
 package com.rhythm.pb.data;
 
 import java.lang.reflect.InvocationTargetException;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Collections2;
 import com.google.protobuf.Message;
 
 /**
@@ -40,6 +39,16 @@ public class Result<A,R extends Message> {
     }
     
     public static <A,R extends Message> Result<A,R> results(A arg, List<R> results) {
+        return new Result<A,R>(true, Collections.singletonList(arg), results);
+    }
+    
+    public static <A,R extends Message> Result<A,R> results(A arg, R result) {
+        List<R> results;
+        if (result==null) {
+            results = Collections.emptyList();
+        } else {
+            results = Collections.singletonList(result);
+        }
         return new Result<A,R>(true, Collections.singletonList(arg), results);
     }
     
@@ -82,45 +91,6 @@ public class Result<A,R extends Message> {
         duration=0;
         execTime=0;
     }
-    
-//     public void addArgument(A arg) {
-//        if (arg!=null) {
-//            arguments.add(arg);
-//        }
-//    }
-//    public void addArguments(Collection<? extends A> args) {
-//        if (args!=null) {
-//            arguments.addAll(args);
-//        }
-//    }
-//    public void addResult(A arg,R message) {
-//        addArgument(arg);
-//        addMessage(message);
-//    }
-//    public void addResults(Collection<? extends A> args,
-//            Collection<? extends R> messages) {
-//        addArguments(args);
-//        addMessages(messages);
-//    }
-//    public void addResults(A arg,
-//            Collection<? extends R> messages) {
-//        addArgument(arg);
-//        addMessages(messages);
-////    }
-//     public void addMessages(List<? extends R> messages) {
-//        if (messages != null) {
-//            for (R msg : messages) {
-//                if (msg != null) {
-//                    this.messages.add(msg);
-//                }
-//            }
-//        }
-////    }
-//     public void addMessage(R msg) {
-//        if (msg!=null) {
-//            messages.add(msg);
-//        }
-//    }
     
     public void setInfo(String info) {
         this.info=info;

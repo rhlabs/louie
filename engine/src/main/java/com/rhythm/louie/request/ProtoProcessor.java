@@ -65,7 +65,7 @@ public class ProtoProcessor {
             identity = session.getIdentity();
         }
         
-        if (header.hasRouteUser() && !"LoUIE".equals(identity.getUser())) {
+        if (header.hasRouteUser() && (identity==null || !"LoUIE".equals(identity.getUser()))) {
             throw new Exception("User Route Permission Denied!");
         }
         

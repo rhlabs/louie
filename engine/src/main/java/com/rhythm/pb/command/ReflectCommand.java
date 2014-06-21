@@ -179,7 +179,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
                 if (o != null && o instanceof List) {
                     return Result.results(param, (List<R>) o);
                 } else if (o == null || o instanceof Message) {
-                    return Result.results(param, Collections.singletonList((R) o));
+                    return Result.results(param, (R) o);
                 } else {
                     throw new Exception("Unknown return type!");
                 }
@@ -198,7 +198,13 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
                     if (o != null && o instanceof List) {
                         results.put(param, (List<R>) o);
                     } else if (o == null || o instanceof Message) {
-                        results.put(param, Collections.singletonList((R) o));
+                        List<R> argResults;
+                        if (o == null) {
+                            argResults = Collections.emptyList();
+                        } else {
+                            argResults = Collections.singletonList((R)o);
+                        }
+                        results.put(param, argResults);
                     } else {
                         throw new Exception("Unknown return type!");
                     }
