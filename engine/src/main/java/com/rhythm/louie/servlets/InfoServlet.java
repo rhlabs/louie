@@ -73,8 +73,9 @@ public class InfoServlet extends HttpServlet {
                     writeGroupedServiceCalls(out, service,false);
                 }
             } catch (Exception ex) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST,"Error Looking up Service: " + serviceName);
-                out.println("Error Looking up Service: " + serviceName+"\n"+ex.toString());
+                String error = "Error Looking up Service: "+serviceName+" "+ex.toString();
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, error);
+                out.println(error);
             }
             
             out.println("</body>");
@@ -133,22 +134,17 @@ public class InfoServlet extends HttpServlet {
 
             @Override
             public int compare(PBCommand<?, ?> o1, PBCommand<?, ?> o2) {
-                String group1 = o1.getGroup();
-                String group2 = o2.getGroup();
-                boolean dep1 = o1.isDeprecated();
-                boolean dep2 = o2.isDeprecated();
-                if (dep1 && !dep2) return 1;
-                if (dep2 && !dep1) return -1;
-                if (!group1.equals("") && !group2.equals("")) {
-                    int order1 = o1.getGroupOrder();
-                    int order2 = o2.getGroupOrder();
-
-                    if (order1 == order2) { return 0; }
-                    if (order1 == -1) { return 1; }
-                    else if (order2 == -1) { return -1; }
-                    return ((Integer)order1).compareTo(order2);
+                int cmp = Boolean.compare(o1.isDeprecated(), o2.isDeprecated());
+                if (cmp == 0) {
+                    cmp = String.CASE_INSENSITIVE_ORDER.compare(o1.getGroup(), o2.getGroup());
                 }
-                return o1.getCommandName().compareTo(o2.getCommandName());
+                if (cmp == 0) {
+                    cmp = Integer.compare(o1.getGroupOrder(), o2.getGroupOrder());
+                }
+                if (cmp == 0) {
+                    cmp = o1.getCommandName().compareTo(o2.getCommandName());
+                }
+                return cmp;
             }
             
         });
