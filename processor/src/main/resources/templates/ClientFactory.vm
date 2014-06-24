@@ -7,12 +7,29 @@
  */
 package ${info.packageName};
 
+import com.rhythm.louie.Server;
+import com.rhythm.louie.ServiceManager;
 import com.rhythm.louie.connection.LouieConnection;
+import com.rhythm.louie.connection.LouieConnectionFactory;
 
 public class ${className} {
     private ${className}() {}
 
     public static ${baseName}Client getClient(LouieConnection connection) {
-        return new ${baseName}ServiceClient(new ${baseName}Facade(connection));
+        return new ${baseName}ServiceClient(connection);
+    }
+
+    /**
+     * findClient attempts to locate a running instance of the relevant service 
+     * on the local deployment or via a router w/in the local network of deployments
+     */
+    public static ${baseName}Client findClient() throws Exception{
+        if (ServiceManager.hasService("${info.serviceName}")) {
+            return ${baseName}ServiceFactory.getInstance().getServiceClient();
+        } else if (Server.getRouter() != null) {
+            return new ${baseName}ServiceClient(LouieConnectionFactory.getConnectionForServer(Server.getRouter()));
+        } else {
+            throw new Exception("Could not locate an instance of the ${info.serviceName} service");
+        }
     }
 }

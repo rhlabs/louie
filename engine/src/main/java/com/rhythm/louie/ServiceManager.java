@@ -289,6 +289,10 @@ public class ServiceManager {
         return service;
     }
 
+    public static boolean hasService(String serviceName) {
+        return servicesByName.containsKey(serviceName);
+    }
+    
     public static Collection<Service> getServices() {
         return Collections.unmodifiableCollection(servicesByName.values());
     }

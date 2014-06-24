@@ -15,6 +15,7 @@ import com.rhythm.pb.command.ServiceFactory;
 public class LouieServiceFactory implements ServiceFactory{
     
     private static final String serviceName = "louie";
+    private static LouieServiceHandler service;
     
     public static LouieServiceFactory getInstance() {
         return Holder.INSTANCE;
@@ -31,7 +32,14 @@ public class LouieServiceFactory implements ServiceFactory{
     
     @Override
     public Service getService() {
-        return new LouieServiceHandler(new LouieDAO());
+        if (service == null) {
+            service = new LouieServiceHandler(new LouieDAO());
+        }
+        return service;
+    }
+    
+    public LouieClient getServiceClient() {
+        return service.getClient();
     }
     
 }

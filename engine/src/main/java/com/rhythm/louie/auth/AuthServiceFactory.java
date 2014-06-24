@@ -25,6 +25,7 @@ public class AuthServiceFactory implements ServiceFactory {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthServiceFactory.class);
     
     private static final String serviceName = "auth";
+    private static AuthServiceHandler service;
     
     private AuthServiceFactory() {}
     
@@ -43,8 +44,16 @@ public class AuthServiceFactory implements ServiceFactory {
     
     @Override
     public Service getService() {
-        AuthClient dmo = AuthDMO.getInstance();
-        return new AuthPortValidator(dmo);
+        if (service == null) {
+            AuthClient dmo = AuthDMO.getInstance();
+            service = new AuthPortValidator(dmo);
+        }
+        return service;
+    }
+    
+    public AuthClient getServiceClient() {
+        getService();
+        return service.getClient();
     }
     
     private class AuthPortValidator extends AuthServiceHandler {

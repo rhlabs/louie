@@ -215,7 +215,12 @@ public class DefaultLouieConnection implements LouieConnection {
         }
         return key;
     }
-
+    
+    @Override
+    public <T extends Message> Response<T> request(com.rhythm.louie.connection.RequestParams<T> req) throws Exception {  //TODO replace. This is a hack while I update some shit.
+        return this.request(req.getSystem(), req.getCmd(), req.getParam(), req.getTemplate());
+    }
+    
     @Override
     public <T extends Message> Response<T> request(String service,String cmd, PBParam param,T template) throws Exception { 
         boolean requestFailure = true;

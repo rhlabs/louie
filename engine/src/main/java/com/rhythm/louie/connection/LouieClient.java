@@ -40,4 +40,9 @@ public class LouieClient implements Client {
     public <T extends Message> Response<T> doRequest(String system,String cmd,PBParam param,T template) throws Exception {
         return louieConn.request(system,cmd,param,template);
     }
+
+    @Override
+    public <T extends Message> Response<T> doRequest(RequestParams<T> req) throws Exception {
+        return louieConn.request(req);
+    }
 }

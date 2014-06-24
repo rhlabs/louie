@@ -7,12 +7,19 @@
  */
 package ${info.packageName};
 
+import com.rhythm.louie.connection.LouieConnection;
+import com.rhythm.louie.connection.RequestParams;
+
+import com.rhythm.pb.PBParam;
 import com.rhythm.pb.PBType;
 
 public class ${className} implements ${baseName}Client {
-    private final ${baseName}Facade facade;
-    public ${className}(${baseName}Facade facade) {
-        this.facade = facade;
+
+    private final String SYSTEM = "${info.serviceName}";
+    private final com.rhythm.louie.connection.LouieClient client;
+
+    public ${className}(LouieConnection connection) {
+        client = new com.rhythm.louie.connection.LouieClient(connection);
     }
 #foreach($method in $info.methodInfos)
 
@@ -21,7 +28,21 @@ public class ${className} implements ${baseName}Client {
 #end
     @Override
     public ${method.convertedReturnType} ${method.name}(${method.convertedParamString}) throws ${method.throwsClause} {
-        ${method.returnType} pb = facade.${method.name}(${method.builderParamString});
+#if ( $method.hasParams() )
+        PBParam param = PBParam.createParam(${method.builderParamString});
+        RequestParams<${method.baseReturnType}> packagedRequest = 
+            RequestParams.newParams(SYSTEM, "${method.name}", param, 
+#else
+        RequestParams<${method.baseReturnType}> packagedRequest = 
+            RequestParams.newParams(SYSTEM, "${method.name}", 
+#end
+            ${method.baseReturnType}.getDefaultInstance());
+        ${method.returnType} pb = client.doRequest(packagedRequest)
+#if ( $method.returnsList() )
+            .getResults();
+#else
+            .getSingleResult();
+#end
         return ${method.getReturnConvertCode("pb")};
     }
 #end

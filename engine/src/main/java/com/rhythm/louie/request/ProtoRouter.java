@@ -74,8 +74,7 @@ public class ProtoRouter implements ProtoProcess{
         CodedInputStream externalCodedInput = CodedInputStream.newInstance(externalInput);                                                                                           
         CodedOutputStream externalCodedOutput = CodedOutputStream.newInstance(externalOutput);                                                                                       
                                                                                                                                                                                      
-        RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(externalInput);                                                                                                  
-        RequestHeaderPB singleHeader = header.toBuilder().setCount(1).build();                                                                                                       
+        RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(externalInput);                                                                                                                                                                            
 
         IdentityPB identity = null;
         if (header.hasKey()) {     
@@ -172,6 +171,7 @@ public class ProtoRouter implements ProtoProcess{
 //                louieConn = TopologyManager.getConnectionForService(key); // this get will fail prior to returning something into louieConn, i believe.
                                                                                                                                                        
                 if (louieConn == null) { //Service doesn't exist or something went wrong in forming it                                                 
+                    //This might be unreachable due to service default mapping concept
                     ResponsePB.Builder responseBuilder = ResponsePB.newBuilder();                                                                      
                     responseBuilder.setId(request.getId());                                                                                            
 
@@ -188,10 +188,15 @@ public class ProtoRouter implements ProtoProcess{
                     continue;                                                          
                 }                                                                      
                 ////////////////// PUT DATA INTO THAT CONNECTION ///////////////////   
-                URLConnection urlConn = louieConn.getForwardingConnection(); //Direct URL exposure, which is probably BAD
+                URLConnection urlConn = louieConn.getForwardingConnection();
                 urlConn.connect();
                 CodedOutputStream codedOutput = CodedOutputStream.newInstance(urlConn.getOutputStream());
 
+                RequestHeaderPB singleHeader = header.toBuilder()
+                        .setCount(1)
+                        .addRoute(localRoute)
+                        .build();
+                
                 codedOutput.writeRawVarint32(singleHeader.getSerializedSize());
                 singleHeader.writeTo(codedOutput); //add in the header         
 

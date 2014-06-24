@@ -23,6 +23,8 @@ public interface LouieConnection {
 
     <T extends Message> Response<T> request(String system, String cmd, PBParam params, T template) throws Exception;
     
+    <T extends Message> Response<T> request(RequestParams<T> req) throws Exception;
+    
     public void setMaxTimeout(int seconds);
     
     public int getMaxTimeout();

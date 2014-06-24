@@ -153,6 +153,11 @@ public class LouieConnectionFactory {
                         .error(ex.toString());
             }
         }
+
+        @Override
+        public <T extends Message> Response<T> request(RequestParams<T> req) throws Exception {
+            return getDelegate().request(req);
+        }
     }
     
     public static LouieConnection getConnection(String host) {

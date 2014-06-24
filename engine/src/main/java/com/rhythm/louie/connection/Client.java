@@ -17,4 +17,5 @@ public interface Client {
     public <T extends Message> Response<T> doRequest(String system,String cmd, T template) throws Exception;
     public <T extends Message> Response<T> doRequest(String system,String cmd,Message message,T template) throws Exception;
     public <T extends Message> Response<T> doRequest(String system,String cmd,PBParam param,T template) throws Exception;
+    public <T extends Message> Response<T> doRequest(RequestParams<T> req) throws Exception;
 }

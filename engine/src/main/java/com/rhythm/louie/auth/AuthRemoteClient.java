@@ -14,7 +14,7 @@ import com.rhythm.louie.connection.LouieConnection;
 public class AuthRemoteClient extends AuthServiceClient {
     private final LouieConnection connection;
     public AuthRemoteClient(LouieConnection connection) {
-        super(new AuthFacade(connection));
+        super(connection);
         this.connection=connection;
     }
     
