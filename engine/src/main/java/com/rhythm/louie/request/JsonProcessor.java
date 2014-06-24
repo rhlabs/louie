@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.pb.DataTypeProtos.StringListPB;
-import com.rhythm.pb.RequestProtos;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.data.DataType;
@@ -98,10 +97,10 @@ public class JsonProcessor {
                 who = "unknown";
             }
             String agent = json.optString(AGENT);
-            String system = json.optString(SYSTEM);
+            String service = json.optString(SYSTEM);
             String method = json.optString(METHOD);
             
-            if (system == null || system.isEmpty()) {
+            if (service == null || service.isEmpty()) {
                 throw new Exception("Improper Request format!  Missing System.");
             }
             if(method == null || method.isEmpty()) {
@@ -115,7 +114,7 @@ public class JsonProcessor {
                     .build();
             RequestPB.Builder reqBuilder = RequestPB.newBuilder()
                     .setId(1)
-                    .setSystem(system)
+                    .setService(service)
                     .setMethod(method);
             
             List<String> args = new ArrayList<String>();
@@ -188,15 +187,8 @@ public class JsonProcessor {
             props.setHostIp(InetAddress.getLocalHost().getHostAddress());
             props.setGateway(req.getContextPath().substring(1));
             
-            RequestProtos.RoutePB localRoute = props.createRoute(request.getSystem());
-            for (RequestProtos.RoutePB route : requestHeader.getRouteList()) {
-                if (route.equals(localRoute)) {
-                    throw new Exception("Route Loop Detected!");
-                }
-            }
-            
             pbReq.setLocalPort(props.getLocalPort());
-            pbReq.setRoute(localRoute);
+            pbReq.setRoute(props.createRoute(request.getService()));
             
             if (agent !=null && !agent.isEmpty()) {
                 pbReq.setUserAgent(agent);
@@ -230,11 +222,11 @@ public class JsonProcessor {
             long start=System.nanoTime();
             
             String user = Strings.nullToEmpty(req.getParameter("user"));
-            String system = req.getParameter("system");
+            String service = req.getParameter("system");
             String method = req.getParameter("method");
             String type = req.getParameter("type");
             
-            if (system == null || system.equals("") ||
+            if (service == null || service.equals("") ||
                 method == null || method.equals("") ) {
                 throw new Exception("Must specify system,method");
             }
@@ -251,7 +243,7 @@ public class JsonProcessor {
 
             RequestPB.Builder reqBuilder = RequestPB.newBuilder()
                     .setId(1)
-                    .setSystem(system)
+                    .setService(service)
                     .setMethod(method);
             
             if (type!=null && !type.equals("")) {

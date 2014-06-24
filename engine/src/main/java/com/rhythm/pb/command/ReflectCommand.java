@@ -186,7 +186,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
 
             } else {
                 LOGGER.warn("Multi Arg Request({}) {}:{}", request.getParams().size(),
-                        request.getRequest().getSystem(), request.getRequest().getMethod());
+                        request.getRequest().getService(), request.getRequest().getMethod());
                 Map<Param, List<R>> results = new HashMap<Param, List<R>>();
                 for (Param param : request.getParams()) {
                     Object[] args = new Object[params.count()];

@@ -89,7 +89,7 @@ public class AnnotatedService implements Service {
                      +getServiceName()+":"+req.getRequest().getMethod()
                      +"("+req.getType()+")");
          }
-         String serviceName = req.getRequest().getSystem();
+         String serviceName = req.getRequest().getService();
          ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
          if (cmd.isUpdate() && props.isReadOnly()){
              throw new UnsupportedOperationException("Louie Service "+serviceName+" is set to read-only mode.");

@@ -12,17 +12,18 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.protobuf.Message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.request.RequestContext;
+
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
@@ -44,7 +45,7 @@ public class DefaultLouieConnection implements LouieConnection {
     private static int SSL_PORT = 8181;
     
     private static final boolean AUTH_ENABLED = true;
-    private static final String AUTH_SYSTEM = "auth";
+    private static final String AUTH_SERVICE = "auth";
     private static final AtomicInteger txId = new AtomicInteger(0);
     
     private IdentityPB identity;
@@ -61,11 +62,12 @@ public class DefaultLouieConnection implements LouieConnection {
 //    private String sslCertPass = null;
 //    private String sslCAPass = null;
     
+    private int retryWait = 2000; //milliseconds
     private int maxTimeout = 30; //seconds
     private boolean enableRetry = true; //retry on by default
     private boolean lockoffRetry = false; //disable retries after timeout window reached. global lock that is disabled by a succesful request
     
-    private String gateway = "louie/pb";
+    private String gateway = "louie";
     
     protected DefaultLouieConnection(String host) {
         this(null, host, null);
@@ -87,7 +89,7 @@ public class DefaultLouieConnection implements LouieConnection {
         this.identity = identity;
         this.host = host;
         if (gateway != null) {
-            this.gateway = gateway + "/pb";
+            this.gateway = gateway;
         }
         this.louieURL = getLouieURL(this.host, PORT);
         this.authURL = getLouieURL(this.host, AUTH_PORT);
@@ -142,7 +144,7 @@ public class DefaultLouieConnection implements LouieConnection {
     
     @Override
     public void setGateway(String gateway) {
-        this.gateway = gateway + "/pb";
+        this.gateway = gateway;
         louieURL = getLouieURL(host, PORT);
         authURL = getLouieURL(host, AUTH_PORT);
         sslURL = getSecureLouieURL(host, SSL_PORT);
@@ -153,7 +155,7 @@ public class DefaultLouieConnection implements LouieConnection {
 //    }
     
     private URL getLouieURL(String host, int port) {
-        String url = "http://"+host+":"+port+"/"+gateway;
+        String url = "http://"+host+":"+port+"/"+gateway+"/pb";
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
@@ -163,7 +165,7 @@ public class DefaultLouieConnection implements LouieConnection {
     }
     
     private URL getSecureLouieURL(String host, int port) {
-        String url = "https://"+host+":"+port+"/"+gateway;
+        String url = "https://"+host+":"+port+"/"+gateway+"/pb";
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
@@ -248,45 +250,47 @@ public class DefaultLouieConnection implements LouieConnection {
         
         if (key==null) {
            // AuthRemoteClient authClient = new AuthRemoteClient(this);
-            key = performRequest(AUTH_SYSTEM,"createSession", PBParam.singleParam(getIdentity()),
+            key = performRequest(AUTH_SERVICE,"createSession", PBParam.singleParam(getIdentity()),
                 SessionKey.getDefaultInstance()).getSingleResult();
         }
         return key;
     }
 
     @Override
-    public <T extends Message> Response<T> request(String system,String cmd, PBParam param,T template) throws Exception { 
+    public <T extends Message> Response<T> request(String service,String cmd, PBParam param,T template) throws Exception { 
         boolean requestFailure = true;
-        int elapsedTime = 0;
+        long elapsedTime = 0;
+        long maxTime = maxTimeout*1000;
+        
         while (requestFailure){ 
             try {
-                Response<T> ret = performRequest(system,cmd,param,template);
+                Response<T> ret = performRequest(service,cmd,param,template);
                 lockoffRetry = false;
                 return ret;
             } catch (HttpException e) {
                 if (e.getErrorCode()==407) {
                     key = null;
-                    return performRequest(system,cmd,param,template);
+                    return performRequest(service,cmd,param,template);
                 } else {
                     LOGGER.error(e.getMessage());
                     throw e;
                 }
                 
             } catch (BouncedException e){
-                if (elapsedTime >= maxTimeout || !enableRetry || lockoffRetry){
+                if (elapsedTime >= maxTime || !enableRetry || lockoffRetry){
                     lockoffRetry = true;
                     throw e;
                 }
                 LOGGER.warn("{}  ...retrying request {}:{}.{}...", 
-                        e.getMessage(),host,system,cmd);
-                Thread.sleep(5000);
-                elapsedTime += 5;
+                        e.getMessage(),host,service,cmd);
+                Thread.sleep(retryWait);
+                elapsedTime += retryWait;
             }  
         }
         return null;
     }
     
-    private <T extends Message> Response<T> performRequest(String system,String cmd, PBParam param,T template) throws Exception { 
+    private <T extends Message> Response<T> performRequest(String service,String cmd, PBParam param,T template) throws Exception { 
         if (param==null) {
             param = PBParam.EMPTY;
         }
@@ -300,7 +304,7 @@ public class DefaultLouieConnection implements LouieConnection {
                     LOGGER.error("Error creating secure connection", e);
                     throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords.");
                 }
-            } else if (system.equals(AUTH_SYSTEM)) {
+            } else if (service.equals(AUTH_SERVICE)) {
                 try {
                     connection = getConnection(authURL);
                 } catch (Exception e) {
@@ -320,31 +324,34 @@ public class DefaultLouieConnection implements LouieConnection {
         RequestHeaderPB.Builder headerBuilder = RequestHeaderPB.newBuilder();
         headerBuilder.setCount(1);
         //headerBuilder.setAgent("Unknown");
-        if (AUTH_ENABLED && !system.equals(AUTH_SYSTEM)) {
+        if (AUTH_ENABLED && !service.equals(AUTH_SERVICE)) {
             headerBuilder.setKey(getSessionKey()); 
-            
-            // Only send routing info if this is not a auth call
-            Request currentRequest = RequestContext.getRequest();
-            if (currentRequest != null) {
-                // The identity should be set, so this check should not be needed.
-                // TODO determine how the identity could be null...
-                // (identity could be null if key in request is null, but that should not be happening either
-                if (currentRequest.getIdentity()!=null) {
-                    // Set the Routed User, as the current User is most like "LoUIE"
-                    headerBuilder.setRouteUser(currentRequest.getIdentity().getUser());
-                }
-                // Append any routes you been on and the current Route
-                headerBuilder.addAllRoute(currentRequest.getHeader().getRouteList());
-                headerBuilder.addRoute(currentRequest.getRoute());
-            }
         }
         headerBuilder.build().writeDelimitedTo(connection.getOutputStream()); 
 
         // Build and Write Request
         RequestPB.Builder reqBuilder = RequestPB.newBuilder();
         reqBuilder.setId(txId.incrementAndGet())
-                  .setSystem(system)
+                  .setService(service)
                   .setMethod(cmd);
+        
+        // Only send routing info if this is not a auth call
+        Request currentRequest = RequestContext.getRequest();
+        if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
+            if (currentRequest.getRequest().hasRouteUser()) {
+                reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
+            } else if (currentRequest.getIdentity() != null) {
+                    // The identity should be set, so this check should not be needed.
+                // TODO determine how the identity could be null...
+                // (identity could be null if key in request is null, but that should not be happening either
+
+                // Set the Routed User, as the current User is may be "LoUIE"
+                reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
+            }
+            // Append any routes you been on and the current Route
+            reqBuilder.addAllRoute(currentRequest.getRequest().getRouteList());
+            reqBuilder.addRoute(currentRequest.getRoute());
+        }
             
         for (Message message : param.getArguments()) {
             reqBuilder.addType(message.getDescriptorForType().getFullName());
@@ -379,24 +386,30 @@ public class DefaultLouieConnection implements LouieConnection {
             }
         }
 
-        List<Response<T>> allResponses = new ArrayList<Response<T>>();
-
         BufferedInputStream input = new BufferedInputStream(connection.getInputStream());
 
         // Read in the Response Header
         ResponseHeaderPB responseHeader = ResponseHeaderPB.parseDelimitedFrom(input);
-        for (int r=0; r<responseHeader.getCount();r++) {
-            // Read in each Response
-            ResponsePB response = ResponsePB.parseDelimitedFrom(input);
-            if (response.hasError()) {
-                throw new Exception(response.getError().getDescription());
-            }
-            Response<T> result = new LouieResponse<T>(response,template,input);
-            allResponses.add(result);
+        
+        if (responseHeader.getCount()!=1) {
+            throw new Exception("Received more than one response! This is unsupported behavior.");
         }
 
+        // Read in each Response
+        ResponsePB response = ResponsePB.parseDelimitedFrom(input);
+        if (response.hasError()) {
+            throw new Exception(response.getError().getDescription());
+        }
+        
+        Response<T> result = new LouieResponse<T>(response, template, input);
+        
         input.close();
-        return allResponses.get(0);
+
+        if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
+            currentRequest.addDestinationRoutes(response.getRouteList());
+        }
+        
+        return result;
     }
     
     @Override

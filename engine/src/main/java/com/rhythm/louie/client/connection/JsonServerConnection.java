@@ -66,7 +66,7 @@ public class JsonServerConnection {
         // Build and Write Request
         RequestPB.Builder reqBuilder = RequestPB.newBuilder();
         reqBuilder.setId(1)
-                  .setSystem(system)
+                  .setService(system)
                   .setMethod(cmd);
         if (messages != null && !messages.isEmpty()) {
             GeneratedMessage first = messages.get(0);
@@ -101,7 +101,7 @@ public class JsonServerConnection {
         connection.setDefaultUseCaches(false);
         
         String data = "user=cjohnson"
-                + "&system="+URLEncoder.encode(req.getSystem(), "UTF-8")
+                + "&system="+URLEncoder.encode(req.getService(), "UTF-8")
                 + "&method="+URLEncoder.encode(req.getMethod(), "UTF-8")
                 + "&type="+URLEncoder.encode(Joiner.on(",").join(req.getTypeList()), "UTF-8")
                 + "&params="+URLEncoder.encode(writer.toString(), "UTF-8");

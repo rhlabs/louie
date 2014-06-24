@@ -5,10 +5,9 @@
  */
 package com.rhythm.louie;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,7 @@ public class ServiceProperties {
     private static final String PROP_CACHE = "caching";
     
     private static final Map<String,ServiceProperties> SERVICES = 
-            Collections.synchronizedMap(new HashMap<String,ServiceProperties>());
+            new ConcurrentHashMap<String,ServiceProperties>();
 
     private static ServiceProperties DEFAULT = new ServiceProperties(DEFAULT_NAME,false,"",false,"",false,true);
     
@@ -50,10 +49,12 @@ public class ServiceProperties {
     }
     
     private ServiceProperties(String name) {
-        this(name,DEFAULT.enable,DEFAULT.main,DEFAULT.centralized,DEFAULT.dao,DEFAULT.readOnly,DEFAULT.caching);
+        this(name,DEFAULT.enable && !name.equals("test"),DEFAULT.main,
+                DEFAULT.centralized,DEFAULT.dao,DEFAULT.readOnly,DEFAULT.caching);
     }
     
-    private ServiceProperties(String name, boolean enable, String main, boolean centralized, String dao, boolean readOnly, boolean caching) {
+    private ServiceProperties(String name, boolean enable, String main, 
+            boolean centralized, String dao, boolean readOnly, boolean caching) {
         this.name = name;
         this.enable = enable;
         this.main = main;
@@ -61,7 +62,7 @@ public class ServiceProperties {
         this.dao = dao;
         this.readOnly = readOnly;
         this.caching = caching;
-        properties = Collections.synchronizedMap(new HashMap<String,String>());
+        properties = new ConcurrentHashMap<String, String>();
     }
      
     public String getName() {
@@ -110,22 +111,24 @@ public class ServiceProperties {
             DEFAULT.caching = props.getProperty(DEFAULT_NAME+"."+PROP_CACHE,"true").equals("true");
             
             for (String key : props.stringPropertyNames()) {
-                String value = props.getProperty(key);
-            
                 String[] keyParts = key.split("\\.",2);
+                if (keyParts.length!=2) {
+                    LoggerFactory.getLogger(ServiceProperties.class)
+                        .warn("Skipping key as it does not match service.attribute: {}", key);
+                    continue;
+                }
+                
+                String value = props.getProperty(key);
                 String serviceName = keyParts[0];
+                String attribute = keyParts[1];
             
-                if (ServiceManager.isServiceReserved(serviceName)) {
-                     LoggerFactory.getLogger(ServiceProperties.class)
-                             .warn("Ignoring property for reserved service: {}={}", key, value);
+                if (ServiceManager.isServiceReserved(serviceName) &&
+                        !ServiceManager.isTestService(serviceName)) {
+                    LoggerFactory.getLogger(ServiceProperties.class)
+                        .warn("Ignoring property for reserved service: {}={}", key, value);
                 } else if (!serviceName.equals(DEFAULT_NAME)) {
-                    ServiceProperties service = SERVICES.get(serviceName);
-                    if (service==null) {
-                        service = new ServiceProperties(serviceName);
-                        SERVICES.put(serviceName,service);
-                    }
+                    ServiceProperties service = getServiceProperties(serviceName);
 
-                    String attribute = keyParts[1];
                     if (attribute.equals(PROP_ENABLE)) {
                         service.enable = value.equals("true");
                     } else if (attribute.equals(PROP_MAIN)) {

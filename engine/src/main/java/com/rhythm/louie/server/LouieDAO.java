@@ -9,9 +9,6 @@ import com.rhythm.louie.ServiceManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.base.Joiner;
-import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.request.RequestContext;
 import com.rhythm.pb.command.ArgType;
 import com.rhythm.pb.command.PBCommand;
 import com.rhythm.pb.command.PBParamType;
@@ -76,29 +73,5 @@ public class LouieDAO implements LouieClient {
             }
         }
         return builder.build();
-    }
-    
-    @Override
-    public String echoTest(String value, Integer sleep) throws Exception {
-        String key = RequestContext.getRequest().getSessionKey();
-        
-        Thread.sleep(sleep);
-        
-        if (!RequestContext.getRequest().getSessionKey().equals(key)) {
-            throw new Exception("Context does not work!!!");
-        }
-        return value;
-    }
-
-    @Override
-    public String loopTest(List<String> hosts) throws Exception {
-        if (hosts.isEmpty()) {
-            return "Done";
-        }
-        List<String> args = new ArrayList<String>(hosts);
-        String host = args.remove(0);
-        LouieClient client = new LouieServiceClient(new LouieFacade(
-                        LouieConnectionFactory.getConnection(host)));
-        return client.loopTest(args);
     }
 }

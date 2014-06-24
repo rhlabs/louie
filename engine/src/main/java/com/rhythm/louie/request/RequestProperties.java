@@ -5,7 +5,6 @@
  */
 package com.rhythm.louie.request;
 
-import java.net.InetAddress;
 import com.rhythm.pb.RequestProtos.RoutePB;
 
 /**

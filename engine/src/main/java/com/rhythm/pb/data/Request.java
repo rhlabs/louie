@@ -7,12 +7,14 @@ package com.rhythm.pb.data;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.RequestProtos.RoutePB;
+import com.rhythm.pb.RequestProtos.RoutePathPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
 import com.rhythm.pb.command.PBParamType;
 
@@ -36,6 +38,8 @@ public class Request {
     private IdentityPB identity;
     private RoutePB route;
     
+    private List<RoutePathPB> destinations;
+    
     public Request(RequestHeaderPB header,
             RequestPB request,DataType dataType) {
 
@@ -45,13 +49,15 @@ public class Request {
         this.params = new ArrayList<Param>();
         
         type = PBParamType.typeForNames(request.getTypeList());
+        
+        destinations = null;
     }
     
     @SuppressWarnings("deprecation")
     public String getWho() {
         String who;
-        if (getHeader().hasRouteUser()) {
-            who = getHeader().getRouteUser();
+        if (getRequest().hasRouteUser()) {
+            who = getRequest().getRouteUser();
         } else if (identity!=null) {
             who = identity.getUser();
         } else {
@@ -233,4 +239,26 @@ public class Request {
         this.route=route;
     }
 
+    /**
+     * Adds a RoutePath to the list of visited destinations
+     * 
+     * @param routes
+     */
+    synchronized public void addDestinationRoutes(List<RoutePathPB> routes) {
+        if (destinations == null) {
+            destinations = new ArrayList<RoutePathPB>();
+        }
+        destinations.addAll(routes);
+    }
+    
+    /**
+     * List of Routes that this request visited
+     * @return 
+     */
+    synchronized public List<RoutePathPB> getDesinationRoutes() {
+        if (destinations == null) {
+            return Collections.emptyList();
+        }
+        return destinations;
+    }
 }

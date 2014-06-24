@@ -58,31 +58,34 @@ public class ProtoProcessor {
         List<Result> results = new ArrayList<Result>();
         
         RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(input);
-
+        if (header.getCount()>1) {
+            throw new Exception("Batching Requests is not yet supported!");
+        }
+        
         IdentityPB identity = null;
         if (header.hasKey()) {
             SessionStat session = AuthUtils.accessSession(header.getKey());
             identity = session.getIdentity();
         }
         
-        if (header.hasRouteUser() && (identity==null || !"LoUIE".equals(identity.getUser()))) {
-            throw new Exception("User Route Permission Denied!");
-        }
-        
         ResponseHeaderPB responseHeader = ResponseHeaderPB.newBuilder()
                 .setCount(header.getCount()).build();
         responseHeader.writeDelimitedTo(output);
+        
         for (int r = 0; r < header.getCount(); r++) {
             RequestPB request = RequestPB.parseDelimitedFrom(input);
             if (request == null) {
                 throw new Exception("Improper Request format!  Reached EOF prematurely!");
             }
-
+            if (request.hasRouteUser() && (identity == null || !"LoUIE".equals(identity.getUser()))) {
+                throw new Exception("User Route Permission Denied!");
+            }
+            
             Request pbReq = null;
             Result result = null;
 
-            RoutePB localRoute = props.createRoute(request.getSystem());
-            for (RoutePB route : header.getRouteList()) {
+            RoutePB localRoute = props.createRoute(request.getService());
+            for (RoutePB route : request.getRouteList()) {
                 if (route.equals(localRoute)) {
                     throw new Exception("Route Loop Detected!");
                 }
@@ -128,10 +131,10 @@ public class ProtoProcessor {
         return results;
     }
 
-    private void handleResult(Request pbReq,Result result,OutputStream output) throws Exception {
+    private void handleResult(Request requestContext,Result result,OutputStream output) throws Exception {
         CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
         ResponsePB.Builder responseBuilder = ResponsePB.newBuilder();
-        responseBuilder.setId(pbReq.getRequest().getId());
+        responseBuilder.setId(requestContext.getRequest().getId());
         
         if (result.isError()) {
             responseBuilder.setError(ErrorPB.newBuilder()
@@ -139,6 +142,10 @@ public class ProtoProcessor {
                     .setType(result.getException().getClass().getSimpleName())
                     .setDescription(result.getException().getMessage()));
         }
+        
+        responseBuilder.addRouteBuilder()
+                .setRoute(requestContext.getRoute())
+                .addAllPath(requestContext.getDesinationRoutes());
         
         if (result.getMessages().isEmpty()) {
             responseBuilder.setCount(0);

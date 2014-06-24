@@ -89,67 +89,10 @@ public class LouieClientTest {
     public void testGetService() throws Exception {
         System.out.println("getService");
    
-        ServicePB result = client.getService("scene");
+        ServicePB result = client.getService("louie");
         assertNotNull(result);
     
         System.out.println(result);
     }
-    
-    
-    /**
-     * Test of getService method, of class LouieClient.
-     */
-    @Test
-    public void echoTest() throws Exception {
-        System.out.println("echoTest");
-        
-        ArrayList<Thread> threads = new ArrayList<Thread>();
-        
-        for (int i=0;i<10;i++) {
-            final int f = i;
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        client = LouieClientFactory.getClient(
-                        LouieConnectionFactory.getLocalConnection(
-                        Identity.createJUnitIdentity()));
-                        
-                        String result = client.echoTest(Integer.toString(f),5000);
-                        assertNotNull(result);
-                        
-                        System.out.println(result);
-                    } catch (Exception ex) {
-                        Logger.getLogger(LouieClientTest.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-            threads.add(t);
-            t.start();
-        }
-        
-        for (Thread t : threads) {
-            while (t.isAlive()) {
-                Thread.sleep(10);
-            }
-            System.out.println("Thread finished");
-        }
-        
-        
-    }
-    
-     /**
-     * Test of getService method, of class LouieClient.
-     */
-    @Test
-    public void loopTest() throws Exception {
-        System.out.println("loopTest");
-        
-        String result = client.loopTest(Arrays.asList("vans256","louiebeta.rhythm.com","lid1577"));
-        assertNotNull(result);
-        
-        System.out.println(result);
-    }
-    
     
 }

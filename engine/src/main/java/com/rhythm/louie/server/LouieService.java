@@ -33,12 +33,4 @@ public interface LouieService {
     @CommandDescriptor(description = "Returns info for a single service", args = {"name"})
     ServicePB getService(StringPB name) throws Exception;
     
-    // Should probably setup a test service, but this will do for now...
-    @Disabled
-    @CommandDescriptor(description = "Echoes the value back after sleeping", args = {"value","sleep"})
-    StringPB echoTest(StringPB value, UIntPB sleep) throws Exception;
-    
-    @Disabled
-    @CommandDescriptor(description = "calls this method on the first host in the list, passing the rest of the hosts", args = {"hosts"})
-    StringPB loopTest(StringListPB hosts) throws Exception;
 }

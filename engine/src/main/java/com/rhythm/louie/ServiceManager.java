@@ -16,6 +16,7 @@ import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.rhythm.louie.auth.AuthServiceFactory;
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.connection.Identity;
@@ -24,6 +25,7 @@ import com.rhythm.louie.jms.ActiveMQUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
 import com.rhythm.louie.server.LouieServiceFactory;
+import com.rhythm.louie.testservice.TestServiceFactory;
 
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.command.ServiceFactory;
@@ -44,6 +46,7 @@ public class ServiceManager {
         serviceFactories = new ArrayList<ServiceFactory>();
         serviceFactories.add(LouieServiceFactory.getInstance());
         serviceFactories.add(AuthServiceFactory.getInstance());
+        serviceFactories.add(TestServiceFactory.getInstance());
         
         reservedServices = new HashSet<String>();
         for (ServiceFactory factory : serviceFactories) {
@@ -62,6 +65,11 @@ public class ServiceManager {
     public static boolean isServiceReserved(String serviceName) {
         return reservedServices.contains(serviceName);
     }
+    
+    public static boolean isTestService(String serviceName) {
+        return serviceName.equals("test");
+    }
+    
     
     private ServiceManager() {};
     
@@ -203,9 +211,10 @@ public class ServiceManager {
     }
     
     private static boolean initializeService(ServiceFactory factory) throws Exception {
-        ServiceProperties props = ServiceProperties.getServiceProperties(factory.getServiceName());
+        String serviceName = factory.getServiceName();
+        ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
         
-        if (!reservedServices.contains(factory.getServiceName()) && !props.isEnabled()) {
+        if ((!isServiceReserved(serviceName) || isTestService(serviceName)) && !props.isEnabled()) {
             return false;
         }
         

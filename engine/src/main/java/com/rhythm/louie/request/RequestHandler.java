@@ -44,7 +44,7 @@ public class RequestHandler {
         }
         
         String session = request.getWho();
-        if (request.getHeader().hasRouteUser()) {
+        if (request.getRequest().hasRouteUser()) {
             session=request.getIdentity().getUser()+"("+session+")";
         }
         if (request.getSessionKey()!=null && !request.getSessionKey().isEmpty()) {
@@ -70,7 +70,7 @@ public class RequestHandler {
         MDC.put(LogVars.LOG_BYTES, Long.toString(result.getSize()));
         
         StringBuilder logtext = new StringBuilder();
-        logtext.append(request.getRequest().getSystem()).append(":")
+        logtext.append(request.getRequest().getService()).append(":")
              .append(request.getRequest().getMethod());
         logtext.append("(");
         if (request.getRequest().getTypeCount()>0) {
@@ -232,8 +232,8 @@ public class RequestHandler {
     
     public static Result processSingleRequest(Request pbreq) throws Exception {
 
-        if (pbreq.getRequest().getSystem() == null || pbreq.getRequest().getSystem().isEmpty()) {
-            throw new Exception("No System Specified");
+        if (pbreq.getRequest().getService() == null || pbreq.getRequest().getService().isEmpty()) {
+            throw new Exception("No Service Specified");
         }
         if (pbreq.getRequest().getMethod() == null || pbreq.getRequest().getMethod().isEmpty()) {
             throw new Exception("No Method Specified");
@@ -243,7 +243,7 @@ public class RequestHandler {
         
         try {
             RequestContext.setRequest(pbreq);
-            Service service = ServiceManager.getService(pbreq.getRequest().getSystem());
+            Service service = ServiceManager.getService(pbreq.getRequest().getService());
             Result result =  service.executeCommand(pbreq);
             if (result == null) {
                 LoggerFactory.getLogger("").error("Result is null!?");
@@ -252,7 +252,7 @@ public class RequestHandler {
             return result;
         } catch (Exception e) {
             Result result = Result.errorResult(e);
-            String command = pbreq.getRequest().getSystem() + ":" + pbreq.getRequest().getMethod();
+            String command = pbreq.getRequest().getService() + ":" + pbreq.getRequest().getMethod();
             LoggerFactory.getLogger("").error("Unable to process request: "+command+"!",e);
             return result;
         } finally {
