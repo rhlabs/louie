@@ -101,6 +101,20 @@ public class ServiceProperties {
         return value;
     }
     
+    public int getCustomIntegerProperty(String attribute, int def) {
+        String value = properties.get(attribute);
+        if (value == null || value.isEmpty()) {
+            return def;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            LoggerFactory.getLogger(ServiceProperties.class)
+                    .error("Error parsing integer {}: \"{}\"", attribute, value);
+            return def;
+        }
+    }
+    
     public static void processServiceProperties(Properties props) {
         synchronized(SERVICES) {
             DEFAULT.enable = props.getProperty(DEFAULT_NAME+"."+PROP_ENABLE,"false").equals("true");

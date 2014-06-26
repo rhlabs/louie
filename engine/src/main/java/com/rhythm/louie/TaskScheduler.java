@@ -24,7 +24,6 @@ public class TaskScheduler {
     private final Logger LOGGER = LoggerFactory.getLogger(TaskScheduler.class);
     
     private static final String POLL = "poll";
-    private static final String POLL_INTERVAL = "pollInterval";
     
     private static final int THREAD_POOL_SIZE = 8;
     
@@ -53,20 +52,6 @@ public class TaskScheduler {
     private boolean isEnabled(ServiceProperties props) {
         return props.getCustomProperty(POLL, "false").equals("true"); 
     }
-    
-    private int getInterval(ServiceProperties props) {
-        int pollInterval = -1;
-        try {
-            String s = props.getCustomProperty(POLL_INTERVAL, "");
-            if (!s.equals("")) {
-                pollInterval = Integer.parseInt(s);
-            }
-        } catch (NumberFormatException e) {
-            LOGGER.error("Error parsing pollInterval: \"{}\"", props.getCustomProperty(POLL_INTERVAL, ""));
-        }
-        return pollInterval;
-    }
-    
     
     /**
      * Executes the given command at some time in the future.  The command
@@ -180,11 +165,6 @@ public class TaskScheduler {
         if (!isEnabled(serviceProperties)) {
             LOGGER.info("{} Polling DISABLED!", serviceProperties.getName());
             return null;
-        }
-        int pollInterval = getInterval(serviceProperties);
-        if (pollInterval != -1) {
-            initialDelay = pollInterval;
-            delay = pollInterval;
         }
         LOGGER.info("{} Polling Enabled ({})", serviceProperties.getName(), delay);
         return scheduler.scheduleWithFixedDelay(command, initialDelay, delay, unit);
