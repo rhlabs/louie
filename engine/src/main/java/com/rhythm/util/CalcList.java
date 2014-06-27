@@ -14,8 +14,12 @@ import java.util.ListIterator;
 import com.google.common.base.Function;
 
 /**
- *
+ * Creates a list of arguments that will apply a function to retrieve a value
+ * when the list is accessed
+ * 
  * @author cjohnson
+ * @param <F> The function argument type
+ * @param <E> The result type
  */
 public class CalcList<F,E> implements Collection<E>, List<E> {
     

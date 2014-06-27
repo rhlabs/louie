@@ -8,6 +8,7 @@ package com.rhythm.louie.testservice;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +25,7 @@ import com.rhythm.louie.server.LouieClientTest;
 import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.PBParam;
+import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.RoutePathPB;
 
 import static org.junit.Assert.*;
@@ -40,7 +42,7 @@ public class TestServiceTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         client = TestClientFactory.getClient(
-                LouieConnectionFactory.getLocalConnection(
+                LouieConnectionFactory.getConnection("vans256",
                 Identity.createJUnitIdentity()));
     }
     
@@ -161,4 +163,28 @@ public class TestServiceTest {
         }
     }
     
+     @Test
+    public void streamTest() throws Exception {
+        System.out.println("loopTest");
+        
+            long start = System.nanoTime();
+            List<ErrorPB> result = client.streamTest(10,100,500);
+            System.out.println("YES:"+(System.nanoTime()-start)/1000000);
+            
+    }
+    
+    @Test
+    public void streamTestBulk() throws Exception {
+        System.out.println("loopTest");
+        
+        for (int i=0;i<5;i++) {
+            long start = System.nanoTime();
+            List<ErrorPB> result = client.streamTest(1000,10000,0);
+            System.out.println("YES:"+(System.nanoTime()-start)/1000000);
+            
+            start = System.nanoTime();
+            result = client.noStreamTest(1000,10000,0);
+            System.out.println("NO:"+(System.nanoTime()-start)/1000000);
+        }
+    }
 }

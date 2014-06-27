@@ -66,11 +66,6 @@ public class ServiceManager {
         return reservedServices.contains(serviceName);
     }
     
-    public static boolean isTestService(String serviceName) {
-        return serviceName.equals("test");
-    }
-    
-    
     private ServiceManager() {};
     
     public static synchronized void initialize() {
@@ -214,7 +209,7 @@ public class ServiceManager {
         String serviceName = factory.getServiceName();
         ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
         
-        if ((!isServiceReserved(serviceName) || isTestService(serviceName)) && !props.isEnabled()) {
+        if (!isServiceReserved(serviceName) && !props.isEnabled()) {
             return false;
         }
         

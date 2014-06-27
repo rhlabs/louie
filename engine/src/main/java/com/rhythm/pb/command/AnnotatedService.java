@@ -94,7 +94,9 @@ public class AnnotatedService implements Service {
          if (cmd.isUpdate() && props.isReadOnly()){
              throw new UnsupportedOperationException("Louie Service "+serviceName+" is set to read-only mode.");
          }
-         return cmd.execute(req);
+         Result r = cmd.execute(req);
+         r.setStreaming(cmd.isStreaming());
+         return r;
     }
 
     @Override

@@ -29,4 +29,5 @@ public interface PBCommand<A,R extends Message> {
     public String getGroup();
     public int getGroupOrder();
     public boolean isPrivate();
+    public boolean isStreaming();
 }

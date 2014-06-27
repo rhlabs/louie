@@ -24,13 +24,13 @@ import com.google.protobuf.Message;
 public class Result<A,R extends Message> {
     private final List<R> messages;
     private final List<A> arguments;
-    private boolean success;
+    private boolean success = true;
     private String info;
     private long duration;
     private long execTime;
     private long size;
     private Exception ex;
-    
+    private boolean streaming = false;
     
     public static <A,R extends Message> Result<A,R> emptyResult() {
         List<A> args = Collections.emptyList();
@@ -171,5 +171,19 @@ public class Result<A,R extends Message> {
      */
     public void setException(Exception ex) {
         this.ex = ex;
+    }
+    
+    /**
+     * @return true if the result is meant to be streamed
+     */
+    public boolean isStreaming() {
+        return streaming;
+    }
+    
+    /**
+     * @param streaming enable result streaming
+     */
+    public void setStreaming(boolean streaming) {
+        this.streaming = streaming;
     }
 }

@@ -156,6 +156,7 @@ public class ProtoProcessor {
             responseBuilder.setCount(result.getMessages().size());
 
             boolean first = true;
+            long totalSize = 0;
             for (Object oMessage : result.getMessages()) {
                 Message message = (Message) oMessage;
                 if (first) {
@@ -170,7 +171,13 @@ public class ProtoProcessor {
                 int serializedSize = message.getSerializedSize();
                 codedOutput.writeRawVarint32(serializedSize);
                 message.writeTo(codedOutput);
+                if (result.isStreaming()) {
+                    codedOutput.flush();
+                    output.flush();
+                }
+                totalSize+=serializedSize;
             }
+            result.setSize(totalSize);
         }
         codedOutput.flush();
     }

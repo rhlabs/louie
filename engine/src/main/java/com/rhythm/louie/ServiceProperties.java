@@ -136,8 +136,7 @@ public class ServiceProperties {
                 String serviceName = keyParts[0];
                 String attribute = keyParts[1];
             
-                if (ServiceManager.isServiceReserved(serviceName) &&
-                        !ServiceManager.isTestService(serviceName)) {
+                if (ServiceManager.isServiceReserved(serviceName)) {
                     LoggerFactory.getLogger(ServiceProperties.class)
                         .warn("Ignoring property for reserved service: {}={}", key, value);
                 } else if (!serviceName.equals(DEFAULT_NAME)) {

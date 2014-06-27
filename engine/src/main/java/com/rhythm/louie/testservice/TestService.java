@@ -6,12 +6,16 @@
 
 package com.rhythm.louie.testservice;
 
+import java.util.List;
+
 import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.Streaming;
 
 import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.DataTypeProtos.UIntPB;
+import com.rhythm.pb.RequestProtos.ErrorPB;
 
 /**
  *
@@ -25,5 +29,20 @@ public interface TestService {
     
     @CommandDescriptor(description = "calls this method on the first host in the list, passing the rest of the hosts", args = {"hosts"})
     StringPB loopTest(StringListPB hosts) throws Exception;
+    
+    @Streaming
+    @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
+            + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep"})
+    public List<ErrorPB> streamTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep) throws Exception;
+    
+    @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
+            + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep"})
+    public List<ErrorPB> noStreamTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep) throws Exception;
+    
+    @Streaming
+    @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
+            + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep", "hosts"})
+    public List<ErrorPB> streamLoopTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep, StringListPB hosts) throws Exception;
+    
 }
 
