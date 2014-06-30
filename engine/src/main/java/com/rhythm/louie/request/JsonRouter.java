@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;                        
 import java.io.OutputStream;                       
 import java.io.PrintWriter;                        
+import java.net.InetAddress;
 import java.net.URLConnection;                     
 import java.util.ArrayList;                        
 import java.util.Arrays;                           
@@ -187,7 +188,16 @@ public class JsonRouter implements JsonProcess{
             RequestContext pbReq = new RequestContext(requestHeader,request,DataType.JSON);                       
             pbReq.addParam(Param.buildJsonParam(args));                                             
             pbReq.setRemoteAddress(req.getRemoteAddr());                                            
-                                                                                                    
+                                                             
+            RequestProperties props = new RequestProperties();
+            props.setRemoteAddress(req.getRemoteAddr());
+            props.setLocalPort(req.getLocalPort());
+            props.setHostIp(InetAddress.getLocalHost().getHostAddress());
+            props.setGateway(req.getContextPath().substring(1));
+            
+            pbReq.setLocalPort(props.getLocalPort());
+            pbReq.setRoute(props.createRoute(request.getService()));
+            
             if (agent !=null && !agent.isEmpty()) {                                                 
                 pbReq.setUserAgent(agent);                                                          
             } else {                                                                                
@@ -286,10 +296,10 @@ public class JsonRouter implements JsonProcess{
             String params = req.getParameter("params");                                      
             if (params!=null && !params.isEmpty()) {                                         
                 pbReq.addParam(Param.buildJsonParam(Arrays.asList(params.split(","))));      
-            }                                                                                
+            }                                  
             pbReq.setRemoteAddress(req.getRemoteAddr());                                     
             pbReq.setUserAgent(Strings.nullToEmpty(req.getHeader("user-agent")));            
-                                                                                             
+            
             Result result = RequestHandler.processSingleRequest(pbReq);                      
             handleResult(result,resp);                                                       
                                                                                              
