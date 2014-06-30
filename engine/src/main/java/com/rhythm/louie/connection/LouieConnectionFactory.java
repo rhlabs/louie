@@ -155,8 +155,8 @@ public class LouieConnectionFactory {
         }
 
         @Override
-        public <T extends Message> Response<T> request(Request<T> req) throws Exception {
-            return getDelegate().request(req);
+        public <T extends Message> void request(Request<T> req) throws Exception {
+            getDelegate().request(req);
         }
     }
     

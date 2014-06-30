@@ -42,7 +42,7 @@ public class LouieClient implements Client {
     }
 
     @Override
-    public <T extends Message> Response<T> doRequest(Request<T> req) throws Exception {
-        return louieConn.request(req);
+    public <T extends Message> void doRequest(Request<T> req) throws Exception {
+        louieConn.request(req);
     }
 }

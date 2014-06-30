@@ -6,24 +6,21 @@
 
 package com.rhythm.louie.testservice;
 
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.request.RequestContextManager;
+import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.testservice.TestServiceProtos.TestServicePB;
+import com.rhythm.util.CalcList;
 import com.rhythm.util.FutureList;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.base.Function;
-import com.google.common.base.Strings;
-
-import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.request.RequestContext;
-
-import com.rhythm.pb.RequestProtos.ErrorPB;
-
-import com.rhythm.util.CalcList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  *
@@ -107,44 +104,44 @@ public class TestDAO implements TestClient {
     }
     
     
-    @Override
-    public List<TestServicePB> streamTest(Integer resultSize, Integer sleepTime) throws Exception {
-        FutureList<TestServicePB> results = new FutureList<TestServicePB>();
-        
-        SleepThread s = new SleepThread(resultSize, sleepTime);
-        
-        for(int i = 0; i < resultSize; i++) {
-            SettableFuture<TestServicePB> sf = SettableFuture.create();
-            results.addFuture(sf);
-            s.addFuture(sf);
-        }
-        scheduler.submit(s);
-        return results;
-    }
+//    @Override
+//    public List<TestServicePB> streamTest(Integer resultSize, Integer sleepTime) throws Exception {
+//        FutureList<TestServicePB> results = new FutureList<TestServicePB>();
+//        
+//        SleepThread s = new SleepThread(resultSize, sleepTime);
+//        
+//        for(int i = 0; i < resultSize; i++) {
+//            SettableFuture<TestServicePB> sf = SettableFuture.create();
+//            results.addFuture(sf);
+//            s.addFuture(sf);
+//        }
+//        scheduler.submit(s);
+//        return results;
+//    }
     
-    private class SleepThread implements Callable<TestServicePB>{
-
-        private int size;
-        private int sleep;
-        private List<SettableFuture<TestServicePB>> res = new ArrayList<SettableFuture<TestServicePB>>();
-        
-        SleepThread(int size, int sleep) {
-            this.size = size;
-            this.sleep = sleep;
-        }
-        
-        public void addFuture(SettableFuture<TestServicePB> sf) {
-            res.add(sf);
-        }
-
-        @Override
-        public TestServicePB call() throws Exception {
-            for (int i = 0; i<size; i++) {
-                Thread.sleep(sleep);
-                res.get(i).set(TestServicePB.newBuilder().setValue("String response # " + i + " @ "+ System.nanoTime() / 1000000).build());
-            }   
-            return null;
-        }
-    }
+//    private class SleepThread implements Callable<TestServicePB>{
+//
+//        private int size;
+//        private int sleep;
+//        private List<SettableFuture<TestServicePB>> res = new ArrayList<SettableFuture<TestServicePB>>();
+//        
+//        SleepThread(int size, int sleep) {
+//            this.size = size;
+//            this.sleep = sleep;
+//        }
+//        
+//        public void addFuture(SettableFuture<TestServicePB> sf) {
+//            res.add(sf);
+//        }
+//
+//        @Override
+//        public TestServicePB call() throws Exception {
+//            for (int i = 0; i<size; i++) {
+//                Thread.sleep(sleep);
+//                res.get(i).set(TestServicePB.newBuilder().setValue("String response # " + i + " @ "+ System.nanoTime() / 1000000).build());
+//            }   
+//            return null;
+//        }
+//    }
     
 }

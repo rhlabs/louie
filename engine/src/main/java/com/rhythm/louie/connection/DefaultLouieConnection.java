@@ -46,16 +46,14 @@ public class DefaultLouieConnection implements LouieConnection {
     private IdentityPB identity;
     private String host;
     private SessionKey key;
-    private URL louieURL;
-    private URL authURL;
-    private URL sslURL;
+
     
     private boolean requestOnSSL = false;
     private SSLConfig sslConfig;
     
     private int retryWait = 2000; //milliseconds
     private int maxTimeout = 30; //seconds
-    private boolean enableRetry = true; //retry on by default
+    private boolean retry = true; //retry on by default
     private boolean lockoffRetry = false; //disable retries after timeout window reached. global lock that is disabled by a succesful request
     
     private String gateway = "louie";
@@ -82,9 +80,7 @@ public class DefaultLouieConnection implements LouieConnection {
         if (gateway != null) {
             this.gateway = gateway;
         }
-        this.louieURL = getPBURL();
-        this.authURL = getAuthURL();
-        this.sslURL = getSecurePBURL();
+
         if (key != null) {
             this.key = SessionKey.newBuilder().setKey(key).build();
         }
@@ -109,7 +105,6 @@ public class DefaultLouieConnection implements LouieConnection {
         this.sslConfig = sslConfig;
         if(sslConfig.getPort() != 0) {
             SSL_PORT = sslConfig.getPort();
-            sslURL = getSecurePBURL();
         }
         if(sslConfig.getGateway() != null) {
             setGateway(sslConfig.getGateway());
@@ -119,9 +114,6 @@ public class DefaultLouieConnection implements LouieConnection {
     @Override
     public void setGateway(String gateway) {
         this.gateway = gateway;
-        louieURL = getPBURL();
-        authURL = getAuthURL();
-        sslURL = getSecurePBURL();
     }
     
 
@@ -204,7 +196,6 @@ public class DefaultLouieConnection implements LouieConnection {
         // TODO add check for identity changes, and pass up new identity if needed
         
         if (key==null) {
-           // AuthRemoteClient authClient = new AuthRemoteClient(this);
             SingleConsumer<SessionKey> con = Consumers.newSingleConsumer();
             Request<SessionKey> req = Request.newParams(con, AUTH_SERVICE, "createSession", PBParam.singleParam(getIdentity()), SessionKey.getDefaultInstance());
             performRequest(req);
@@ -215,27 +206,25 @@ public class DefaultLouieConnection implements LouieConnection {
     }
     
     @Override
-    public <T extends Message> Response<T> request(Request<T> req) throws Exception {  
-        boolean requestFailure = true;
+    public <T extends Message> void request(Request<T> req) throws Exception {  
         long elapsedTime = 0;
         long maxTime = maxTimeout*1000;
         
-        while (requestFailure){ 
+        while (true){ 
             try {
-                Response<T> ret = performRequest(req);
+                performRequest(req);
                 lockoffRetry = false;
-                return ret;
+                return;
             } catch (HttpException e) {
                 if (e.getErrorCode()==407) {
                     key = null;
-                    return performRequest(req);
+//                    performRequest(req); //unnecessary line
                 } else {
                     LOGGER.error(e.getMessage());
                     throw e;
                 }
-                
             } catch (BouncedException e){
-                if (elapsedTime >= maxTime || !enableRetry || lockoffRetry){
+                if (elapsedTime >= maxTime || !retry || lockoffRetry){
                     lockoffRetry = true;
                     throw e;
                 }
@@ -245,10 +234,10 @@ public class DefaultLouieConnection implements LouieConnection {
                 elapsedTime += retryWait;
             }  
         }
-        return null;
+        
     }
     
-    private <T extends Message> Response<T> performRequest(Request<T> req) throws Exception { 
+    private <T extends Message> void performRequest(Request<T> req) throws Exception { 
         
         URLConnection connection;
         String service = req.getService();
@@ -358,7 +347,8 @@ public class DefaultLouieConnection implements LouieConnection {
             throw new Exception(response.getError().getDescription());
         }
         
-        Response<T> result = new LouieResponse<T>(req, response, input);
+//        Response<T> result = new LouieResponse<T>(req, response, input);
+        LouieResponse.processResponse(req, response, input);
         
         input.close();
 
@@ -366,7 +356,6 @@ public class DefaultLouieConnection implements LouieConnection {
             currentRequest.addDestinationRoutes(response.getRouteList());
         }
         
-        return result;
     }
     
     @Deprecated
@@ -391,7 +380,7 @@ public class DefaultLouieConnection implements LouieConnection {
                 }
                 
             } catch (BouncedException e){
-                if (elapsedTime >= maxTime || !enableRetry || lockoffRetry){
+                if (elapsedTime >= maxTime || !retry || lockoffRetry){
                     lockoffRetry = true;
                     throw e;
                 }
@@ -540,12 +529,12 @@ public class DefaultLouieConnection implements LouieConnection {
     
     @Override
     public void setRetryEnable(boolean enable){
-        enableRetry = enable;
+        retry = enable;
     }
     
     @Override
     public boolean getRetryEnable(){
-        return enableRetry;
+        return retry;
     }
 
     @Override
@@ -600,9 +589,6 @@ public class DefaultLouieConnection implements LouieConnection {
     @Override
     public void setPort(int port) {
         PORT = port;
-        louieURL = getPBURL();
-        authURL = getAuthURL();
-        sslURL = getSecurePBURL();
     }
     
     class HttpException extends Exception {

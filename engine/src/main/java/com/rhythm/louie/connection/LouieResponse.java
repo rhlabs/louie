@@ -23,12 +23,14 @@ public class LouieResponse<T extends Message> implements Response<T>{
     private final List<T> results;
     private final T template;
     
+    @Deprecated
     public LouieResponse(ResponsePB response,T template) {
         this.response = response;
         this.template = template;
         results = new ArrayList<T>(response.getCount());
     }
     
+    @Deprecated
     public LouieResponse(ResponsePB response,T template,InputStream input) throws Exception {
         this(response,template);
         
@@ -37,6 +39,7 @@ public class LouieResponse<T extends Message> implements Response<T>{
         }
     }
     
+    @Deprecated
     public LouieResponse(Request<T> request, ResponsePB response, InputStream input) throws Exception {
         this.response = response;
         this.template = request.getTemplate();
@@ -55,6 +58,22 @@ public class LouieResponse<T extends Message> implements Response<T>{
         }
     }
 
+    public static <T extends Message> void processResponse(Request<T> request, ResponsePB response, InputStream input)  throws Exception {
+        T templ = request.getTemplate();
+        Consumer<T> consumer = request.getConsumer();
+        consumer.informMessageCount(response.getCount());
+        for (int d = 0; d < response.getCount(); d++) {
+            Data data = Data.readPBData(input);
+            if (data!=null) {
+                if (templ!=null) {
+                    consumer.consume(data.parse(templ));
+                } else {
+                    throw new Exception("Error Parsing Data: No Template!");
+                }
+            }
+        }
+    }
+    
     public ResponsePB getResponse() {
         return response;
     }
