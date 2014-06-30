@@ -21,14 +21,21 @@ import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.connection.LouieServiceClient;
 import com.rhythm.louie.connection.Response;
 import com.rhythm.louie.server.LouieClientTest;
-
+import com.rhythm.louie.stream.Consumer;
 import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.RoutePathPB;
+import com.rhythm.pb.testservice.TestServiceProtos.TestServicePB;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
@@ -36,7 +43,7 @@ import static org.junit.Assert.*;
  */
 public class TestServiceTest {
     
-    private static TestClient client;
+    private static TestServiceClient client;
     public TestServiceTest() {}
 
     @BeforeClass

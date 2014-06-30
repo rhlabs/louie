@@ -17,7 +17,7 @@ import com.rhythm.pb.DataTypeProtos;
 import com.rhythm.pb.RequestProtos;                
 import com.rhythm.pb.data.DataType;                   
 import com.rhythm.pb.data.Param;                 
-import com.rhythm.pb.data.Request;                  
+import com.rhythm.pb.data.RequestContext;                  
 import com.rhythm.pb.data.Result;              
 import java.io.ByteArrayOutputStream;                        
 import java.io.IOException;                        
@@ -60,6 +60,7 @@ public class JsonRouter implements JsonProcess{
         }                                                                                                              
     }                                                                                                                  
 
+    @SuppressWarnings("deprecation")
     private void processJsonRequest(HttpServletRequest req,
             HttpServletResponse resp) throws IOException { 
         try {                                              
@@ -120,8 +121,7 @@ public class JsonRouter implements JsonProcess{
                     .build();                                                                       
             RequestProtos.RequestPB.Builder reqBuilder = RequestProtos.RequestPB.newBuilder()       
                     .setId(1)                                                                       
-                    .setParamCount(1)                                                               
-                    .setSystem(system)                                                              
+                    .setService(system)                                                              
                     .setMethod(method);                                                             
                                                                                                     
             List<String> args = new ArrayList<String>();                                            
@@ -184,7 +184,7 @@ public class JsonRouter implements JsonProcess{
                                                                                                     
             RequestProtos.RequestPB request = reqBuilder.build();                                   
                                                                                                     
-            Request pbReq = new Request(requestHeader,request,DataType.JSON);                       
+            RequestContext pbReq = new RequestContext(requestHeader,request,DataType.JSON);                       
             pbReq.addParam(Param.buildJsonParam(args));                                             
             pbReq.setRemoteAddress(req.getRemoteAddr());                                            
                                                                                                     
@@ -207,7 +207,8 @@ public class JsonRouter implements JsonProcess{
             System.err.println(errorMessage);                                                       
         }                                                                                           
     }                                                                                               
-                                                                                                    
+                                 
+    @SuppressWarnings("deprecation")
     private void processFormRequest(HttpServletRequest req,                                         
             HttpServletResponse resp) throws IOException {                                          
         resp.setContentType("application/json");                                                    
@@ -273,8 +274,7 @@ public class JsonRouter implements JsonProcess{
 
             RequestProtos.RequestPB.Builder reqBuilder = RequestProtos.RequestPB.newBuilder()
                     .setId(1)                                                                
-                    .setParamCount(1)                                                        
-                    .setSystem(system)                                                       
+                    .setService(system)                                                       
                     .setMethod(method);                                                      
                                                                                              
             if (type!=null && !type.equals("")) {                                            
@@ -282,7 +282,7 @@ public class JsonRouter implements JsonProcess{
             }                                                                                
             RequestProtos.RequestPB request = reqBuilder.build();                            
                                                                                              
-            Request pbReq = new Request(requestHeader, request,DataType.JSON);               
+            RequestContext pbReq = new RequestContext(requestHeader, request,DataType.JSON);               
             String params = req.getParameter("params");                                      
             if (params!=null && !params.isEmpty()) {                                         
                 pbReq.addParam(Param.buildJsonParam(Arrays.asList(params.split(","))));      

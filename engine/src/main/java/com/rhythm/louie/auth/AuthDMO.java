@@ -103,10 +103,10 @@ public class AuthDMO implements AuthClient {
     public SessionStat getSessionStat(SessionKey sessionKey) throws Exception {
         SessionStat stat = SESSION_STATS.get(sessionKey.getKey());                                                                                  
         if (stat == null && !isCentralAuth()) {
-            LOGGER.debug("getSessionStat found a null key locally, gonna go look to central auth");
+            LOGGER.trace("getSessionStat found a null key locally, gonna go look to central auth");
             SessionBPB statBPB = getAuthClient().getSession(sessionKey);                                                                            
             if (statBPB.hasKey()) { //check that this is not an empty instance                  
-                LOGGER.debug("getSession from central auth found something!");
+                LOGGER.trace("getSession from central auth found something!");
                 stat = new SessionStat(statBPB.getKey(), statBPB.getIdentity());
                 SESSION_STATS.put(sessionKey.getKey(), stat);                                                                   
                 return stat;                                                                                                    
@@ -142,7 +142,7 @@ public class AuthDMO implements AuthClient {
         if (!isCentralAuth()) {                                                                                                                     
             SessionBPB statBPB = getAuthClient().getSession(sessionKey);              
             if (statBPB.hasKey()) {
-                LOGGER.debug("getSession found a non null stat from Central!");
+                LOGGER.trace("getSession found a non null stat from Central!");
                 SESSION_STATS.put(sessionKey.getKey(), new SessionStat(statBPB.getKey(), statBPB.getIdentity()));                                                                   
                 return statBPB;                                                                                                                     
             }
@@ -192,7 +192,7 @@ public class AuthDMO implements AuthClient {
     @Override
     public Boolean isValidSession(SessionKey sessionKey) throws Exception {
         SessionStat stat = SESSION_STATS.get(sessionKey.getKey());
-        LOGGER.debug("isValidSession: {} : {}", sessionKey.getKey(), (stat!=null));
+        LOGGER.trace("isValidSession: {} : {}", sessionKey.getKey(), (stat!=null));
         if (stat!=null) {
             return Boolean.TRUE;
         }

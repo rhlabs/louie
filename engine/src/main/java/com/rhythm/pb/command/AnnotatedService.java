@@ -21,7 +21,7 @@ import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.Disabled;
 import com.rhythm.louie.process.ServiceFacade;
 
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 /**
@@ -82,7 +82,7 @@ public class AnnotatedService implements Service {
     }
     
     @Override
-    public Result executeCommand(Request req) throws Exception {
+    public Result executeCommand(RequestContext req) throws Exception {
          PBCommand cmd = getCommand(req.getRequest().getMethod(),req.getType());
          if (cmd==null) {
              throw new Exception("Command Does Not Exist! - "

@@ -32,7 +32,7 @@ import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.data.DataType;
 import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 import java.net.InetAddress;
 
@@ -178,7 +178,7 @@ public class JsonProcessor implements JsonProcess{
             
             RequestPB request = reqBuilder.build();
             
-            Request pbReq = new Request(requestHeader,request,DataType.JSON);
+            RequestContext pbReq = new RequestContext(requestHeader,request,DataType.JSON);
             pbReq.addParam(Param.buildJsonParam(args));
             pbReq.setRemoteAddress(req.getRemoteAddr());
             
@@ -252,7 +252,7 @@ public class JsonProcessor implements JsonProcess{
             }
             RequestPB request = reqBuilder.build();
             
-            Request pbReq = new Request(requestHeader, request,DataType.JSON);
+            RequestContext pbReq = new RequestContext(requestHeader, request,DataType.JSON);
             String params = req.getParameter("params");
             if (params!=null && !params.isEmpty()) {
                 pbReq.addParam(Param.buildJsonParam(Arrays.asList(params.split(","))));

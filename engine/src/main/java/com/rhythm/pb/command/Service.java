@@ -9,7 +9,7 @@ import java.util.Collection;
 
 import com.rhythm.louie.jms.MessageHandler;
 
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 /**
@@ -19,7 +19,7 @@ import com.rhythm.pb.data.Result;
 public interface Service {
     static final String PK_CHECK_ERROR = "Invalid request Parameters!";
 
-    Result executeCommand(Request req) throws Exception;
+    Result executeCommand(RequestContext req) throws Exception;
 
     Collection<PBCommand<?, ?>> getCommands();
 

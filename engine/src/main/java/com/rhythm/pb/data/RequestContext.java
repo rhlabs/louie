@@ -22,7 +22,7 @@ import com.rhythm.pb.command.PBParamType;
  * @author cjohnson
  * Created: Jun 14, 2011 5:49:18 PM
  */
-public class Request {
+public class RequestContext {
     private final RequestHeaderPB header;
     private final RequestPB request;
     private final DataType dataType;
@@ -40,7 +40,7 @@ public class Request {
     
     private List<RoutePathPB> destinations;
     
-    public Request(RequestHeaderPB header,
+    public RequestContext(RequestHeaderPB header,
             RequestPB request,DataType dataType) {
 
         this.header = header;

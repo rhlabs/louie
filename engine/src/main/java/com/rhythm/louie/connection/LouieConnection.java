@@ -23,22 +23,22 @@ public interface LouieConnection {
 
     <T extends Message> Response<T> request(String system, String cmd, PBParam params, T template) throws Exception;
     
-    <T extends Message> Response<T> request(RequestParams<T> req) throws Exception;
+    <T extends Message> Response<T> request(Request<T> req) throws Exception;
     
-    public void setMaxTimeout(int seconds);
+    void setMaxTimeout(int seconds);
     
-    public int getMaxTimeout();
+    int getMaxTimeout();
     
-    public void setRetryEnable(boolean enable);
+    void setRetryEnable(boolean enable);
     
-    public boolean getRetryEnable();
+    boolean getRetryEnable();
     
-    public void setGateway(String gateway);
+    void setGateway(String gateway);
     
-    public void setPort(int port);
+    void setPort(int port);
     
-    public URLConnection getJsonForwardingConnection() throws Exception;
+    URLConnection getJsonForwardingConnection() throws Exception;
 
-    public URLConnection getForwardingConnection() throws Exception;
+    URLConnection getForwardingConnection() throws Exception;
     
 }

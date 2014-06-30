@@ -32,7 +32,7 @@ import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;
 import com.rhythm.pb.RequestProtos.RoutePB;
 import com.rhythm.pb.data.DataType;
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 /**
@@ -81,7 +81,7 @@ public class ProtoProcessor implements ProtoProcess{
                 throw new Exception("User Route Permission Denied!");
             }
             
-            Request pbReq = null;
+            RequestContext pbReq = null;
             Result result = null;
 
             RoutePB localRoute = props.createRoute(request.getService());
@@ -92,7 +92,7 @@ public class ProtoProcessor implements ProtoProcess{
             }
             
             try {
-                pbReq = new Request(header, request,DataType.PB);
+                pbReq = new RequestContext(header, request,DataType.PB);
                 pbReq.setIdentity(identity);
                 pbReq.readPBParams(input);
                 pbReq.setRemoteAddress(props.getRemoteAddress());
@@ -131,7 +131,7 @@ public class ProtoProcessor implements ProtoProcess{
         return results;
     }
 
-    private void handleResult(Request requestContext,Result result,OutputStream output) throws Exception {
+    private void handleResult(RequestContext requestContext,Result result,OutputStream output) throws Exception {
         CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
         ResponsePB.Builder responseBuilder = ResponsePB.newBuilder();
         responseBuilder.setId(requestContext.getRequest().getId());
@@ -154,7 +154,6 @@ public class ProtoProcessor implements ProtoProcess{
             response.writeTo(codedOutput);
         } else {
             responseBuilder.setCount(result.getMessages().size());
-
             boolean first = true;
             long totalSize = 0;
             for (Object oMessage : result.getMessages()) {
@@ -167,7 +166,6 @@ public class ProtoProcessor implements ProtoProcess{
                     response.writeTo(codedOutput);
                     first = false;
                 }
-
                 int serializedSize = message.getSerializedSize();
                 codedOutput.writeRawVarint32(serializedSize);
                 message.writeTo(codedOutput);
@@ -180,5 +178,6 @@ public class ProtoProcessor implements ProtoProcess{
             result.setSize(totalSize);
         }
         codedOutput.flush();
+        output.flush();
     }
 }

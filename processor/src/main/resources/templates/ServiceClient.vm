@@ -8,8 +8,11 @@
 package ${info.packageName};
 
 import com.rhythm.louie.connection.LouieConnection;
-import com.rhythm.louie.connection.RequestParams;
-
+import com.rhythm.louie.connection.Request;
+import com.rhythm.louie.stream.ListConsumer;
+import com.rhythm.louie.stream.SingleConsumer;
+import com.rhythm.louie.stream.Consumer;
+import com.rhythm.louie.stream.Consumers;
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.PBType;
 
@@ -28,22 +31,38 @@ public class ${className} implements ${baseName}Client {
 #end
     @Override
     public ${method.convertedReturnType} ${method.name}(${method.convertedParamString}) throws ${method.throwsClause} {
+#if( $method.returnsList() )        
+        ListConsumer<${method.baseReturnType}> consumer = Consumers.newListConsumer();
+#else 
+        SingleConsumer<${method.baseReturnType}> consumer = Consumers.newSingleConsumer();
+#end
 #if ( $method.hasParams() )
         PBParam param = PBParam.createParam(${method.builderParamString});
-        RequestParams<${method.baseReturnType}> packagedRequest = 
-            RequestParams.newParams(SYSTEM, "${method.name}", param, 
+        Request<${method.baseReturnType}> packagedRequest = 
+            Request.newParams(consumer, SYSTEM, "${method.name}", param, 
 #else
-        RequestParams<${method.baseReturnType}> packagedRequest = 
-            RequestParams.newParams(SYSTEM, "${method.name}", 
+        Request<${method.baseReturnType}> packagedRequest = 
+            Request.newParams(consumer, SYSTEM, "${method.name}", 
 #end
             ${method.baseReturnType}.getDefaultInstance());
-        ${method.returnType} pb = client.doRequest(packagedRequest)
-#if ( $method.returnsList() )
-            .getResults();
-#else
-            .getSingleResult();
+        client.doRequest(packagedRequest);
+        return ${method.getReturnConvertCode("consumer.get()")};
+    }
+
+#if ( $method.isDeprecated() )
+    @Deprecated
 #end
-        return ${method.getReturnConvertCode("pb")};
+    public void ${method.name}(${method.convertedParamString}#if ( $method.hasParams() ),#end Consumer<${method.baseReturnType}> consumer) throws ${method.throwsClause} {
+#if ( $method.hasParams() )
+        PBParam param = PBParam.createParam(${method.builderParamString});
+        Request<${method.baseReturnType}> packagedRequest = 
+            Request.newParams(consumer, SYSTEM, "${method.name}", param, 
+#else
+        Request<${method.baseReturnType}> packagedRequest = 
+            Request.newParams(consumer, SYSTEM, "${method.name}", 
+#end
+            ${method.baseReturnType}.getDefaultInstance());
+        client.doRequest(packagedRequest);
     }
 #end
 }

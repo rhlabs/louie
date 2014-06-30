@@ -15,7 +15,7 @@ import com.rhythm.louie.connection.LouieConnectionFactory;
 public class ${className} {
     private ${className}() {}
 
-    public static ${baseName}Client getClient(LouieConnection connection) {
+    public static ${baseName}ServiceClient getClient(LouieConnection connection) {
         return new ${baseName}ServiceClient(connection);
     }
 

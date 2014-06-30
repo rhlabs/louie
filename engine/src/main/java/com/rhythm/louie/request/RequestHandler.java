@@ -24,7 +24,7 @@ import com.rhythm.louie.ServiceManager;
 
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 /**
@@ -32,10 +32,10 @@ import com.rhythm.pb.data.Result;
  Created: Jun 14, 2011 3:47:14 PM
  */
 public class RequestHandler {
-    public static void logRequest(Request request,Result result) {
+    public static void logRequest(RequestContext request,Result result) {
         logRequest(request,result,LoggerFactory.getLogger("louie.request"));
     }
-    public static void logRequest(Request request,Result<?,?> result,Logger log) {
+    public static void logRequest(RequestContext request,Result<?,?> result,Logger log) {
         // Bail out of here if logging is turned off.
         if (result.isError() && !log.isErrorEnabled()) {
             return;
@@ -230,7 +230,7 @@ public class RequestHandler {
         }
     }
     
-    public static Result processSingleRequest(Request pbreq) throws Exception {
+    public static Result processSingleRequest(RequestContext pbreq) throws Exception {
 
         if (pbreq.getRequest().getService() == null || pbreq.getRequest().getService().isEmpty()) {
             throw new Exception("No Service Specified");
@@ -242,7 +242,7 @@ public class RequestHandler {
         MDC.put(LogVars.LOG_REQID, Integer.toString(pbreq.getRequest().getId()));
         
         try {
-            RequestContext.setRequest(pbreq);
+            RequestContextManager.setRequest(pbreq);
             Service service = ServiceManager.getService(pbreq.getRequest().getService());
             Result result =  service.executeCommand(pbreq);
             if (result == null) {
@@ -256,7 +256,7 @@ public class RequestHandler {
             LoggerFactory.getLogger("").error("Unable to process request: "+command+"!",e);
             return result;
         } finally {
-            RequestContext.clearRequest();
+            RequestContextManager.clearRequest();
         }
     }
 }

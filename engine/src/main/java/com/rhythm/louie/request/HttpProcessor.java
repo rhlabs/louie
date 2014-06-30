@@ -53,7 +53,6 @@ public class HttpProcessor {
                 if (req.getContentType() == null || !req.getContentType().startsWith("application/x-protobuf")) {
                     throw new Exception("This servlet is not configured to deal with content of type: "+req.getContentType());
                 }
-                
                 RequestProperties props = new RequestProperties();
                 props.setRemoteAddress(req.getRemoteAddr());
                 props.setLocalPort(req.getLocalPort());

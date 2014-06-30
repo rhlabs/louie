@@ -5,25 +5,10 @@
  */
 package com.rhythm.louie.connection;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.google.protobuf.Message;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.rhythm.louie.request.RequestContext;
-
+import com.rhythm.louie.request.RequestContextManager;
+import com.rhythm.louie.stream.Consumers;
+import com.rhythm.louie.stream.SingleConsumer;
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
@@ -31,7 +16,18 @@ import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;
 import com.rhythm.pb.RequestProtos.SessionKey;
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.net.ssl.HttpsURLConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author cjohnson
@@ -192,7 +188,6 @@ public class DefaultLouieConnection implements LouieConnection {
 
         connection.setSSLSocketFactory(sslConfig.getSSLSocketFactory());
         
-        connection.connect();
         return connection;
     }
     
@@ -210,17 +205,171 @@ public class DefaultLouieConnection implements LouieConnection {
         
         if (key==null) {
            // AuthRemoteClient authClient = new AuthRemoteClient(this);
-            key = performRequest(AUTH_SERVICE,"createSession", PBParam.singleParam(getIdentity()),
-                SessionKey.getDefaultInstance()).getSingleResult();
+            SingleConsumer<SessionKey> con = Consumers.newSingleConsumer();
+            Request<SessionKey> req = Request.newParams(con, AUTH_SERVICE, "createSession", PBParam.singleParam(getIdentity()), SessionKey.getDefaultInstance());
+            performRequest(req);
+            key = con.get();
+//                SessionKey.getDefaultInstance()).getSingleResult();
         }
         return key;
     }
     
     @Override
-    public <T extends Message> Response<T> request(com.rhythm.louie.connection.RequestParams<T> req) throws Exception {  //TODO replace. This is a hack while I update some shit.
-        return this.request(req.getSystem(), req.getCmd(), req.getParam(), req.getTemplate());
+    public <T extends Message> Response<T> request(Request<T> req) throws Exception {  
+        boolean requestFailure = true;
+        long elapsedTime = 0;
+        long maxTime = maxTimeout*1000;
+        
+        while (requestFailure){ 
+            try {
+                Response<T> ret = performRequest(req);
+                lockoffRetry = false;
+                return ret;
+            } catch (HttpException e) {
+                if (e.getErrorCode()==407) {
+                    key = null;
+                    return performRequest(req);
+                } else {
+                    LOGGER.error(e.getMessage());
+                    throw e;
+                }
+                
+            } catch (BouncedException e){
+                if (elapsedTime >= maxTime || !enableRetry || lockoffRetry){
+                    lockoffRetry = true;
+                    throw e;
+                }
+                LOGGER.warn("{}  ...retrying request {}:{}.{}...", 
+                        e.getMessage(),host,req.getService(),req.getCommand());
+                Thread.sleep(retryWait);
+                elapsedTime += retryWait;
+            }  
+        }
+        return null;
     }
     
+    private <T extends Message> Response<T> performRequest(Request<T> req) throws Exception { 
+        
+        URLConnection connection;
+        String service = req.getService();
+        String command = req.getCommand();
+        try{
+            if (requestOnSSL) {
+                try {
+                    connection = getSecureConnection(getSecurePBURL());
+                } catch (Exception e) {
+                    LOGGER.error("Error creating secure connection", e);
+                    throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords.");
+                }
+            } else if (service.equals(AUTH_SERVICE)) {
+                try {
+                    connection = getConnection(getAuthURL());
+                } catch (Exception e) {
+                    LOGGER.warn("Error Connecting to Auth Port, Falling back to louieport");
+                    connection = getConnection(getPBURL());
+                }
+            } else {
+                connection = getConnection(getPBURL());
+            }
+            connection.connect();
+        } catch (HttpsException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BouncedException(e);
+        } 
+        
+        // Build and Write Request Header
+        RequestHeaderPB.Builder headerBuilder = RequestHeaderPB.newBuilder();
+        headerBuilder.setCount(1);
+        //headerBuilder.setAgent("Unknown");
+        if (!service.equals(AUTH_SERVICE) || !command.equals("createSession")) {
+            headerBuilder.setKey(getSessionKey()); 
+        }
+        headerBuilder.build().writeDelimitedTo(connection.getOutputStream()); 
+
+        // Build and Write Request
+        RequestPB.Builder reqBuilder = RequestPB.newBuilder();
+        reqBuilder.setId(txId.incrementAndGet())
+                  .setService(service)
+                  .setMethod(command);
+        
+        // Only send routing info if this is not a auth call
+        RequestContext currentRequest = RequestContextManager.getRequest();
+        if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
+            if (currentRequest.getRequest().hasRouteUser()) {
+                reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
+            } else if (currentRequest.getIdentity() != null) {
+                    // The identity should be set, so this check should not be needed.
+                // TODO determine how the identity could be null...
+                // (identity could be null if key in request is null, but that should not be happening either
+
+                // Set the Routed User, as the current User is may be "LoUIE"
+                reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
+            }
+            // Append any routes you been on and the current Route
+            reqBuilder.addAllRoute(currentRequest.getRequest().getRouteList());
+            reqBuilder.addRoute(currentRequest.getRoute());
+        }
+            
+        for (Message message : req.getParam().getArguments()) {
+            reqBuilder.addType(message.getDescriptorForType().getFullName());
+        }
+        reqBuilder.build().writeDelimitedTo(connection.getOutputStream());
+
+        // Write Data
+        for (Message message : req.getParam().getArguments()) {
+            message.writeDelimitedTo(connection.getOutputStream());
+        }
+        
+        connection.getOutputStream().close();
+
+        // Cast to a HttpURLConnection
+        if (connection instanceof HttpURLConnection) {
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            int respCode = 0;
+            try{
+                respCode = httpConnection.getResponseCode();
+            } catch (SocketTimeoutException se){
+                throw se;
+            } catch (IOException e){
+                throw new BouncedException(e);
+            }
+                
+            if (respCode == 404 || respCode == 503){
+                httpConnection.disconnect();
+                throw new BouncedException("Server returned: " + Integer.toString(respCode));
+            }
+            if (httpConnection.getResponseCode()>=400) {
+                throw new HttpException(httpConnection.getResponseCode(),httpConnection.getResponseMessage());
+            }
+        }
+
+        BufferedInputStream input = new BufferedInputStream(connection.getInputStream());
+
+        // Read in the Response Header
+        ResponseHeaderPB responseHeader = ResponseHeaderPB.parseDelimitedFrom(input);
+        if (responseHeader.getCount()!=1) {
+            throw new Exception("Received more than one response! This is unsupported behavior.");
+        }
+
+        // Read in each Response
+        ResponsePB response = ResponsePB.parseDelimitedFrom(input);
+        if (response.hasError()) {
+            throw new Exception(response.getError().getDescription());
+        }
+        
+        Response<T> result = new LouieResponse<T>(req, response, input);
+        
+        input.close();
+
+        if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
+            currentRequest.addDestinationRoutes(response.getRouteList());
+        }
+        
+        return result;
+    }
+    
+    @Deprecated
     @Override
     public <T extends Message> Response<T> request(String service,String cmd, PBParam param,T template) throws Exception { 
         boolean requestFailure = true;
@@ -255,6 +404,7 @@ public class DefaultLouieConnection implements LouieConnection {
         return null;
     }
     
+    @Deprecated
     private <T extends Message> Response<T> performRequest(String service,String cmd, PBParam param,T template) throws Exception { 
         if (param==null) {
             param = PBParam.EMPTY;
@@ -302,7 +452,7 @@ public class DefaultLouieConnection implements LouieConnection {
                   .setMethod(cmd);
         
         // Only send routing info if this is not a auth call
-        Request currentRequest = RequestContext.getRequest();
+        RequestContext currentRequest = RequestContextManager.getRequest();
         if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
             if (currentRequest.getRequest().hasRouteUser()) {
                 reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());

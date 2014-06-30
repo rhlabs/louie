@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.rhythm.pb.data.DataParser;
 import com.rhythm.pb.data.DataParser.BuilderParser;
 import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 import com.rhythm.louie.process.CommandDescriptor;
@@ -163,7 +163,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     
     @Override
     @SuppressWarnings("unchecked")
-    public Result<Param, R> execute(Request request) throws Exception {
+    public Result<Param, R> execute(RequestContext request) throws Exception {
         try {
             if ((request.getParams().isEmpty() && params.getTypes().isEmpty()) || request.getParams().size() == 1) {
                 Param param = request.getParams().isEmpty() ? Param.EMPTY : request.getParams().get(0);

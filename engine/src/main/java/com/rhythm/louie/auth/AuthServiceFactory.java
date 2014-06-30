@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.Request;
+import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 import com.rhythm.louie.connection.DefaultLouieConnection;
@@ -63,7 +63,7 @@ public class AuthServiceFactory implements ServiceFactory {
         }
 
         @Override
-        public Result executeCommand(Request req) throws Exception {
+        public Result executeCommand(RequestContext req) throws Exception {
             if (req.getLocalPort()!=DefaultLouieConnection.AUTH_PORT && 
                 req.getLocalPort()!=DefaultLouieConnection.sslPort()) {
                      LOGGER.warn("Warning: Calls to Auth service on insecure port: {}", req.getLocalPort());

@@ -26,7 +26,7 @@ import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;      
 import com.rhythm.pb.RequestProtos.RoutePB;                 
 import com.rhythm.pb.data.DataType;                  
-import com.rhythm.pb.data.Request;                   
+import com.rhythm.pb.data.RequestContext;                   
 import com.rhythm.pb.data.Result;                            
 import java.io.IOException;                     
 import java.io.InputStream;
@@ -67,12 +67,12 @@ public class ProtoRouter implements ProtoProcess{
      */                                                                                  
     @Override                                                                            
     public List<Result> processRequest(InputStream externalInput, OutputStream externalOutput, RequestProperties props) throws Exception{
-        long start = System.currentTimeMillis();                                                                                                                                     
+        long start = System.nanoTime();                                                                                                                                     
         long begin = start;                                                                                                                                                          
         List<Result> results = new ArrayList<Result>();                                                                                                                              
                                                                                                                                                                                      
         CodedInputStream externalCodedInput = CodedInputStream.newInstance(externalInput);                                                                                           
-        CodedOutputStream externalCodedOutput = CodedOutputStream.newInstance(externalOutput);                                                                                       
+//        CodedOutputStream externalCodedOutput = CodedOutputStream.newInstance(externalOutput);                                                                                       
                                                                                                                                                                                      
         RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(externalInput);                                                                                                                                                                            
 
@@ -87,9 +87,10 @@ public class ProtoRouter implements ProtoProcess{
                                                                            
         ResponseHeaderPB responseHeader = ResponseHeaderPB.newBuilder()    
                 .setCount(header.getCount()).build();                      
-        externalCodedOutput.writeRawVarint32(responseHeader.getSerializedSize());
-        responseHeader.writeTo(externalCodedOutput);                             
-        externalCodedOutput.flush();                                             
+        responseHeader.writeDelimitedTo(externalOutput);
+//        externalCodedOutput.writeRawVarint32(responseHeader.getSerializedSize());
+//        responseHeader.writeTo(externalCodedOutput);                             
+//        externalCodedOutput.flush();                                             
                                                                                  
                                                                                  
         for (int i = 0; i<header.getCount(); i++) {                              
@@ -101,15 +102,15 @@ public class ProtoRouter implements ProtoProcess{
 
             /////////////////////// FIND A CONNECTION /////////////////////////
                                                                                
-            String destinationService = request.getSystem();                   
+            String destinationService = request.getService();                   
             log.debug("ProtoRouter processing request");                       
             Server target = Route.get(destinationService);
             if (target == null) {
                 target = Route.get("default");
             }
             
-            RoutePB localRoute = props.createRoute(request.getSystem());
-            for (RoutePB route : header.getRouteList()) {
+            RoutePB localRoute = props.createRoute(request.getService());
+            for (RoutePB route : request.getRouteList()) {
                 if (route.equals(localRoute)) {
                     throw new Exception("Route Loop Detected!");
                 }
@@ -118,19 +119,19 @@ public class ProtoRouter implements ProtoProcess{
             if (Server.LOCAL.equals(target)) {                                                                                  
                 log.debug("Service {} was determined to be local!",destinationService);                                         
                 // Treat as normal local service fetch                                                    
-                Request pbReq = null;                                                                     
+                RequestContext pbReq = null;                                                                     
                 Result result = null;                                                                     
 
                 try {
-                    pbReq = new Request(header, request,DataType.PB);
+                    pbReq = new RequestContext(header, request,DataType.PB);
                     pbReq.setIdentity(identity);                     
                     pbReq.readPBParams(externalInput);                         
                     pbReq.setRemoteAddress(props.getRemoteAddress());          
                     pbReq.setLocalPort(props.getLocalPort());                 
                     pbReq.setRoute(localRoute);
                     result = RequestHandler.processSingleRequest(pbReq);       
-                    result.setExecTime(System.currentTimeMillis()-start);
-                    handleResult(pbReq, result, externalCodedOutput);           
+                    result.setExecTime((System.nanoTime()-start)/1000000);
+                    handleResult(pbReq, result, externalOutput);           
                 } catch (Exception e) {                                         
                     String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
                     log.error(errorMessage);                                            
@@ -140,14 +141,14 @@ public class ProtoRouter implements ProtoProcess{
                         result = Result.errorResult(e);
                     }                                                                            
                 } finally {                                                                      
-                    long end = System.currentTimeMillis();                                       
+                    long end = System.nanoTime();                                       
                     if (pbReq == null) {                                                         
                         log.error("Unknown Error, Request is null");                    
                     } else {                                                                     
                         if (result == null) {                                                    
                             result = Result.errorResult(null);
                         }                                                                        
-                        result.setDuration(end - start);                                         
+                        result.setDuration((end - start)/1000000);                                         
                         try {                                                                    
                             RequestHandler.logRequest(pbReq, result);                            
                         } catch (Exception le) {                                                 
@@ -160,16 +161,17 @@ public class ProtoRouter implements ProtoProcess{
                                                                                                  
             } else {                                                                             
                 log.debug("Service {} was determined NOT to be local",destinationService);
+
+                CodedOutputStream externalCodedOutput = CodedOutputStream.newInstance(externalOutput);                                                                                                                 
                 /* Connection legend:
                     * externalCodedInput = from client, to HERE
                     * externalCodedOutput = from HERE, to client
                     * responseInputStream = from target LoUIE, to HERE 
                     * codedOutput = from HERE, going to target LoUIE
                 */
-                long startTime = System.currentTimeMillis();                                     
+                long startTime = System.nanoTime();                                     
                 LouieConnection louieConn = LouieConnectionFactory.getConnectionForServer(target);
 //                louieConn = TopologyManager.getConnectionForService(key); // this get will fail prior to returning something into louieConn, i believe.
-                                                                                                                                                       
                 if (louieConn == null) { //Service doesn't exist or something went wrong in forming it                                                 
                     //This might be unreachable due to service default mapping concept
                     ResponsePB.Builder responseBuilder = ResponsePB.newBuilder();                                                                      
@@ -194,7 +196,6 @@ public class ProtoRouter implements ProtoProcess{
 
                 RequestHeaderPB singleHeader = header.toBuilder()
                         .setCount(1)
-                        .addRoute(localRoute)
                         .build();
                 
                 codedOutput.writeRawVarint32(singleHeader.getSerializedSize());
@@ -237,25 +238,27 @@ public class ProtoRouter implements ProtoProcess{
                 int count;                  
                 while ((count = responseInputStream.read(buf)) >= 0) {
                     externalCodedOutput.writeRawBytes(buf, 0, count); 
+                    externalCodedOutput.flush();
+                    externalOutput.flush();
                 }                                                     
 
-                start = System.currentTimeMillis();  //uncertain if this is correct logic. i think this is approximately correct, since it will reset the start time for the next iteration in case it's local¿
+                start = System.nanoTime();  //uncertain if this is correct logic. i think this is approximately correct, since it will reset the start time for the next iteration in case it's local¿
                                                                                                                                                                                                                
                 responseInputStream.close();                                                                                                                                                                   
 
                 externalCodedOutput.flush();
-                log.info("Router HTTP turn around time: {}",(System.currentTimeMillis() - startTime));
+                log.info("Router HTTP turn around time: {}",(System.nanoTime() - startTime)/1000000);
             }                                                                                         
         }                                                                                             
-        log.debug("Router total time cost in ms = {}",(System.currentTimeMillis()-begin));            
+        log.debug("Router total time cost in ms = {}",(System.nanoTime()-begin)/1000000);            
         return results;                                                                               
                                                                                                      
     }                                                                                                 
 
-    private void handleResult(Request pbReq,Result result, CodedOutputStream codedOutput) throws Exception {
-//        CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
+    private void handleResult(RequestContext requestContext,Result result, OutputStream output) throws Exception {
+        CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
         ResponsePB.Builder responseBuilder = ResponsePB.newBuilder();
-        responseBuilder.setId(pbReq.getRequest().getId());
+        responseBuilder.setId(requestContext.getRequest().getId());
 
         if (result.isError()) {
             log.debug("Error Found in handleResult");
@@ -265,6 +268,10 @@ public class ProtoRouter implements ProtoProcess{
                     .setDescription(result.getException().getMessage()));
         }
 
+        responseBuilder.addRouteBuilder()
+                .setRoute(requestContext.getRoute())
+                .addAllPath(requestContext.getDesinationRoutes());
+        
         if (result.getMessages().isEmpty()) {
             log.debug("Result has no messages");
             responseBuilder.setCount(0);
@@ -290,6 +297,7 @@ public class ProtoRouter implements ProtoProcess{
                 int serializedSize = message.getSerializedSize();
                 codedOutput.writeRawVarint32(serializedSize);
                 message.writeTo(codedOutput);
+                codedOutput.flush();
             }
         }
         codedOutput.flush();
