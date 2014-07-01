@@ -5,6 +5,22 @@
  */
 package com.rhythm.louie.request;
 
+import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.Message;
+import com.rhythm.louie.auth.AuthUtils;
+import com.rhythm.louie.auth.SessionStat;
+import com.rhythm.louie.auth.UnauthorizedSessionException;
+import com.rhythm.pb.RequestProtos.ErrorPB;
+import com.rhythm.pb.RequestProtos.IdentityPB;
+import com.rhythm.pb.RequestProtos.RequestHeaderPB;
+import com.rhythm.pb.RequestProtos.RequestPB;
+import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
+import com.rhythm.pb.RequestProtos.ResponsePB;
+import com.rhythm.pb.RequestProtos.RoutePB;
+import com.rhythm.pb.RequestProtos.SessionKey;
+import com.rhythm.pb.data.DataType;
+import com.rhythm.pb.data.RequestContext;
+import com.rhythm.pb.data.Result;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,27 +29,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-
-import com.google.protobuf.CodedOutputStream;
-import com.google.protobuf.Message;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.rhythm.louie.auth.AuthUtils;
-import com.rhythm.louie.auth.SessionStat;
-import com.rhythm.louie.auth.UnauthorizedSessionException;
-
-import com.rhythm.pb.RequestProtos.ErrorPB;
-import com.rhythm.pb.RequestProtos.IdentityPB;
-import com.rhythm.pb.RequestProtos.RequestHeaderPB;
-import com.rhythm.pb.RequestProtos.RequestPB;
-import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
-import com.rhythm.pb.RequestProtos.ResponsePB;
-import com.rhythm.pb.RequestProtos.RoutePB;
-import com.rhythm.pb.data.DataType;
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
 
 /**
  *
@@ -63,14 +60,21 @@ public class ProtoProcessor implements ProtoProcess{
         }
         
         IdentityPB identity = null;
+        SessionKey sessionKey = null;
         if (header.hasKey()) {
             SessionStat session = AuthUtils.accessSession(header.getKey());
             identity = session.getIdentity();
+        } else { //initial request, we will handle creating and returning a key
+            identity = header.getIdentity();
+            sessionKey = AuthUtils.createKey(identity);
         }
         
-        ResponseHeaderPB responseHeader = ResponseHeaderPB.newBuilder()
-                .setCount(header.getCount()).build();
-        responseHeader.writeDelimitedTo(output);
+        ResponseHeaderPB.Builder responseHeader = ResponseHeaderPB.newBuilder();
+        responseHeader.setCount(header.getCount());
+        if (sessionKey != null) {
+            responseHeader.setKey(sessionKey);
+        }
+        responseHeader.build().writeDelimitedTo(output);
         
         for (int r = 0; r < header.getCount(); r++) {
             RequestPB request = RequestPB.parseDelimitedFrom(input);

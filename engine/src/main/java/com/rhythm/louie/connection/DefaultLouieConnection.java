@@ -200,7 +200,6 @@ public class DefaultLouieConnection implements LouieConnection {
             Request<SessionKey> req = Request.newParams(con, AUTH_SERVICE, "createSession", PBParam.singleParam(getIdentity()), SessionKey.getDefaultInstance());
             performRequest(req);
             key = con.get();
-//                SessionKey.getDefaultInstance()).getSingleResult();
         }
         return key;
     }
@@ -218,7 +217,6 @@ public class DefaultLouieConnection implements LouieConnection {
             } catch (HttpException e) {
                 if (e.getErrorCode()==407) {
                     key = null;
-//                    performRequest(req); //unnecessary line
                 } else {
                     LOGGER.error(e.getMessage());
                     throw e;
@@ -271,9 +269,12 @@ public class DefaultLouieConnection implements LouieConnection {
         RequestHeaderPB.Builder headerBuilder = RequestHeaderPB.newBuilder();
         headerBuilder.setCount(1);
         //headerBuilder.setAgent("Unknown");
-        if (!service.equals(AUTH_SERVICE) || !command.equals("createSession")) {
-            headerBuilder.setKey(getSessionKey()); 
+        if (key == null) {
+            headerBuilder.setIdentity(getIdentity());
+        } else if (!command.equals("createSession")){ //lame extra check
+            headerBuilder.setKey(key);
         }
+
         headerBuilder.build().writeDelimitedTo(connection.getOutputStream()); 
 
         // Build and Write Request
@@ -339,6 +340,9 @@ public class DefaultLouieConnection implements LouieConnection {
         ResponseHeaderPB responseHeader = ResponseHeaderPB.parseDelimitedFrom(input);
         if (responseHeader.getCount()!=1) {
             throw new Exception("Received more than one response! This is unsupported behavior.");
+        }
+        if (responseHeader.hasKey()) {
+            key = responseHeader.getKey();
         }
 
         // Read in each Response

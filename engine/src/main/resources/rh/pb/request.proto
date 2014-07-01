@@ -9,7 +9,8 @@ message RequestHeaderPB {
     optional string agent = 2;
     optional uint32 count = 3;
 
-    optional SessionKey   key = 10;
+    optional SessionKey   key       = 10;
+    optional IdentityPB   identity  = 11; // set on initial request, thereafter requests should use the key that would have come back in the initial ResponsePB
 
     repeated RoutePB route    = 20 [deprecated=true];
 
@@ -75,7 +76,8 @@ message RequestPB {
 }
 
 message ResponseHeaderPB {
-    optional uint32 count = 1;
+    optional uint32         count   = 1;
+    optional SessionKey     key     = 2;
 }
 
 message ResponsePB {

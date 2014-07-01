@@ -5,6 +5,7 @@
  */
 package com.rhythm.louie.auth;
 
+import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
 
 /**
@@ -20,6 +21,10 @@ public class AuthUtils {
          }
          session.update();
          return session;
+    }
+    
+    public static SessionKey createKey(IdentityPB identity) throws Exception {
+        return AuthDMO.getInstance().createSession(identity);
     }
     
 }

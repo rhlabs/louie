@@ -16,8 +16,6 @@ import com.rhythm.louie.auth.UnauthorizedSessionException;
 import com.rhythm.louie.connection.LouieConnection;       
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.topology.Route;
-//import com.rhythm.louie.topology.TopologyManager;         
-
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
@@ -25,10 +23,11 @@ import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;      
 import com.rhythm.pb.RequestProtos.RoutePB;                 
-import com.rhythm.pb.data.DataType;                  
-import com.rhythm.pb.data.RequestContext;                   
-import com.rhythm.pb.data.Result;                            
-import java.io.IOException;                     
+import com.rhythm.pb.RequestProtos.SessionKey;                  
+import com.rhythm.pb.data.DataType;                   
+import com.rhythm.pb.data.RequestContext;                            
+import com.rhythm.pb.data.Result;                     
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -77,17 +76,21 @@ public class ProtoRouter implements ProtoProcess{
         RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(externalInput);                                                                                                                                                                            
 
         IdentityPB identity = null;
+        SessionKey sessionKey = null;
         if (header.hasKey()) {     
-            log.debug("header had a key: {}", header.getKey());
             SessionStat session = AuthUtils.accessSession(header.getKey()); //there is something flawed here, about the way that i am trying to send in data, vs the way it's actually picking up a session
             identity = session.getIdentity();                              
         } else {
-            log.debug("header had no key, it's still null");
+            identity = header.getIdentity();
+            sessionKey = AuthUtils.createKey(identity);
         }                                                                  
                                                                            
-        ResponseHeaderPB responseHeader = ResponseHeaderPB.newBuilder()    
-                .setCount(header.getCount()).build();                      
-        responseHeader.writeDelimitedTo(externalOutput);
+        ResponseHeaderPB.Builder responseHeader = ResponseHeaderPB.newBuilder();
+        responseHeader.setCount(header.getCount());
+        if (sessionKey != null) {
+            responseHeader.setKey(sessionKey);
+        }
+        responseHeader.build().writeDelimitedTo(externalOutput);
 //        externalCodedOutput.writeRawVarint32(responseHeader.getSerializedSize());
 //        responseHeader.writeTo(externalCodedOutput);                             
 //        externalCodedOutput.flush();                                             
