@@ -27,7 +27,6 @@ import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.RoutePathPB;
-import com.rhythm.pb.testservice.TestServiceProtos.TestServicePB;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
