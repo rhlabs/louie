@@ -7,6 +7,7 @@ package com.rhythm.louie.request;
 
 import com.rhythm.louie.Server;
 import com.rhythm.louie.auth.UnauthorizedSessionException;
+import com.rhythm.louie.exception.LouieRouteException;
 import com.rhythm.pb.data.Result;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -61,6 +62,9 @@ public class HttpProcessor {
                 
                 List<Result> results = processor.processRequest(req.getInputStream(),resp.getOutputStream(),props);
                 sendHttpError(results,resp);
+        } catch (LouieRouteException ex) {
+            LOGGER.error(ex.toString());
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
         } catch (UnauthorizedSessionException ex) {
             LOGGER.error(ex.toString());
             resp.sendError(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED,"Invalid Session Key");
@@ -79,6 +83,9 @@ public class HttpProcessor {
                     int errorcode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
                     if (e instanceof NoSuchMethodException) {
                         errorcode = HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+                    }
+                    if (e instanceof LouieRouteException) {                     //logically, yes. name-wise, no.
+                        errorcode = HttpServletResponse.SC_NOT_FOUND;           //trigger a retry from clients
                     }
                     
                     String message = "Unknown Error";

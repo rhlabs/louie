@@ -15,17 +15,18 @@ import com.rhythm.louie.auth.SessionStat;
 import com.rhythm.louie.auth.UnauthorizedSessionException;
 import com.rhythm.louie.connection.LouieConnection;       
 import com.rhythm.louie.connection.LouieConnectionFactory;
+import com.rhythm.louie.exception.LouieRouteException;
 import com.rhythm.louie.topology.Route;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.IdentityPB;
-import com.rhythm.pb.RequestProtos.RequestHeaderPB;
-import com.rhythm.pb.RequestProtos.RequestPB;      
-import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
-import com.rhythm.pb.RequestProtos.ResponsePB;      
-import com.rhythm.pb.RequestProtos.RoutePB;                 
-import com.rhythm.pb.RequestProtos.SessionKey;                  
-import com.rhythm.pb.data.DataType;                   
-import com.rhythm.pb.data.RequestContext;                            
+import com.rhythm.pb.RequestProtos.RequestHeaderPB;      
+import com.rhythm.pb.RequestProtos.RequestPB;
+import com.rhythm.pb.RequestProtos.ResponseHeaderPB;      
+import com.rhythm.pb.RequestProtos.ResponsePB;                 
+import com.rhythm.pb.RequestProtos.RoutePB;                  
+import com.rhythm.pb.RequestProtos.SessionKey;                   
+import com.rhythm.pb.data.DataType;                            
+import com.rhythm.pb.data.RequestContext;                     
 import com.rhythm.pb.data.Result;                     
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,8 +82,10 @@ public class ProtoRouter implements ProtoProcess{
             SessionStat session = AuthUtils.accessSession(header.getKey()); //there is something flawed here, about the way that i am trying to send in data, vs the way it's actually picking up a session
             identity = session.getIdentity();                              
         } else {
-            identity = header.getIdentity();
-            sessionKey = AuthUtils.createKey(identity);
+            if (header.hasIdentity()) {
+                identity = header.getIdentity();
+                sessionKey = AuthUtils.createKey(identity);
+            }
         }                                                                  
                                                                            
         ResponseHeaderPB.Builder responseHeader = ResponseHeaderPB.newBuilder();
@@ -176,6 +179,8 @@ public class ProtoRouter implements ProtoProcess{
                 LouieConnection louieConn = LouieConnectionFactory.getConnectionForServer(target);
 //                louieConn = TopologyManager.getConnectionForService(key); // this get will fail prior to returning something into louieConn, i believe.
                 if (louieConn == null) { //Service doesn't exist or something went wrong in forming it                                                 
+                    log.error("Unable to create a LouieConnection to a target host");
+                    System.out.println("Couldn't create a LouieConnection to target host");
                     //This might be unreachable due to service default mapping concept
                     ResponsePB.Builder responseBuilder = ResponsePB.newBuilder();                                                                      
                     responseBuilder.setId(request.getId());                                                                                            
@@ -194,7 +199,12 @@ public class ProtoRouter implements ProtoProcess{
                 }                                                                      
                 ////////////////// PUT DATA INTO THAT CONNECTION ///////////////////   
                 URLConnection urlConn = louieConn.getForwardingConnection();
-                urlConn.connect();
+                try {
+                    urlConn.connect();
+                } catch (IOException ex) {
+                    throw new LouieRouteException(ex);
+                }
+                
                 CodedOutputStream codedOutput = CodedOutputStream.newInstance(urlConn.getOutputStream());
 
                 RequestHeaderPB singleHeader = header.toBuilder()
@@ -221,19 +231,28 @@ public class ProtoRouter implements ProtoProcess{
                     HttpURLConnection httpConn = (HttpURLConnection) urlConn;       
                     try {                                                           
                         int respCode = httpConn.getResponseCode();                  
-                        if (respCode != 200) {                                      
-                            Result res = Result.errorResult(new Exception(httpConn.getResponseMessage()));
-//                            res.setException(new Exception(httpConn.getResponseMessage()));
+                        if (respCode != 200) {      
+                            Result res;
+                            if (respCode == 404) { // Confirmed, works for catching a target currently down. 
+                                res = Result.errorResult(new LouieRouteException(httpConn.getResponseMessage()));
+                            } else { 
+                                res = Result.errorResult(new Exception(httpConn.getResponseMessage()));
+                            }
                             results.add(res);                                              
                         }                                                                  
-                    } catch (IOException e) {                                                
+                    } catch (IOException e) {   
                         log.error(e.toString());
-                        throw e;                                                           
+                        results.add(Result.errorResult(new LouieRouteException(httpConn.getResponseMessage())));
                     }                                                                      
                 }                                                                          
 
                 ////////////////// GET RESPONSE FROM CONNECTION ////////////////////
-                InputStream responseInputStream = urlConn.getInputStream();         
+                InputStream responseInputStream;
+                try {
+                    responseInputStream = urlConn.getInputStream();         
+                } catch (IOException ex) {
+                    continue;
+                }
 
                 ResponseHeaderPB.parseDelimitedFrom(responseInputStream); //just run through these bytes
 
@@ -245,12 +264,12 @@ public class ProtoRouter implements ProtoProcess{
                     externalOutput.flush();
                 }                                                     
 
-                start = System.nanoTime();  //uncertain if this is correct logic. i think this is approximately correct, since it will reset the start time for the next iteration in case it's local¿
+                start = System.nanoTime();
                                                                                                                                                                                                                
                 responseInputStream.close();                                                                                                                                                                   
 
                 externalCodedOutput.flush();
-                log.info("Router HTTP turn around time: {}",(System.nanoTime() - startTime)/1000000);
+                log.debug("Router HTTP turn around time: {}",(System.nanoTime() - startTime)/1000000);
             }                                                                                         
         }                                                                                             
         log.debug("Router total time cost in ms = {}",(System.nanoTime()-begin)/1000000);            

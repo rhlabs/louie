@@ -78,6 +78,7 @@ message RequestPB {
 message ResponseHeaderPB {
     optional uint32         count   = 1;
     optional SessionKey     key     = 2;
+    repeated InfoPB         info    = 3;
 }
 
 message ResponsePB {
@@ -93,4 +94,9 @@ message ErrorPB {
     optional uint32 code = 1;
     optional string type = 2;
     optional string description = 3;
+}
+
+message InfoPB {
+    optional string     key     = 1;
+    optional string     value   = 2;
 }

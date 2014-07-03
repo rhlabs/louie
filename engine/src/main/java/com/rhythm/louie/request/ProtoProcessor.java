@@ -65,8 +65,10 @@ public class ProtoProcessor implements ProtoProcess{
             SessionStat session = AuthUtils.accessSession(header.getKey());
             identity = session.getIdentity();
         } else { //initial request, we will handle creating and returning a key
-            identity = header.getIdentity();
-            sessionKey = AuthUtils.createKey(identity);
+            if (header.hasIdentity()) { //to make backwards compatible
+                identity = header.getIdentity();
+                sessionKey = AuthUtils.createKey(identity);
+            }
         }
         
         ResponseHeaderPB.Builder responseHeader = ResponseHeaderPB.newBuilder();

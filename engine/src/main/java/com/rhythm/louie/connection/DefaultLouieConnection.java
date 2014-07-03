@@ -6,6 +6,8 @@
 package com.rhythm.louie.connection;
 
 import com.google.protobuf.Message;
+import com.rhythm.louie.exception.LouieRequestException;
+import com.rhythm.louie.exception.LouieResponseException;
 import com.rhythm.louie.request.RequestContextManager;
 import com.rhythm.louie.stream.Consumers;
 import com.rhythm.louie.stream.SingleConsumer;
@@ -198,7 +200,7 @@ public class DefaultLouieConnection implements LouieConnection {
         if (key==null) {
             SingleConsumer<SessionKey> con = Consumers.newSingleConsumer();
             Request<SessionKey> req = Request.newParams(con, AUTH_SERVICE, "createSession", PBParam.singleParam(getIdentity()), SessionKey.getDefaultInstance());
-            performRequest(req);
+            executeRequest(req);
             key = con.get();
         }
         return key;
@@ -211,7 +213,7 @@ public class DefaultLouieConnection implements LouieConnection {
         
         while (true){ 
             try {
-                performRequest(req);
+                executeRequest(req);
                 lockoffRetry = false;
                 return;
             } catch (HttpException e) {
@@ -235,7 +237,8 @@ public class DefaultLouieConnection implements LouieConnection {
         
     }
     
-    private <T extends Message> void performRequest(Request<T> req) throws Exception { 
+    private <T extends Message> void executeRequest(Request<T> req) throws HttpException, BouncedException, 
+            HttpsException, IOException, LouieRequestException, LouieResponseException { 
         
         URLConnection connection;
         String service = req.getService();
@@ -259,8 +262,6 @@ public class DefaultLouieConnection implements LouieConnection {
                 connection = getConnection(getPBURL());
             }
             connection.connect();
-        } catch (HttpsException e) {
-            throw e;
         } catch (Exception e) {
             throw new BouncedException(e);
         } 
@@ -329,7 +330,7 @@ public class DefaultLouieConnection implements LouieConnection {
                 httpConnection.disconnect();
                 throw new BouncedException("Server returned: " + Integer.toString(respCode));
             }
-            if (httpConnection.getResponseCode()>=400) {
+            if (respCode>=400) {
                 throw new HttpException(httpConnection.getResponseCode(),httpConnection.getResponseMessage());
             }
         }
@@ -339,7 +340,7 @@ public class DefaultLouieConnection implements LouieConnection {
         // Read in the Response Header
         ResponseHeaderPB responseHeader = ResponseHeaderPB.parseDelimitedFrom(input);
         if (responseHeader.getCount()!=1) {
-            throw new Exception("Received more than one response! This is unsupported behavior.");
+            throw new LouieRequestException("Received more than one response! This is unsupported behavior.");
         }
         if (responseHeader.hasKey()) {
             key = responseHeader.getKey();
@@ -348,11 +349,15 @@ public class DefaultLouieConnection implements LouieConnection {
         // Read in each Response
         ResponsePB response = ResponsePB.parseDelimitedFrom(input);
         if (response.hasError()) {
-            throw new Exception(response.getError().getDescription());
+            throw new LouieRequestException(response.getError().getDescription());
         }
         
 //        Response<T> result = new LouieResponse<T>(req, response, input);
-        LouieResponse.processResponse(req, response, input);
+        try {
+            LouieResponse.processResponse(req, response, input);
+        } catch (Exception ex) {
+            throw new LouieResponseException(ex);
+        }
         
         input.close();
 
