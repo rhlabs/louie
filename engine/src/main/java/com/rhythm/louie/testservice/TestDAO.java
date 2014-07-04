@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.request.RequestContextManager;
 import com.rhythm.pb.RequestProtos.ErrorPB;
-import com.rhythm.pb.testservice.TestServiceProtos.TestServicePB;
 import com.rhythm.util.CalcList;
 import com.rhythm.util.FutureList;
 import java.util.ArrayList;
