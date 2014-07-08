@@ -7,19 +7,15 @@
 package com.rhythm.louie.stream;
 
 /**
- *
  * @author eyasukoc
- * @param <T>
+ * @param <T> Type of the returned object(s)
  */
-public class SingleConsumer<T> implements Consumer<T>{
+public class SingleConsumer<T> extends Consumer<T>{
 
     private T item;
     
     public SingleConsumer() {};
     
-    @Override
-    public void informMessageCount(int count) {}
-
     @Override
     public void consume(T item) {
         this.item = item;

@@ -10,16 +10,23 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.request.RequestContextManager;
+
 import com.rhythm.pb.RequestProtos.ErrorPB;
+
 import com.rhythm.util.CalcList;
 import com.rhythm.util.FutureList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import com.rhythm.louie.TaskScheduler;
+import com.rhythm.louie.stream.StreamingConsumer;
 
 /**
  *
@@ -87,19 +94,29 @@ public class TestDAO implements TestClient {
     }
 
     @Override
-    public List<ErrorPB> streamLoopTest(Integer numResults, Integer resultSize, Integer sleep, List<String> hosts) throws Exception {
+    public List<ErrorPB> streamLoopTest(final Integer numResults, final Integer resultSize, 
+            final Integer sleep, final List<String> hosts) throws Exception {
         if (hosts.isEmpty()) {
             return streamTest(numResults,resultSize,sleep);
         }
-        List<String> args = new ArrayList<String>(hosts);
-        String host = args.remove(0);
+        final List<String> args = new ArrayList<String>(hosts);
+        final String host = args.remove(0);
         
+        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<ErrorPB>(100);
         
-        // TODO this does not yet stream
-        
-        TestClient client = TestClientFactory.getClient(
-                LouieConnectionFactory.getConnection(host));
-        return client.streamLoopTest(numResults,resultSize,sleep,args);
+        TaskScheduler.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TestServiceClient client = TestClientFactory.getClient(
+                            LouieConnectionFactory.getConnection(host));
+                    client.streamLoopTest(numResults, resultSize, sleep, args, consumer);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        return consumer.getStreamList();
     }
     
     

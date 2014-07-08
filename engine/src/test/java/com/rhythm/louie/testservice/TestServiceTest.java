@@ -6,14 +6,7 @@
 
 package com.rhythm.louie.testservice;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
@@ -22,19 +15,24 @@ import com.rhythm.louie.connection.LouieServiceClient;
 import com.rhythm.louie.connection.Response;
 import com.rhythm.louie.server.LouieClientTest;
 import com.rhythm.louie.stream.Consumer;
+
 import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.RoutePathPB;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.rhythm.louie.stream.StreamingConsumer;
 
 /**
  *
@@ -47,9 +45,12 @@ public class TestServiceTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+//        client = TestClientFactory.getClient(
+//                LouieConnectionFactory.getConnection("vans256",
+//                Identity.createJUnitIdentity()));
         client = TestClientFactory.getClient(
-                LouieConnectionFactory.getConnection("vans256",
-                Identity.createJUnitIdentity()));
+                LouieConnectionFactory.getLocalConnection(
+                        Identity.createJUnitIdentity()));
     }
     
     /**
@@ -169,19 +170,25 @@ public class TestServiceTest {
         }
     }
     
-     @Test
+    @Test
     public void streamTest() throws Exception {
-        System.out.println("loopTest");
+        System.out.println("streamTest");
+
+        long start = System.nanoTime();
         
-            long start = System.nanoTime();
-            List<ErrorPB> result = client.streamTest(10,100,500);
-            System.out.println("YES:"+(System.nanoTime()-start)/1000000);
-            
+        client.streamTest(10, 100, 500, new Consumer<ErrorPB>() {
+            @Override
+            public void consume(ErrorPB object) {
+                System.out.println("Got Object : "+(System.nanoTime()/1000000));
+            }
+        });
+        System.out.println("YES:" + (System.nanoTime() - start) / 1000000);
+
     }
     
     @Test
     public void streamTestBulk() throws Exception {
-        System.out.println("loopTest");
+        System.out.println("streamTestBulk");
         
         for (int i=0;i<5;i++) {
             long start = System.nanoTime();
@@ -193,4 +200,49 @@ public class TestServiceTest {
             System.out.println("NO:"+(System.nanoTime()-start)/1000000);
         }
     }
+    
+    @Test
+    public void streamTestLoop() throws Exception {
+        System.out.println("streamTest");
+
+        long start = System.nanoTime();
+        
+        List<String> hosts = Arrays.asList("louiebeta.rhythm.com","louiebeta.van.rhythm.com");
+        
+        client.streamLoopTest(10, 100, 500, hosts, new Consumer<ErrorPB>() {
+            @Override
+            public void consume(ErrorPB object) {
+                System.out.println("Got Object : "+(System.nanoTime()/1000000));
+            }
+        });
+        System.out.println("YES:" + (System.nanoTime() - start) / 1000000);
+    }
+    
+    @Test
+    public void streamTest_StreamConsumer() throws Exception {
+        System.out.println("streamTest");
+
+        long start = System.nanoTime();
+        
+        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<ErrorPB>(4);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    client.streamTest(20, 100, 100, consumer);
+                } catch (Exception ex) {
+                    Logger.getLogger(TestServiceTest.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        t.start();
+
+        Thread.sleep(1000);
+        for (ErrorPB error : consumer.getStreamList()) {
+            System.out.println("Got Object : "+(System.nanoTime()/1000000));
+        }
+        System.out.println("YES:" + (System.nanoTime() - start) / 1000000);
+
+    }
+    
 }

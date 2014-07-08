@@ -11,10 +11,10 @@ package com.rhythm.louie.stream;
  * @author eyasukoc
  * @param <T> Type of the returned object(s)
  */
-public interface Consumer <T> {
+public abstract class Consumer <T> {
     
-    public void informMessageCount(int count);
+    public void informMessageCount(int count) {}
 
-    public void consume(T object);
+    abstract public void consume(T object);
 
 }

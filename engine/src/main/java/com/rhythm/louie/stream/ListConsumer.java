@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author eyasukoc
+ * @param <T> Type of the returned object(s)
  */
-public class ListConsumer<T> implements Consumer<T>{
+public class ListConsumer<T> extends Consumer<T>{
 
     private final List<T> list = new ArrayList<T>();
     
