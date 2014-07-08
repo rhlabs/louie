@@ -3,7 +3,7 @@
   
     <groupId>com.rhythm.louie</groupId>
     <artifactId>louie-parent</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
   
     <packaging>pom</packaging>
     <name>LoUIE Parent</name>
