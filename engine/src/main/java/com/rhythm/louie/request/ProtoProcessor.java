@@ -99,6 +99,9 @@ public class ProtoProcessor implements ProtoProcess{
             
             try {
                 pbReq = new RequestContext(header, request,DataType.PB);
+                if (header.hasIdentity()) {
+                    pbReq.setSessionKey(sessionKey);
+                }
                 pbReq.setIdentity(identity);
                 pbReq.readPBParams(input);
                 pbReq.setRemoteAddress(props.getRemoteAddress());

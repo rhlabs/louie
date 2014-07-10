@@ -130,6 +130,9 @@ public class ProtoRouter implements ProtoProcess{
 
                 try {
                     pbReq = new RequestContext(header, request,DataType.PB);
+                    if (header.hasIdentity()) {
+                        pbReq.setSessionKey(sessionKey);
+                    }
                     pbReq.setIdentity(identity);                     
                     pbReq.readPBParams(externalInput);                         
                     pbReq.setRemoteAddress(props.getRemoteAddress());          

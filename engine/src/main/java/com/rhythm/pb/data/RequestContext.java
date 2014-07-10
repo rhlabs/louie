@@ -36,6 +36,7 @@ public class RequestContext {
     private PBParamType type;
     
     private IdentityPB identity;
+    private SessionKey sessionKey = null;
     private RoutePB route;
     
     private List<RoutePathPB> destinations;
@@ -123,12 +124,18 @@ public class RequestContext {
         this.identity = identity;
     }
     
+    public void setSessionKey(SessionKey key) {
+        this.sessionKey = key;
+    }
+    
     public String getSessionKey() {
         if (header.hasKey()) {
             SessionKey key = header.getKey();
             if (key.hasKey()) {
                 return key.getKey();
             }
+        } else if (sessionKey != null) {
+            return sessionKey.getKey();
         }
         return "";
     }
