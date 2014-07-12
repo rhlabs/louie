@@ -222,6 +222,7 @@ public class QueryBuilder {
 
      /**
      * Adds a custom clause 
+     * 
      * @param clause full text of a clause with a single ? for a value
      * @param value the data to be injected into the prepared statement
      * @param sqlType the java.sql.Type of the field
@@ -230,13 +231,7 @@ public class QueryBuilder {
      * @see java.sql.Types
      */
     public void addClause(String clause, Object value, int sqlType) throws Exception {
-        int param = clause.indexOf('?');
-        if (param==-1) {
-            throw new Exception("Must specify a ? param!");
-        } else if (clause.indexOf('?', param+1)!=-1) {
-            throw new Exception("Must only specify a single ? param!");
-        }
-        addClause(new QueryClause(clause, value, sqlType));
+        addClause(QueryClause.createClause(clause, value, sqlType));
     }
 
     /**

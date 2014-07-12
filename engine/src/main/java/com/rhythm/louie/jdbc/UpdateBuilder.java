@@ -32,9 +32,12 @@ public class UpdateBuilder {
     
     /**
      * Adds a clause in the form of: field=? 
+     * 
      * @param fieldName the name of the field
      * @param value value to be assigned on execution
      * @param sqlType java.sql.Types identifier
+     * 
+     * @see java.sql.Types
      */
     public void addWhereFieldClause(String fieldName, Object value, int sqlType) {
         whereClauses.add(QueryClause.createFieldClause(fieldName, value, sqlType));
@@ -42,29 +45,49 @@ public class UpdateBuilder {
     
     /**
      * Adds a clause in the form of: field IN (?,?)
+     * 
      * @param fieldName the name of the field
      * @param values values to be assigned on execution
      * @param sqlType java.sql.Types identifier
+     * 
+     * @see java.sql.Types
      */
     public void addWhereInClause(String fieldName, Collection<?> values, int sqlType) {
         whereClauses.add(QueryClause.createInClause(fieldName, values, sqlType));
     }
     
      /**
-     * Adds a custom clause 
+     * Adds a custom clause that must contain one and only one ?
+     * 
      * @param clause a custom clause string like
      *     id IN (select id from other_type where value=?)
      * @param value value to be assigned on execution
      * @param sqlType java.sql.Types identifier
+     * @throws java.lang.Exception if the clause does not contain one and only one ?
+     * 
+     * @see java.sql.Types
      */
-    public void addWhereClause(String clause, Object value, int sqlType) {
-        whereClauses.add(new QueryClause(clause, value, sqlType));
+    public void addWhereClause(String clause, Object value, int sqlType) throws Exception {
+        whereClauses.add(QueryClause.createClause(clause, value, sqlType));
     }
     
+    /**
+     * Returns the service created to perform the query
+     * 
+     * @param query
+     * @return a jdbc service
+     * @throws Exception 
+     */
     protected JdbcService getService(String query) throws Exception {
         return factory.newService(query);
     }
     
+    /**
+     * Perform the database update.  This call automatically cleans up after itself
+     * 
+     * @return the number of rows that were updated
+     * @throws Exception 
+     */
     public int execute() throws Exception {
         JdbcService jdbc = null;
         try {
@@ -110,6 +133,12 @@ public class UpdateBuilder {
         }
     }
 
+    /**
+     * Returns the query used to perform the update
+     * 
+     * @return the query string
+     * @throws Exception 
+     */
     public String getQuery() throws Exception {
         StringBuilder query = new StringBuilder();
         query.append("UPDATE ").append(table).append(" SET ");
@@ -145,24 +174,83 @@ public class UpdateBuilder {
         return query.toString();
     }
     
+    /**
+     * Sets a field equals to the special clause that does not contain a ?
+     * 
+     * @param name the name of the field
+     * @param special the clause to set the field to
+     * @throws Exception if special contains a ?
+     */
     public void setFieldNoParamSpecial(String name,String special) throws Exception {
         fields.add(Field.createNoParamField(name,special));
     }
     
+    /**
+     * Creates a clause in the form of: field=? 
+     * 
+     * @param name the name of the field
+     * @param value the new value of the field
+     */
     public void setField(String name,Object value) {
         fields.add(new Field(name,value));
     }
-    public void setFieldSpecial(String name,String special,Object value) {
-        fields.add(new Field(name,special,value));
-    }
     
-    public void setField(String name,Object value,int sqlType) {
-        fields.add(new Field(name,value,sqlType));
+    /**
+     * Sets a field using the special clause.  Resultant clause will look like field=SPECIAL.
+     * SPECIAL must contain a single ?
+     * 
+     * @param name the name of the field 
+     * @param special the clause containing a single ?
+     * @param value the value to inject into the prepared statement
+     * @throws java.lang.Exception if you do not specify one and only one ?
+     * 
+     * @see java.sql.Types
+     */
+    public void setFieldSpecial(String name,String special,Object value) throws Exception {
+        setFieldSpecial(name, special, value, Types.OTHER);
     }
-    public void setFieldSpecial(String name,String special,Object value,int sqlType) {
+  
+    /**
+     * Creates a clause in the form of: field=? 
+     * 
+     * @param name the name of the field
+     * @param value the new value of the field
+     * @param sqlType the type of the value
+     * 
+     * @see java.sql.Types
+     */
+    public void setField(String name, Object value, int sqlType) {
+        fields.add(new Field(name, value, sqlType));
+    }
+
+    /**
+     * Sets a field using the special clause.  Resultant clause will look like field=SPECIAL.
+     * SPECIAL must contain a single ?
+     * 
+     * @param name the name of the field 
+     * @param special the clause containing a single ?
+     * @param value the value to inject into the prepared statement
+     * @param sqlType the type of the value
+     * @throws java.lang.Exception if you do not specify one and only one ?
+     * 
+     * @see java.sql.Types
+     */
+    public void setFieldSpecial(String name,String special,Object value,int sqlType) throws Exception {
+        int param = special.indexOf('?');
+        if (param==-1) {
+            throw new Exception("Must specify a ? param!");
+        } else if (special.indexOf('?', param+1)!=-1) {
+            throw new Exception("Must only specify a single ? param!");
+        }
+        
         fields.add(new Field(name,special,value,sqlType));
     }
     
+    /**
+     * Returns true if there has not been any fields set
+     * 
+     * @return true if no fields are set
+     */
     public boolean isEmpty() {
         return fields.isEmpty();
     }

@@ -44,11 +44,11 @@ public class QueryClause {
     private boolean isList;
     private boolean batched = false;
 
-    QueryClause(String clause, Object value) {
+    private QueryClause(String clause, Object value) {
         this(clause, value, Types.OTHER);
     }
 
-    QueryClause(String clause, Object value, int sqlType) {
+    private QueryClause(String clause, Object value, int sqlType) {
         this.clause = clause;
         this.value = value;
         this.sqlType = sqlType;
@@ -57,7 +57,42 @@ public class QueryClause {
     }
 
     /**
+     * 
+     * @param clause
+     * @param value
+     * @return
+     * @throws Exception 
+     */
+    public static QueryClause createClause(String clause, Object value) throws Exception {
+        return createClause(clause, value, Types.OTHER);
+    }
+    
+    /**
+     * Creates a custom clause that must contain one and only one ?
+     * 
+     * @param clause the custom clause
+     * @param value the value to be injected into the query
+     * @param sqlType the type of the value
+     * 
+     * @return the created QueryClause
+     * @throws Exception 
+     */
+    public static QueryClause createClause(String clause, Object value, int sqlType) throws Exception {
+        int param = clause.indexOf('?');
+        if (param==-1) {
+            throw new Exception("Must specify a ? param!");
+        } else if (clause.indexOf('?', param+1)!=-1) {
+            throw new Exception("Must only specify a single ? param!");
+        }
+        return new QueryClause(clause, value, sqlType);
+    }
+    
+    /**
      * Creates a clause that does not contain any ?, such as "t.visible"
+     * 
+     * @param clause
+     * @return
+     * @throws Exception 
      */
     public static QueryClause createNoParamClause(String clause) throws Exception {
         if (clause.contains("?")) {
@@ -70,6 +105,13 @@ public class QueryClause {
 
     /**
      * Creates a clause in the form of: field IN (?,?,?) 
+     * 
+     * @param field
+     * @param values
+     * @param sqlType
+     * @return 
+     * 
+     * @see java.sql.Types
      */
     public static QueryClause createInClause(String field, Collection<?> values, int sqlType) {
         String clause = DAOUtils.appendInParams(field + " IN ", values.size());
@@ -80,6 +122,13 @@ public class QueryClause {
     
     /**
      * Creates a clause in the form of: field NOT IN (?,?,?) 
+     * 
+     * @param field
+     * @param values
+     * @param sqlType
+     * @return 
+     * 
+     * @see java.sql.Types
      */
     public static QueryClause createNotInClause(String field, Collection<?> values, int sqlType) {
         String clause = DAOUtils.appendInParams(field + " NOT IN ", values.size());
@@ -93,6 +142,11 @@ public class QueryClause {
      * Only takes strings, automatically sets the type to VARCHAR
      * If useInIfPossible is set to true, it will scan the values to see if any contain a %,
      * if none do, it will use an IN statement instead
+     * 
+     * @param field
+     * @param values
+     * @param useInIfPossible
+     * @return 
      */
     public static QueryClause createInLikeClause(String field, Collection<String> values, boolean useInIfPossible) {
         
@@ -127,6 +181,13 @@ public class QueryClause {
 
     /**
      * Creates a clause in the form of: field=? 
+     * 
+     * @param field
+     * @param value
+     * @param sqlType
+     * @return 
+     * 
+     * @see java.sql.Types
      */
     public static QueryClause createFieldClause(String field, Object value, int sqlType) {
         return new QueryClause(field + "=?", value, sqlType);
@@ -136,6 +197,13 @@ public class QueryClause {
      * Creates a custom clause that has a list of values of the same type
      * This method is a bit of a hack work around in order to add a clause like:
      * (job is null OR job in (?,?,?))
+     * 
+     * @param clause
+     * @param value
+     * @param sqlType
+     * @return 
+     * 
+     * @see java.sql.Types
      */
     public static QueryClause createCustomListClause(String clause, Object value, int sqlType) {
         QueryClause f = new QueryClause(clause, value, sqlType);
@@ -162,10 +230,24 @@ public class QueryClause {
         return batched;
     }
     
+    /** 
+     * Returns the clause for the batch offset specified. 
+     * If this is not a batched query, the entire clause is always returned
+     * 
+     * @param batch the batch offset
+     * @return the query clause
+     */
     public String getClauseForBatch(int batch) {
         return getClause();
     }
     
+    /**
+     * Return the values for the batch offset specified.
+     * If this is not a batched query, the empty list is returned
+     * 
+     * @param batch the batch offset
+     * @return a list of values
+     */
     public List<?> getValuesForBatch(int batch) {
         return Collections.emptyList();
     }
@@ -173,6 +255,7 @@ public class QueryClause {
      /**
      * @return a collection of values, if the isList=true, if this is not a list
      * it will throw an Exception
+     * 
      * @throws java.lang.Exception
      */
     public Collection<?> getValuesList() throws Exception {
@@ -195,22 +278,29 @@ public class QueryClause {
     }
     
      /**
-     * Creates a clause in the form of: field IN (?,?,?) 
-     * @param field
-     * @param values
-     * @param sqlType
-     * @return 
+     * Creates a batched clause in the form of: field IN (?,?,?) 
+     * 
+     * @param field the name of the field
+     * @param values the values to be set in the sql
+     * @param sqlType the type of the values
+     * @return the newly created clause 
+     * 
+     * @see java.sql.Types
      */
     public static BatchedInClause createBatchedInClause(String field, List<?> values, int sqlType) {
         return new BatchedInClause(field, values, sqlType);
     }
      /**
-     * Creates a clause in the form of: field IN (?,?,?) 
-     * @param field
-     * @param values
-     * @param sqlType
-     * @param batchSize
-     * @return 
+     * Creates a batched clause in the form of: field IN (?,?,?)
+     * 
+     * @param field the name of the field
+     * @param values the values to be set in the sql
+     * @param sqlType the type of the values
+     * @param batchSize the max size of the in clauses, if the size of 
+     * values is > batchSize then multiple queries will be performed
+     * @return the newly created clause 
+     * 
+     * @see java.sql.Types
      */
     public static BatchedInClause createBatchedInClause(String field, List<?> values, int sqlType, int batchSize) {
         return new BatchedInClause(field, values, sqlType, batchSize);
