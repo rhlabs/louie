@@ -49,11 +49,23 @@ public abstract class SSLClientConfig implements SSLConfig{
         caPassword = sslCAPass.toCharArray();
         
         KeyStore ksClient = KeyStore.getInstance("pkcs12"); 
-        ksClient.load(new FileInputStream(getClientCertificate()), password); 
+        FileInputStream clientCert = null;
+        try {
+            clientCert = new FileInputStream(getClientCertificate());
+            ksClient.load(clientCert, password); 
+        } finally {
+            if (clientCert != null) clientCert.close();
+        }
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm()); 
         kmf.init(ksClient, password); 
         KeyStore ksCACert = KeyStore.getInstance(KeyStore.getDefaultType()); 
-        ksCACert.load(new FileInputStream(getCAKeystore()), caPassword); 
+        FileInputStream caKS = null;
+        try {
+            caKS = new FileInputStream(getCAKeystore());
+            ksCACert.load(caKS, caPassword); 
+        } finally {
+            if (caKS != null) caKS.close();
+        }
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
         tmf.init(ksCACert); 
         SSLContext context = SSLContext.getInstance("TLS"); 
