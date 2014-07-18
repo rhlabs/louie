@@ -7,7 +7,6 @@
  */
 package ${info.packageName};
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.Server;
@@ -21,7 +20,6 @@ import com.rhythm.pb.command.ServiceFactory;
 public class ${className} implements ServiceFactory {
 
     private static final String serviceName = "${info.serviceName}";
-    private static final Logger LOGGER = LoggerFactory.getLogger(${className}.class);
 
     private ${className}() {}
 
@@ -68,19 +66,23 @@ public class ${className} implements ServiceFactory {
                 try {
                     return (${baseName}Client) Class.forName("${info.packageName}.${baseName}CaveDAO").newInstance();
                 } catch( ClassNotFoundException e) {
-                    LOGGER.error("${baseName}CaveDAO set in config but not found, defaulting to R&H DAO");
+                    LoggerFactory.getLogger(${className}.class)
+                        .error("${baseName}CaveDAO set in config but not found, defaulting to R&H DAO");
                 }
             } else {
                 try {
                     Object alternateDAO = Class.forName(daoSource).newInstance();
                     if (alternateDAO instanceof ${baseName}Client){
-                        LOGGER.info("Loading alternate DAO "+daoSource+" for service ${baseName}");
+                        LoggerFactory.getLogger(${className}.class)
+                            .info("Loading alternate DAO {} for service ${baseName}", daoSource);
                         return (${baseName}Client) alternateDAO;
                     } else {
-                        LOGGER.warn("Alternate DAO "+daoSource+" for service ${baseName} does not implement${baseName}Client, defaulting to R&H DAO");
+                        LoggerFactory.getLogger(${className}.class)
+                            .warn("Alternate DAO {} for service ${baseName} does not implement${baseName}Client, defaulting to R&H DAO", daoSource);
                     }
                 } catch (ClassNotFoundException e) {
-                    LOGGER.warn("Attempt to load alternate DAO "+daoSource+" for service ${baseName} has failed.");
+                    LoggerFactory.getLogger(${className}.class)
+                        .warn("Attempt to load alternate DAO {} for service ${baseName} has failed.", daoSource);
                     throw e;
                 }
             }
