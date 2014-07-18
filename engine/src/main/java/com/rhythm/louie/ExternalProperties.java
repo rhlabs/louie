@@ -107,18 +107,24 @@ public class ExternalProperties {
             Enumeration<URL> resources = Constants.class.getClassLoader()
                     .getResources("META-INF/MANIFEST.MF");
             while (resources.hasMoreElements()) {
-                Manifest manifest = new Manifest(resources.nextElement().openStream());
-                Attributes attr = manifest.getMainAttributes();
-                String impl = attr.getValue("Implementation-Title");
-                if (impl != null) {
-                    String buildVersion = attr.getValue(BUILD_VERSION);
-                    if (buildVersion != null) {
-                        gitVersions.put(impl,buildVersion);
+                InputStream input = null;
+                try {
+                    input = resources.nextElement().openStream();
+                    Manifest manifest = new Manifest(input);
+                    Attributes attr = manifest.getMainAttributes();
+                    String impl = attr.getValue("Implementation-Title");
+                    if (impl != null) {
+                        String buildVersion = attr.getValue(BUILD_VERSION);
+                        if (buildVersion != null) {
+                            gitVersions.put(impl,buildVersion);
+                        }
+                        String buildTime = attr.getValue(BUILD_TIME);
+                        if (buildTime != null) {
+                            compileDates.put(impl,buildTime);
+                        }
                     }
-                    String buildTime = attr.getValue(BUILD_TIME);
-                    if (buildTime != null) {
-                        compileDates.put(impl,buildTime);
-                    }
+                } finally {
+                    if (input!=null) input.close();
                 }
             }
         } catch (Exception e) {
