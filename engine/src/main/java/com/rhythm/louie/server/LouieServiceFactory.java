@@ -33,13 +33,14 @@ public class LouieServiceFactory implements ServiceFactory{
     @Override
     public Service getService() {
         if (service == null) {
-            service = new LouieServiceHandler(new LouieDAO());
+            service = new LouieServiceHandler();
+            service.setDelegate(new LouieDAO());
         }
         return service;
     }
     
     public LouieClient getServiceClient() {
-        return service.getClient();
+        return service.getDelegate();
     }
     
 }

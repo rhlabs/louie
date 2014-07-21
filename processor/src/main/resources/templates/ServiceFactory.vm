@@ -7,12 +7,23 @@
  */
 package ${info.packageName};
 
-import org.slf4j.LoggerFactory;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
+import java.util.Set;
+
+import org.reflections.Reflections;
+import org.reflections.scanners.TypeAnnotationsScanner;
+
+import com.rhythm.louie.Delegate;
 import com.rhythm.louie.Server;
 import com.rhythm.louie.ServiceProperties;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
+import com.rhythm.louie.process.CacheDelegate;
+import com.rhythm.louie.process.DAO;
+import com.rhythm.louie.process.Router;
 
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.command.ServiceFactory;
@@ -37,82 +48,108 @@ public class ${className} implements ServiceFactory {
     }
 
     public ${baseName}Client getServiceClient() throws Exception {
-        getService();
-        return service.getClient();
+        return getService().getDelegate();
     }
 
     private static ${baseName}ServiceHandler service;
 
     @Override
-    public synchronized Service getService() throws Exception{
+    @SuppressWarnings("unchecked")
+    public synchronized ${baseName}ServiceHandler getService() throws Exception {
+        if (service!=null) {
+            return service;
+        }
+
         ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-        boolean centralized = props.isCentralized();
-        if (service==null) {
-            if (centralized) {
-                service = new ${baseName}ServiceRouter();
-            } else {
-                ${baseName}Client dao = getConfiguredDAO(props);
-                ${baseName}Client client = new ${baseName}CacheDelegate(dao);
-                service = new ${baseName}ServiceHandler(client);
+        Reflections reflections = new Reflections("${info.packageName}");
+        
+        ${baseName}Client serviceClient;
+        if (useRemoteDAO(props)) {
+            Server PRIMARY = Server.getServer(props.getMain());
+            LouieConnection connection = LouieConnectionFactory.getConnectionForServer(PRIMARY);
+            serviceClient = ${baseName}ClientFactory.getClient(connection);
+        } else {
+            serviceClient = loadLayer(props.getDAO(), "${baseName}DAO", reflections, DAO.class, false);
+        }
+        if (serviceClient==null) {
+            throw new Exception("Must define at least a DAO layer");
+        }
+        
+        ${baseName}Client router = loadLayer(props.getRouter(),null,reflections,Router.class, true);
+        if (router!=null) {
+            ((Delegate<${baseName}Client>)router).setDelegate(serviceClient);
+            serviceClient = router;
+        }
+        
+        if (props.isCachingOn()) {
+            ${baseName}Client cache = loadLayer(props.getCache(),"${baseName}CacheDelegate",reflections,CacheDelegate.class,true);
+            if (cache!=null) {
+                ((Delegate<${baseName}Client>)cache).setDelegate(serviceClient);
+                serviceClient = cache;
             }
         }
+        
+        service = new ${baseName}ServiceHandler();
+        service.setDelegate(serviceClient);
         return service;
     }
 
-    private static ${baseName}Client getConfiguredDAO(ServiceProperties props) throws Exception{
-        String daoSource = props.getDAO();
-        if (!daoSource.equals("rh")){
-            if (daoSource.equals("cave")){
-                try {
-                    return (${baseName}Client) Class.forName("${info.packageName}.${baseName}CaveDAO").newInstance();
-                } catch( ClassNotFoundException e) {
-                    LoggerFactory.getLogger(${className}.class)
-                        .error("${baseName}CaveDAO set in config but not found, defaulting to R&H DAO");
-                }
-            } else {
-                try {
-                    Object alternateDAO = Class.forName(daoSource).newInstance();
-                    if (alternateDAO instanceof ${baseName}Client){
-                        LoggerFactory.getLogger(${className}.class)
-                            .info("Loading alternate DAO {} for service ${baseName}", daoSource);
-                        return (${baseName}Client) alternateDAO;
-                    } else {
-                        LoggerFactory.getLogger(${className}.class)
-                            .warn("Alternate DAO {} for service ${baseName} does not implement${baseName}Client, defaulting to R&H DAO", daoSource);
-                    }
-                } catch (ClassNotFoundException e) {
-                    LoggerFactory.getLogger(${className}.class)
-                        .warn("Attempt to load alternate DAO {} for service ${baseName} has failed.", daoSource);
-                    throw e;
-                }
-            }
-        }
-        return new ${baseName}DAO();
-    }
-
-    private static class ${baseName}ServiceRouter extends ${baseName}ServiceHandler {
-        public ${baseName}ServiceRouter() {
-            super();
-        }
-
-        @Override
-        public void initialize() throws Exception {
-            ServiceProperties props = ServiceProperties.getServiceProperties(getServiceName());
-
+    private boolean useRemoteDAO(ServiceProperties props) throws Exception {
+        if (props.isCentralized()) {
             Server PRIMARY = Server.getServer(props.getMain());
             if (PRIMARY == null) {
                 throw new Exception("Cannot establish service!  Unknown MAIN server: " + props.getMain());
             }
 
-            if (Server.LOCAL.getLocation().equals(PRIMARY.getLocation())) {
-                ${baseName}Client dao = getConfiguredDAO(props);
-                client = new ${baseName}CacheDelegate(dao);
-            } else {
-                LouieConnection connection = LouieConnectionFactory.getConnectionForServer(PRIMARY);
-                client = new ${baseName}CacheDelegate(${baseName}ClientFactory.getClient(connection));
+            if (!Server.LOCAL.getLocation().equals(PRIMARY.getLocation())) {
+                return true;
             }
+        }
+        return false;
+    }
 
-            super.initialize();
+    private ${baseName}Client loadLayer(String property, String defaultName,
+            Reflections reflections, Class<? extends Annotation> annotation, boolean delegate) throws Exception {
+        Class<?> layer = null;
+        if (property==null) {
+            // no layer override found, so search for the class tagged with the annotation
+            Set<Class<?>> caches = reflections.getTypesAnnotatedWith(annotation);
+            if (caches.size()>1) {
+                throw new Exception("Multiple @"+annotation.getSimpleName()+" layers found");
+            } else if (caches.size()==1) {
+                layer = caches.iterator().next();
+            } else if (defaultName!=null && !defaultName.isEmpty()) {
+                // check to see if the default exists, this helps support legacy behavior
+                try {
+                    layer = Class.forName("${info.packageName}."+defaultName);
+                } catch (ClassNotFoundException e) {}
+            }
+        } else if (!property.isEmpty()) {
+            // Attempt to load the override class
+            layer = Class.forName(property);
+        }
+        if (layer == null) {
+            return null;
+        } else {
+            if (!${baseName}Client.class.isAssignableFrom(layer)) {
+                throw new Exception(layer.getCanonicalName()+" does not implement ${baseName}Client");
+            }
+            if (delegate) {
+                if (!Delegate.class.isAssignableFrom(layer)) {
+                    throw new Exception(layer.getCanonicalName()+" must implement Delegate<${baseName}Client>");
+                }
+                for (Type genericInterface : layer.getGenericInterfaces()) {
+                    if (genericInterface instanceof Delegate) {
+                        Type[] genericTypes = ((ParameterizedType) genericInterface).getActualTypeArguments();
+                        for (Type genericType : genericTypes) {
+                            if (!(genericType instanceof ${baseName}Client)) {
+                                throw new Exception(layer.getCanonicalName()+" must implement Delegate<${baseName}Client>");
+                            }
+                        }
+                    }
+                }
+            }
+            return (${baseName}Client) layer.newInstance();
         }
     }
 }

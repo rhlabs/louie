@@ -8,7 +8,6 @@ package com.rhythm.louie.testservice;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import com.rhythm.louie.connection.LouieConnectionFactory;
@@ -17,28 +16,25 @@ import com.rhythm.louie.request.RequestContextManager;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 
 import com.rhythm.util.CalcList;
-import com.rhythm.util.FutureList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import com.rhythm.louie.TaskScheduler;
+import com.rhythm.louie.process.DAO;
 import com.rhythm.louie.stream.StreamingConsumer;
 
 /**
  *
  * @author cjohnson
  */
+@DAO
 public class TestDAO implements TestClient {
-    private static ExecutorService scheduler = null;
     private static final int THREAD_POOL_SIZE = 20;
     public TestDAO() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                     .setNameFormat("qhostTEST-threadscheduler-%d").build();
-        scheduler = Executors.newFixedThreadPool(THREAD_POOL_SIZE,threadFactory);
     }
  
     @Override

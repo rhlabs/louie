@@ -6,8 +6,11 @@
 package com.rhythm.louie.server;
 
 import com.rhythm.louie.ServiceManager;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import com.rhythm.louie.process.DAO;
 
 import com.rhythm.pb.command.ArgType;
 import com.rhythm.pb.command.PBCommand;
@@ -22,6 +25,7 @@ import com.rhythm.pb.louie.LouieProtos.ServicePB;
  * @author cjohnson
  * Created: Oct 27, 2011 11:36:00 AM
  */
+@DAO
 public class LouieDAO implements LouieClient {
     public LouieDAO() {
     }

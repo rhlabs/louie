@@ -7,10 +7,20 @@
  */
 package ${info.packageName};
 
-public class ${className} implements ${baseName}Client {
-    private final ${baseName}Client delegate;
-    public ${className}(${baseName}Client delegate) {
+import com.rhythm.louie.Delegate;
+
+public class ${className} implements ${baseName}Client, Delegate<${baseName}Client> {
+    private ${baseName}Client delegate;
+    public ${className}() {}
+
+    @Override
+    public void setDelegate(${baseName}Client delegate) {
         this.delegate = delegate;
+    }
+
+    @Override
+    public ${baseName}Client getDelegate() {
+        return delegate;
     }
 #foreach($method in $info.methodInfos)
 

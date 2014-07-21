@@ -53,13 +53,14 @@ public class AuthServiceFactory implements ServiceFactory {
     
     public AuthClient getServiceClient() {
         getService();
-        return service.getClient();
+        return service.getDelegate();
     }
     
     private class AuthPortValidator extends AuthServiceHandler {
 
         protected AuthPortValidator(AuthClient dmo) {
-            super(dmo);
+            super();
+            setDelegate(dmo);
         }
 
         @Override

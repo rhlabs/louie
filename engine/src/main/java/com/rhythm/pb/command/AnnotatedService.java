@@ -37,7 +37,24 @@ public class AnnotatedService implements Service {
     protected AnnotatedService(String name) {
         this.name = name;
         commandMap = new ConcurrentHashMap<PBCommandType,PBCommand<?,?>>();
+    }
+    
+    @Override
+    public void initialize() throws Exception {
         processClass(this.getClass());
+    }
+    
+    @Override
+    public String getServiceName() {
+        return name;
+    }
+
+    @Override
+    public void shutdown() throws Exception {}
+    
+    @Override
+    public MessageHandler getMessageHandler() {
+        return null;
     }
     
     private void processClass(Class<?> cl) {
@@ -97,26 +114,5 @@ public class AnnotatedService implements Service {
          Result r = cmd.execute(req);
          r.setStreaming(cmd.isStreaming());
          return r;
-    }
-
-    @Override
-    public String getServiceName() {
-        return name;
-    }
-
-    @Override
-    public void initialize() throws Exception {
-        // write your own hooks here
-    }
-
-    @Override
-    public void shutdown() throws Exception {
-        // write your own hooks here
-    }
-    
-    @Override
-    public MessageHandler getMessageHandler() {
-        // write your own hooks here
-        return null;
     }
 }

@@ -6,16 +6,7 @@
 
 package com.rhythm.louie;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
-
-import javax.servlet.ServletContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.auth.AuthServiceFactory;
 import com.rhythm.louie.cache.CacheManager;
@@ -30,13 +21,14 @@ import com.rhythm.louie.testservice.TestServiceFactory;
 
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.command.ServiceFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
 
 import javax.servlet.ServletContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +53,7 @@ public class ServiceManager {
         reservedServices = new HashSet<String>();
         for (ServiceFactory factory : serviceFactories) {
             reservedServices.add(factory.getServiceName());
+            ServiceProperties.initReservedProperties(factory.getServiceName());
         }
     }
     
@@ -144,37 +137,47 @@ public class ServiceManager {
         sb.append("\nServices:\n\n");
         
         for (ServiceFactory factory : serviceFactories) {
-            long start = System.nanoTime();
             String serviceName = factory.getServiceName().toLowerCase();
-            try {
-                ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-                boolean enabled = initializeService(factory);
-                if (enabled) {
-                    sb.append(serviceName);
+            ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
+            if (props.isEnabled()) {
+                sb.append(String.format("%-15s",serviceName));
+                try {
+                    long start = System.nanoTime();
+                    initializeService(factory);
+                    long time = (System.nanoTime()-start) / 1000000;
+                    sb.append(String.format("%6d ms - ",time));
+                    
+                    int depth = 0;
+                    Object level = servicesByName.get(serviceName);
+                    while(level instanceof Delegate) {
+                        level = ((Delegate)level).getDelegate();
+                        if (depth>0) {
+                            sb.append("->");
+                        }
+                        sb.append(level.getClass().getSimpleName());
+                        depth++;
+                    }
+                    
                     if (props.isCentralized()) {
                         sb.append(" || centralized @ ").append(props.getMain());
                     }
                     if (props.isReadOnly()) {
                         sb.append(" || Read-Only");
                     }
-                    sb.append("  (");
-                    long time = (System.nanoTime()-start) / 1000000;
-                    sb.append(time);
-                    sb.append(" ms)\n");
-                } else {
-                    disabled.append(factory.getServiceName()).append("\n");
+                    sb.append("\n");
+                } catch (Exception ex) {
+                    sb.append(" - ERROR: ")
+                            .append(ex.toString())
+                            .append("\n");
                 }
-            } catch (Exception ex) {
-                sb.append(serviceName)
-                        .append(" - ERROR: ")
-                        .append(ex.toString())
-                        .append("\n");
+            } else {
+                disabled.append(factory.getServiceName()).append("\n");
             }
         }
         
-        if (disabled.length()>0) {
-            sb.append("\nDISABLED:\n\n").append(disabled);
-        }
+//        if (disabled.length()>0) {
+//            sb.append("\nDISABLED:\n\n").append(disabled);
+//        }
         
         LOGGER.info(sb.toString());
     }
@@ -226,14 +229,7 @@ public class ServiceManager {
         return props;
     }
     
-    private static boolean initializeService(ServiceFactory factory) throws Exception {
-        String serviceName = factory.getServiceName();
-        ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-        
-        if (!isServiceReserved(serviceName) && !props.isEnabled()) {
-            return false;
-        }
-        
+    private static void initializeService(ServiceFactory factory) throws Exception {
         Service service = factory.getService();
         service.initialize();
         MessageHandler mh = service.getMessageHandler();
@@ -243,7 +239,6 @@ public class ServiceManager {
         }
         
         servicesByName.put(service.getServiceName(), service);
-        return true;
     }
 
     public static synchronized void shutdown() {
