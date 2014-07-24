@@ -286,9 +286,9 @@ public class InfoServlet extends HttpServlet {
             Map<String,String> compileDates = extProps.getCompileDateMap();
             for (String impl : gitVersions.keySet()) {
                 if("LoUIE Processor".equals(impl)) continue; //hardcoded processor skip
-                out.println("<b>&nbsp&nbsp " + impl + " </b><br>");
-                out.println("<b>&nbsp&nbsp&nbsp&nbsp Git Version: " + gitVersions.get(impl) + "</b><br>");
-                out.println("<b>&nbsp&nbsp&nbsp&nbsp Compile Date: " + compileDates.get(impl) + "</b><br>");
+                out.println("<b>&nbsp&nbsp " + impl + "</b>: ");
+                out.println(gitVersions.get(impl));
+                out.println(" (" + compileDates.get(impl) + ")<br>");
             }
             out.println("<br><br><a href=\"?service=all\">Show All Services</a><br>");
             
