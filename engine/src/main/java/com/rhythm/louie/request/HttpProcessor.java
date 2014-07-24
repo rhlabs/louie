@@ -8,15 +8,18 @@ package com.rhythm.louie.request;
 import com.rhythm.louie.Server;
 import com.rhythm.louie.auth.UnauthorizedSessionException;
 import com.rhythm.louie.exception.LouieRouteException;
+
 import com.rhythm.pb.data.Result;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.logging.Level;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class HttpProcessor {
      private final Logger LOGGER = LoggerFactory.getLogger(HttpProcessor.class);
             
-     private String localIp;
+     private final String localIp;
      
      private final ProtoProcess processor;
      public HttpProcessor() {
@@ -38,12 +41,15 @@ public class HttpProcessor {
             LOGGER.debug("Instantiating a protoprocessor");
             processor = new ProtoProcessor();
         }
-         try {
-             localIp = InetAddress.getLocalHost().getHostAddress();
-         } catch (UnknownHostException ex) {
-             LOGGER.error(ex.toString());
-             localIp = "UNKNOWN_ADDRESS";
-         }
+        
+        String ip;
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException ex) {
+            LOGGER.error(ex.toString());
+            ip = "UNKNOWN_ADDRESS";
+        }
+        localIp = ip;
      }
     
      public void processRequest(HttpServletRequest req,
@@ -61,7 +67,7 @@ public class HttpProcessor {
                 props.setGateway(req.getContextPath().substring(1));
                 
                 List<Result> results = processor.processRequest(req.getInputStream(),resp.getOutputStream(),props);
-                sendHttpError(results,resp);
+                //sendHttpError(results,resp);
         } catch (LouieRouteException ex) {
             LOGGER.error(ex.toString());
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
