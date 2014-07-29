@@ -112,7 +112,7 @@ public class ProtoProcessor implements ProtoProcess{
                 handleResult(pbReq, result, output);
             } catch (Exception e) {
                 String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
-                LOGGER.error("ProtoProcessor caught error: {}",errorMessage);
+                LOGGER.error("ProtoProcessor caught error: "+errorMessage,e);
                 if (result != null) {
                     result.addError(e);
                 } else {
@@ -146,10 +146,18 @@ public class ProtoProcessor implements ProtoProcess{
         responseBuilder.setId(requestContext.getRequest().getId());
         
         if (result.isError()) {
-            responseBuilder.setError(ErrorPB.newBuilder()
-                    .setCode(500)
-                    .setType(result.getException().getClass().getSimpleName())
-                    .setDescription(result.getException().getMessage()));
+            ErrorPB.Builder error = ErrorPB.newBuilder();
+            error.setCode(500);
+            Exception ex = result.getException();
+            if (ex!=null) {
+                error.setType(ex.getClass().getSimpleName());
+                if (ex.getMessage()!=null) {
+                    error.setDescription(ex.getMessage());
+                }
+            } else {
+                error.setType("Unknown Exception");
+            }
+            responseBuilder.setError(error);
         }
         
         responseBuilder.addRouteBuilder()

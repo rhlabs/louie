@@ -6,6 +6,7 @@
 package com.rhythm.louie.request;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -253,7 +254,12 @@ public class RequestHandler {
         } catch (Exception e) {
             Result result = Result.errorResult(e);
             String command = pbreq.getRequest().getService() + ":" + pbreq.getRequest().getMethod();
-            LoggerFactory.getLogger("").error("Unable to process request: "+command+"!",e);
+            
+            Throwable cause = e;
+            if (e instanceof InvocationTargetException && e.getCause()!=null) {
+                cause = e.getCause();
+            }
+            LoggerFactory.getLogger("").error("Unable to process request: "+command+"!",cause);
             return result;
         } finally {
             RequestContextManager.clearRequest();
