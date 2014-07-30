@@ -6,9 +6,10 @@
 package com.rhythm.louie.connection;
 
 import com.google.protobuf.Message;
-import com.rhythm.pb.PBParam;
+
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
+
 import java.net.URLConnection;
 
 /**
@@ -21,9 +22,7 @@ public interface LouieConnection {
 
     SessionKey getSessionKey() throws Exception;
 
-    <T extends Message> Response<T> request(String system, String cmd, PBParam params, T template) throws Exception;
-    
-    <T extends Message> void request(Request<T> req) throws Exception;
+    <T extends Message> Response request(Request<T> req) throws Exception;
     
     void setMaxTimeout(int seconds);
     

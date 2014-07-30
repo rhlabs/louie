@@ -11,7 +11,6 @@ import java.util.List;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.connection.LouieServiceClient;
 import com.rhythm.louie.connection.Response;
 import com.rhythm.louie.server.LouieClientTest;
 import com.rhythm.louie.stream.Consumer;
@@ -32,7 +31,12 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.rhythm.louie.connection.Request;
+import com.rhythm.louie.stream.Consumers;
+import com.rhythm.louie.stream.SingleConsumer;
 import com.rhythm.louie.stream.StreamingConsumer;
+
+import com.rhythm.pb.RequestProtos.ResponsePB;
 
 /**
  *
@@ -128,22 +132,17 @@ public class TestServiceTest {
     public void routeTest() throws Exception {
         System.out.println("loopTest");
         
-        RouteTestFacade facade = new RouteTestFacade(
-                LouieConnectionFactory.getLocalConnection(Identity.createJUnitIdentity()));
+        List<String> hosts = Arrays.asList("louiebeta.van.rhythm.com","louiebeta.rhythm.com");
         
-        StringListPB hosts = StringListPB.newBuilder()
-                .addValues("louiebeta.van.rhythm.com")
-                .addValues("louiebeta.rhythm.com")
-                .build();
-        
-        Response<StringPB> response = facade.loopTest(hosts);
+        SingleConsumer<com.rhythm.pb.DataTypeProtos.StringPB> consumer = Consumers.newSingleConsumer();
+        Response response = client.loopTest(hosts,consumer);
         assertNotNull(response);
         
-        System.out.println(response.getResponse());
+        System.out.println(response);
         
-        assertTrue(response.getResponse().getRouteCount()==1);
+        assertTrue(response.getRouteList().size()==1);
         
-        RoutePathPB route = response.getResponse().getRouteList().get(0);
+        RoutePathPB route = response.getRouteList().get(0);
         
         assertEquals(route.getRoute().getHostIp(), "10.4.23.77");
         assertTrue(route.getPathCount()==1);
@@ -153,21 +152,8 @@ public class TestServiceTest {
         route = route.getPath(0);
         assertEquals(route.getRoute().getHostIp(), "10.4.37.48");
         assertTrue(route.getPathCount()==0);
-        
-        System.out.println(response.getSingleResult());
-        
-    }
-    
-    public class RouteTestFacade extends LouieServiceClient {
-
-        public RouteTestFacade(LouieConnection connection) {
-            super("test", connection);
-        }
-
-        public Response<StringPB> loopTest(StringListPB hosts) throws Exception {
-            PBParam param = PBParam.createParam(hosts);
-            return doRequest("loopTest", param, StringPB.getDefaultInstance());
-        }
+     
+        System.out.println("RESULTS: "+consumer.get().getValue());
     }
     
     @Test

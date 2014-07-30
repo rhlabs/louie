@@ -34,7 +34,6 @@ public class Generator {
         System.out.println();
         
         processTemplate(info,"Client.vm",info.getBaseName()+"Client");
-        processTemplate(info,"Facade.vm",info.getBaseName()+"Facade");
         processTemplate(info,"ServiceClient.vm",info.getBaseName()+"ServiceClient");
         processTemplate(info,"ServiceHandler.vm",info.getBaseName()+"ServiceHandler");
         processTemplate(info,"Delegate.vm",info.getBaseName()+"DelegateAdaptor");

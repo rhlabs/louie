@@ -9,20 +9,22 @@ package ${info.packageName};
 
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.Request;
+import com.rhythm.louie.connection.Response;
 import com.rhythm.louie.stream.ListConsumer;
 import com.rhythm.louie.stream.SingleConsumer;
 import com.rhythm.louie.stream.Consumer;
 import com.rhythm.louie.stream.Consumers;
+
 import com.rhythm.pb.PBParam;
 import com.rhythm.pb.PBType;
 
 public class ${className} implements ${baseName}Client {
 
     private final String SYSTEM = "${info.serviceName}";
-    private final com.rhythm.louie.connection.LouieClient client;
+    private final LouieConnection connection;
 
     public ${className}(LouieConnection connection) {
-        client = new com.rhythm.louie.connection.LouieClient(connection);
+        this.connection = connection;
     }
 #foreach($method in $info.methodInfos)
 
@@ -45,14 +47,14 @@ public class ${className} implements ${baseName}Client {
             Request.newParams(consumer, SYSTEM, "${method.name}", 
 #end
             ${method.baseReturnType}.getDefaultInstance());
-        client.doRequest(packagedRequest);
+        connection.request(packagedRequest);
         return ${method.getReturnConvertCode("consumer.get()")};
     }
 
 #if ( $method.isDeprecated() )
     @Deprecated
 #end
-    public void ${method.name}(${method.convertedParamString}#if ( $method.hasParams() ),#end Consumer<${method.baseReturnType}> consumer) throws ${method.throwsClause} {
+    public Response ${method.name}(${method.convertedParamString}#if ( $method.hasParams() ),#end Consumer<${method.baseReturnType}> consumer) throws ${method.throwsClause} {
 #if ( $method.hasParams() )
         PBParam param = PBParam.createParam(${method.builderParamString});
         Request<${method.baseReturnType}> packagedRequest = 
@@ -62,7 +64,7 @@ public class ${className} implements ${baseName}Client {
             Request.newParams(consumer, SYSTEM, "${method.name}", 
 #end
             ${method.baseReturnType}.getDefaultInstance());
-        client.doRequest(packagedRequest);
+        return connection.request(packagedRequest);
     }
 #end
 }

@@ -7,17 +7,15 @@ package com.rhythm.louie.connection;
 
 import com.google.protobuf.Message;
 
-import org.slf4j.LoggerFactory;
-
 import com.rhythm.louie.Server;
-import com.rhythm.pb.PBParam;
+
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
+
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import org.slf4j.Logger;
+
 import org.slf4j.LoggerFactory;
 
 /**
@@ -70,11 +68,6 @@ public class LouieConnectionFactory {
             return getDelegate().getSessionKey();
         }
 
-        @Override
-        public <T extends Message> Response<T> request(String system, String cmd, PBParam params, T template) throws Exception {
-            return getDelegate().request(system,cmd,params,template);
-        }
-        
         private LouieConnection getDelegate() throws Exception {
             if (delegate==null) {
                 throw new Exception("Shared Connection has not been setup.");
@@ -155,8 +148,8 @@ public class LouieConnectionFactory {
         }
 
         @Override
-        public <T extends Message> void request(Request<T> req) throws Exception {
-            getDelegate().request(req);
+        public <T extends Message> Response request(Request<T> req) throws Exception {
+            return getDelegate().request(req);
         }
     }
     
