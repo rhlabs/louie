@@ -37,6 +37,8 @@ import javax.net.ssl.HttpsURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.Constants;
+import com.rhythm.louie.auth.AuthService;
 import com.rhythm.louie.stream.Consumer;
 
 import com.rhythm.pb.data.Data;
@@ -52,7 +54,7 @@ public class DefaultLouieConnection implements LouieConnection {
     public static final int AUTH_PORT = 8787;
     private static int SSL_PORT = 8181;
     
-    private static final String AUTH_SERVICE = "auth";
+    private static final String AUTH_SERVICE = AuthService.SERVICE_NAME;
     private static final AtomicInteger txId = new AtomicInteger(0);
     
     private IdentityPB identity;
@@ -68,7 +70,7 @@ public class DefaultLouieConnection implements LouieConnection {
     private boolean retry = true; //retry on by default
     private boolean lockoffRetry = false; //disable retries after timeout window reached. global lock that is disabled by a succesful request
     
-    private String gateway = "louie";
+    private String gateway = Constants.DEFAULT_GATEWAY;
     
     protected DefaultLouieConnection(String host) {
         this(null, host, null);

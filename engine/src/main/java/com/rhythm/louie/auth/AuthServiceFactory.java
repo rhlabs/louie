@@ -24,7 +24,6 @@ import com.rhythm.pb.command.ServiceFactory;
 public class AuthServiceFactory implements ServiceFactory {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthServiceFactory.class);
     
-    private static final String serviceName = "auth";
     private static AuthServiceHandler service;
     
     private AuthServiceFactory() {}
@@ -35,7 +34,7 @@ public class AuthServiceFactory implements ServiceFactory {
 
     @Override
     public String getServiceName() {
-        return serviceName;
+        return AuthService.SERVICE_NAME;
     }
 
     private static class Holder {
@@ -45,20 +44,20 @@ public class AuthServiceFactory implements ServiceFactory {
     @Override
     public Service getService() {
         if (service == null) {
-            AuthClient dmo = AuthDMO.getInstance();
+            AuthService dmo = AuthDMO.getInstance();
             service = new AuthPortValidator(dmo);
         }
         return service;
     }
     
-    public AuthClient getServiceClient() {
+    public AuthService getServiceClient() {
         getService();
         return service.getDelegate();
     }
     
     private class AuthPortValidator extends AuthServiceHandler {
 
-        protected AuthPortValidator(AuthClient dmo) {
+        protected AuthPortValidator(AuthService dmo) {
             super();
             setDelegate(dmo);
         }

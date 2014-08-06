@@ -7,15 +7,9 @@ package com.rhythm.louie.server;
 
 import java.util.List;
 
-import com.rhythm.pb.DataTypeProtos.StringListPB;
-import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.louie.LouieProtos.ServicePB;
 
-import com.rhythm.louie.process.CommandDescriptor;
-import com.rhythm.louie.process.Disabled;
 import com.rhythm.louie.process.ServiceFacade;
-
-import com.rhythm.pb.DataTypeProtos.UIntPB;
 
 /**
  *
@@ -23,14 +17,31 @@ import com.rhythm.pb.DataTypeProtos.UIntPB;
  */
 @ServiceFacade(factory=false)
 public interface LouieService {
+    public static final String SERVICE_NAME = "louie";
+    
+    /**
+     * Returns the names of all services
+     * 
+     * @return
+     * @throws Exception 
+     */
+    List<String> getAllServiceNames() throws Exception;
 
-    @CommandDescriptor(description = "Returns the names of all services")
-    StringListPB getAllServiceNames() throws Exception;
-
-    @CommandDescriptor(description = "Returns info for all services")
+    /**
+     * Returns info for all services
+     * 
+     * @return
+     * @throws Exception 
+     */
     List<ServicePB> getAllServices() throws Exception;
 
-    @CommandDescriptor(description = "Returns info for a single service", args = {"name"})
-    ServicePB getService(StringPB name) throws Exception;
+    /**
+     * Returns info for a single service
+     * 
+     * @param name
+     * @return
+     * @throws Exception 
+     */
+    ServicePB getService(String name) throws Exception;
     
 }

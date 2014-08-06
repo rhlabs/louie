@@ -23,7 +23,7 @@ public class Server {
         UNKNOWN.timezone = TimeZone.getDefault().getDisplayName();
     }
     
-    public static String DEFAULT_GATEWAY = "louie";
+    private static String DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
     public static void setDefaultGateway(String gateway) {
         DEFAULT_GATEWAY = gateway;
     }

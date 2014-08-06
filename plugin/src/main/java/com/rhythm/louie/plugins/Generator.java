@@ -7,6 +7,7 @@ package com.rhythm.louie.plugins;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -15,7 +16,14 @@ import java.util.logging.Logger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.reflections.Reflections;
+
+import com.rhythm.louie.Constants;
+import com.rhythm.louie.process.Disabled;
+import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.ServiceCall;
+import com.rhythm.louie.process.ServiceHandler;
+
+import com.rhythm.util.Classes;
 
 /**
  *
@@ -29,9 +37,9 @@ public class Generator {
     private static final String PERL_CLIENT_MODULE = "Client.pm";
     private static final String PYTHON_CLIENT_MODULE = "client.py";
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String host = "localhost";
-        String gateway = "louie";
+        String gateway = Constants.DEFAULT_GATEWAY;
         String prefix = null;
         
         if (args.length>0 && args[0] != null) {
@@ -44,42 +52,41 @@ public class Generator {
         if (args.length>2 && args[2] != null) {
             prefix = args[2];
         }
-            
-        Reflections reflections = new Reflections(prefix);
-        Set<Class<?>> services = reflections.getTypesAnnotatedWith(com.rhythm.louie.process.ServiceFacade.class);
         
-        // Perl
+        System.out.println("Find classes: "+prefix);
+        List<Class<?>> services = Classes.getRecursiveTypesAnnotatedWith(prefix, ServiceHandler.class);
+        
         for (Class<?> service : services) {
-            if (!service.isInterface()) {
-                continue;
-            }
-
+            List<MethodInfo> perlMethods = new ArrayList<MethodInfo>();
+            List<MethodInfo> pythonMethods = new ArrayList<MethodInfo>();
             try {
-                List<MethodInfo> methods = new ArrayList<MethodInfo>();
                 for (Method method : service.getMethods()) {
-                    methods.add(new PerlMethodInfo(method));
+                    if (!Modifier.isStatic(method.getModifiers())
+                                && Modifier.isPublic(method.getModifiers())
+                                && method.isAnnotationPresent(ServiceCall.class)
+                                && !method.isAnnotationPresent(Private.class)
+                                && !method.isAnnotationPresent(Disabled.class)) {
+                        perlMethods.add(new PerlMethodInfo(method));
+                        pythonMethods.add(new PythonMethodInfo(method));
+                    }
                 }
-                Collections.sort(methods);
-                ServiceInfo info = new ServiceInfo(service, host, gateway, methods);
+            } catch (Exception e) {
+                Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, e);
+            }
+            
+            // Perl
+            try {
+                Collections.sort(perlMethods);
+                ServiceInfo info = new ServiceInfo(service, host, gateway, perlMethods);
                 generatePerl(info);
             } catch (Exception e) {
                 Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, e);
             }
-        }
-        
-        // Python
-        for (Class<?> service : services) {
-            if (!service.isInterface()) {
-                continue;
-            }
-
+            
+            // Python
             try {
-                List<MethodInfo> methods = new ArrayList<MethodInfo>();
-                for (Method method : service.getMethods()) {
-                    methods.add(new PythonMethodInfo(method));
-                }
-                Collections.sort(methods);
-                ServiceInfo info = new ServiceInfo(service, host, gateway, methods);
+                Collections.sort(pythonMethods);
+                ServiceInfo info = new ServiceInfo(service, host, gateway, pythonMethods);
                 generatePython(info);
             } catch (Exception e) {
                 Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, e);
@@ -88,11 +95,7 @@ public class Generator {
     }
     
     private static void printServiceInfo(ServiceInfo info) {
-        System.out.print(info.getInputFile());
-        if (!info.getServiceFacade().factory()) {
-            System.out.print(" (NO FACTORY)");
-        }
-        System.out.println();
+        System.out.println(info.getInputFile()+ " "+info.getServiceName());
     }
     
     public static void generatePerl(ServiceInfo info) throws Exception {

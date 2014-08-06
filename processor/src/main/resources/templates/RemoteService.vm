@@ -1,0 +1,34 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ */
+package ${info.packageName};
+
+import com.rhythm.louie.connection.LouieConnection;
+
+public class ${className} implements ${info.serviceClassName} {
+    private final ${baseName}Client remoteClient;
+
+    public ${className}(LouieConnection connection) {
+        this.remoteClient = ${baseName}ClientFactory.getClient(connection);
+    }
+
+    public ${baseName}Client getRemoteClient() {
+        return remoteClient;
+    }
+#foreach($method in $info.methodInfos)
+
+#if ($method.isDeprecated())
+    @Deprecated
+#end
+    @Override
+    public ${method.returnType} ${method.name}(${method.paramString})${method.throwsClause} {
+#if ($method.isClientAccess()) 
+        return remoteClient.${method.name}(${method.paramNameString});
+#else
+        throw new UnsupportedOperationException("This method is Private and cannot be executed on a remote instance");
+#end
+    }
+#end
+}

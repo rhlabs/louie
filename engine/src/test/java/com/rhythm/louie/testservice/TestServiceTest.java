@@ -52,9 +52,12 @@ public class TestServiceTest {
 //        client = TestClientFactory.getClient(
 //                LouieConnectionFactory.getConnection("vans256",
 //                Identity.createJUnitIdentity()));
-        client = TestClientFactory.getClient(
-                LouieConnectionFactory.getLocalConnection(
-                        Identity.createJUnitIdentity()));
+        
+        LouieConnection conn = LouieConnectionFactory.getLocalConnection(
+                        Identity.createJUnitIdentity());
+        conn.setGateway("hsm");
+        
+        client = TestClientFactory.getClient(conn);
     }
     
     /**

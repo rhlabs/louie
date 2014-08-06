@@ -7,14 +7,13 @@
 package com.rhythm.louie.testservice;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.rhythm.louie.process.CommandDescriptor;
+import com.rhythm.louie.process.Private;
 import com.rhythm.louie.process.ServiceFacade;
 import com.rhythm.louie.process.Streaming;
 
-import com.rhythm.pb.DataTypeProtos.StringListPB;
-import com.rhythm.pb.DataTypeProtos.StringPB;
-import com.rhythm.pb.DataTypeProtos.UIntPB;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 
 /**
@@ -24,28 +23,80 @@ import com.rhythm.pb.RequestProtos.ErrorPB;
 
 @ServiceFacade
 public interface TestService {
-    @CommandDescriptor(description = "Echoes the value back after sleeping", args = {"value","sleep"})
-    StringPB echoTest(StringPB value, UIntPB sleep) throws Exception;
+    /**
+     * Echoes the value back after sleeping
+     * 
+     * @param value
+     * @param sleep
+     * @return
+     * @throws Exception 
+     */
+    String echoTest(String value, Integer sleep) throws Exception;
     
-    @CommandDescriptor(description = "calls this method on the first host in the list, passing the rest of the hosts", args = {"hosts"})
-    StringPB loopTest(StringListPB hosts) throws Exception;
+    /**
+     * Calls this method on the first host in the list, passing the rest of the hosts
+     * 
+     * @param hosts
+     * @return
+     * @throws Exception 
+     */
+    String loopTest(List<String> hosts) throws Exception;
     
+    /**
+     * Echoes back the values listed, sleeping in between.
+     * Client should be able to start processing immediately
+     *
+     * @param numResults
+     * @param resultSize
+     * @param sleep
+     * @return
+     * @throws Exception 
+     */
     @Streaming
-    @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
-            + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep"})
-    public List<ErrorPB> streamTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep) throws Exception;
+    public List<ErrorPB> streamTest(Integer numResults, Integer resultSize, Integer sleep) throws Exception;
     
-    @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
-            + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep"})
-    public List<ErrorPB> noStreamTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep) throws Exception;
+    /**
+     * Echoes back the values listed, sleeping in between.
+     * Client should be able to start processing immediately
+     * 
+     * @param numResults
+     * @param resultSize
+     * @param sleep
+     * @return
+     * @throws Exception 
+     */
+    public List<ErrorPB> noStreamTest(Integer numResults, Integer resultSize, Integer sleep) throws Exception;
     
+    /**
+     * Echoes back the values listed, sleeping in between. 
+     * Client should be able to start processing immediately
+     * 
+     * @param numResults
+     * @param resultSize
+     * @param sleep
+     * @param hosts
+     * @return
+     * @throws Exception 
+     */
     @Streaming
-    @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
-            + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep", "hosts"})
-    public List<ErrorPB> streamLoopTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep, StringListPB hosts) throws Exception;
+    public List<ErrorPB> streamLoopTest(Integer numResults, Integer resultSize, Integer sleep, List<String> hosts) throws Exception;
  
-    @CommandDescriptor(description = "Generates a message using the configured JMS adapter, and the same delegate should receive that message", args = {"message"})
-    public StringPB messageTest(StringPB message) throws Exception;
+    /**
+     * Generates a message using the configured JMS adapter,
+     * and the same delegate should receive that message
+     * 
+     * @param message
+     * @return
+     * @throws Exception 
+     */
+    public String messageTest(String message) throws Exception;
+
+    
+    @Private
+    public Map<String,String> mapTest() throws Exception;
+
+    @Private
+    public Set<String> setTest() throws Exception;
     
 }
 

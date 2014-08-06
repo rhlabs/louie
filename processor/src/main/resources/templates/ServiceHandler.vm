@@ -2,35 +2,36 @@
 
 /*
  * ${className}.java
- *
- * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
 package ${info.packageName};
 
 import com.rhythm.louie.Delegate;
 import com.rhythm.louie.jms.MessageHandler;
+import com.rhythm.louie.process.ServiceHandler;
 
 import com.rhythm.pb.PBType;
 import com.rhythm.pb.command.AnnotatedService;
 import com.rhythm.pb.command.CacheLayer;
 
-public class ${className} extends AnnotatedService implements ${baseName}Service, Delegate<${baseName}Client> {
-    protected ${baseName}Client delegate;
+@ServiceHandler("${info.serviceName}")
+public class ${className} extends AnnotatedService implements Delegate<${info.serviceClassName}> {
+    protected ${info.serviceClassName} delegate;
     protected ${className}() {
         super("${info.serviceName}");
     }
 
-    //protected ${baseName}Client getClient() {
-    //    return delegate;
-    //}
+    @Override
+    public Class<?> getServiceInterface() {
+        return ${info.serviceClassName}.class;
+    }
 
     @Override
-    public void setDelegate(${baseName}Client delegate) {
+    public void setDelegate(${info.serviceClassName} delegate) {
         this.delegate=delegate;
     }
     
     @Override
-    public ${baseName}Client getDelegate() {
+    public ${info.serviceClassName} getDelegate() {
         return delegate;
     }
 
@@ -59,13 +60,12 @@ public class ${className} extends AnnotatedService implements ${baseName}Service
     }
 #foreach($method in $info.methodInfos)
 
-#if ( $method.isDeprecated() )
-    @Deprecated
-#end
-    @Override
-    public ${method.returnType} ${method.name}(${method.paramString}) throws ${method.throwsClause} {
-        ${method.convertedReturnType} pb = delegate.${method.name}(${method.convertParamString});
+#if ($method.isClientAccess()) 
+    ${method.getServiceCallString("    ")}
+    public ${method.pbReturnType} ${method.name}(${method.pbParamString})${method.throwsClause} {
+        ${method.returnType} pb = delegate.${method.name}(${method.pbToArgString});
         return ${method.getReturnBuilderCode("pb")};
     }
+#end
 #end
 }

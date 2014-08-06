@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.ServiceProperties;
-import com.rhythm.louie.jms.MessageHandler;
-import com.rhythm.louie.process.CommandDescriptor;
+//import com.rhythm.louie.generator.ProcessorUtils;
 import com.rhythm.louie.process.Disabled;
-import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.ServiceCall;
 
 import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
@@ -28,15 +28,17 @@ import com.rhythm.pb.data.Result;
  * @author cjohnson
  * Created: Oct 21, 2011 4:42:23 PM
  */
-public class AnnotatedService implements Service {
+public abstract class AnnotatedService implements Service {
     private final Logger LOGGER = LoggerFactory.getLogger(AnnotatedService.class);
             
     private final Map<PBCommandType,PBCommand<?,?>> commandMap;
     private final String name;
+//    private final Map<String,StoredMethodProps> props;
     
     protected AnnotatedService(String name) {
         this.name = name;
         commandMap = new ConcurrentHashMap<PBCommandType,PBCommand<?,?>>();
+//        props = ProcessorUtils.readStoredProps(getServiceInterface());
     }
     
     @Override
@@ -52,32 +54,29 @@ public class AnnotatedService implements Service {
     @Override
     public void shutdown() throws Exception {}
     
-    @Override
-    public MessageHandler getMessageHandler() {
-        return null;
-    }
-    
     private void processClass(Class<?> cl) {
-        getCommandsForClass(cl);
+        //if (cl.isAnnotationPresent(ServiceFacade.class)) {
+            getCommandsForClass(cl);
+       // }
         
-        for (Class<?> facade : cl.getInterfaces()) {
-            if (facade.isAnnotationPresent(ServiceFacade.class)) {
-                getCommandsForClass(facade);
-            }
-        }
-        
-        if (cl.getSuperclass()!=Object.class) {
-            processClass(cl.getSuperclass());
-        }
+//        for (Class<?> iface : cl.getInterfaces()) {
+//            processClass(iface);
+//        }
+//        
+//        if (cl.getSuperclass()!=Object.class) {
+//            processClass(cl.getSuperclass());
+//        }
     }
     
-    private void getCommandsForClass(Class cl) {
+    private void getCommandsForClass(Class<?> cl) {
         for (Method meth : cl.getDeclaredMethods()) {
             try {
                 if (!Modifier.isStatic(meth.getModifiers())
                         && Modifier.isPublic(meth.getModifiers())
-                        && meth.isAnnotationPresent(CommandDescriptor.class)
-                        && !meth.isAnnotationPresent(Disabled.class)) {
+                        && meth.isAnnotationPresent(ServiceCall.class)) {
+                    
+//                    String methKey = ProcessorUtils.getStoredMethodKey(meth);
+//                    StoredMethodProps methProps = props.get(methKey);
                     ReflectCommand command = new ReflectCommand(this, meth);
                     if (!commandMap.containsKey(command.getCommandType())) {
                         commandMap.put(command.getCommandType(),command);

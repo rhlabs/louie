@@ -37,18 +37,19 @@ public class Generator {
         processTemplate(info,"ServiceClient.vm",info.getBaseName()+"ServiceClient");
         processTemplate(info,"ServiceHandler.vm",info.getBaseName()+"ServiceHandler");
         processTemplate(info,"Delegate.vm",info.getBaseName()+"DelegateAdaptor");
+        processTemplate(info,"RemoteService.vm",info.getBaseName()+"RemoteService");
         
         if (info.getServiceFacade()!=null && info.getServiceFacade().factory()) {
             processTemplate(info,"ServiceFactory.vm",info.getBaseName()+"ServiceFactory");
         }
         processTemplate(info,"ClientFactory.vm",info.getBaseName()+"ClientFactory");
     }
-
+    
     public static void processTemplate(ServiceInfo info, String template, String className) {
         Collection<String> imports = Collections.emptySet();
         processTemplate(info,imports,template,className);
     }
-    
+     
     public static void processTemplate(ServiceInfo info, Collection<String> imports,
             String template, String className) {
         try {
@@ -62,12 +63,12 @@ public class Generator {
             VelocityContext vc = new VelocityContext();
 
             vc.put("info", info);
-            vc.put("imports",Utils.getImports(info, imports));
+            vc.put("imports",ProcessorUtils.getImports(info, imports));
             vc.put("className", className);
             vc.put("baseName", info.getBaseName());
             Template vt = ve.getTemplate("templates/"+template);
 
-            JavaFileObject jfo =  info.getProcessingEnv().getFiler().
+            JavaFileObject jfo = info.getProcessingEnv().getFiler().
                 createSourceFile(info.getPackageName()+"."+className,info.getTypeElement().getEnclosingElement());
 
             Writer writer = jfo.openWriter();

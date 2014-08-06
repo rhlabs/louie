@@ -2,8 +2,6 @@
 
 /*
  * ${className}.java
- *
- * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
 package ${info.packageName};
 
@@ -27,44 +25,63 @@ public class ${className} implements ${baseName}Client {
         this.connection = connection;
     }
 #foreach($method in $info.methodInfos)
+#if ($method.isClientAccess()) 
+#if( $method.returnsPbList() )        
+#set( $returnType = ${method.basePbReturnType})
+#else 
+#set( $returnType = ${method.pbReturnType})
+#end
 
+    /**
+#foreach( $line in $method.javadoc.split("\n"))
+     * $line
+#end
+     */
 #if ( $method.isDeprecated() )
     @Deprecated
 #end
     @Override
-    public ${method.convertedReturnType} ${method.name}(${method.convertedParamString}) throws ${method.throwsClause} {
-#if( $method.returnsList() )        
-        ListConsumer<${method.baseReturnType}> consumer = Consumers.newListConsumer();
+    public ${method.clientReturnType} ${method.name}(${method.paramString})${method.throwsClause} {
+#if( $method.returnsPbList() )        
+        ListConsumer<$returnType> consumer = Consumers.newListConsumer();
 #else 
-        SingleConsumer<${method.baseReturnType}> consumer = Consumers.newSingleConsumer();
+        SingleConsumer<$returnType> consumer = Consumers.newSingleConsumer();
 #end
 #if ( $method.hasParams() )
         PBParam param = PBParam.createParam(${method.builderParamString});
-        Request<${method.baseReturnType}> packagedRequest = 
+        Request<$returnType> packagedRequest = 
             Request.newParams(consumer, SYSTEM, "${method.name}", param, 
 #else
-        Request<${method.baseReturnType}> packagedRequest = 
+        Request<$returnType> packagedRequest = 
             Request.newParams(consumer, SYSTEM, "${method.name}", 
 #end
-            ${method.baseReturnType}.getDefaultInstance());
+            ${returnType}.getDefaultInstance());
         connection.request(packagedRequest);
-        return ${method.getReturnConvertCode("consumer.get()")};
+        return ${method.getReturnPbCode("consumer.get()")};
     }
 
+    /**
+#foreach( $line in $method.javadoc.split("\n"))
+     * $line
+#end
+     *
+     * @param consumer
+     */
 #if ( $method.isDeprecated() )
     @Deprecated
 #end
-    public Response ${method.name}(${method.convertedParamString}#if ( $method.hasParams() ),#end Consumer<${method.baseReturnType}> consumer) throws ${method.throwsClause} {
+    public Response ${method.name}(${method.paramString}#if ( $method.hasParams() ),#end Consumer<$returnType> consumer)${method.throwsClause} {
 #if ( $method.hasParams() )
         PBParam param = PBParam.createParam(${method.builderParamString});
-        Request<${method.baseReturnType}> packagedRequest = 
+        Request<$returnType> packagedRequest = 
             Request.newParams(consumer, SYSTEM, "${method.name}", param, 
 #else
-        Request<${method.baseReturnType}> packagedRequest = 
+        Request<$returnType> packagedRequest = 
             Request.newParams(consumer, SYSTEM, "${method.name}", 
 #end
-            ${method.baseReturnType}.getDefaultInstance());
+            ${returnType}.getDefaultInstance());
         return connection.request(packagedRequest);
     }
+#end
 #end
 }

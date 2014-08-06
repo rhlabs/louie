@@ -6,10 +6,9 @@
 package com.rhythm.louie.auth;
 
 import java.util.List;
-import com.rhythm.louie.process.CommandDescriptor;
+
 import com.rhythm.louie.process.ServiceFacade;
 
-import com.rhythm.pb.DataTypeProtos.BoolPB;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionBPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
@@ -20,20 +19,51 @@ import com.rhythm.pb.RequestProtos.SessionKey;
  */
 @ServiceFacade(factory=false)
 public interface AuthService {
+    public static final String SERVICE_NAME = "auth";
     
-    @CommandDescriptor(description = "Creates a Session Key", args={"identity"})
+    /**
+     * Creates a Session Key
+     * 
+     * @param identity
+     * @return
+     * @throws Exception 
+     */
     public SessionKey createSession(IdentityPB identity) throws Exception;
     
-    @CommandDescriptor(description = "Gets a Session by key", args = {"sessionKey"})
+    /**
+     * Gets a Session by key
+     * 
+     * @param sessionKey
+     * @return
+     * @throws Exception 
+     */
     SessionBPB getSession(SessionKey sessionKey) throws Exception;
     
-    @CommandDescriptor(description = "Finds sessions starting with the given key.", args = {"sessionKey"})
+    /**
+     * Finds sessions starting with the given key
+     * 
+     * @param sessionKey
+     * @return
+     * @throws Exception 
+     */
     List<SessionBPB> findSessions(SessionKey sessionKey) throws Exception;
 
-    @CommandDescriptor(description = "Gets an Indentity by key", args = {"sessionKey"})
+    /**
+     * Gets an Identity by key
+     * 
+     * @param sessionKey
+     * @return
+     * @throws Exception 
+     */
     IdentityPB getSessionIdentity(SessionKey sessionKey) throws Exception;
 
-    @CommandDescriptor(description = "Check to see if a session key is valid", args = {"sessionKey"})
-    BoolPB isValidSession(SessionKey sessionKey) throws Exception;
+    /**
+     * Check to see if a session key is valid
+     * 
+     * @param sessionKey
+     * @return
+     * @throws Exception 
+     */
+    Boolean isValidSession(SessionKey sessionKey) throws Exception;
 
 }

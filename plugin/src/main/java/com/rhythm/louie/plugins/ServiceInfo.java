@@ -8,7 +8,7 @@ package com.rhythm.louie.plugins;
 
 import java.util.*;
 
-import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.ServiceHandler;
 
 /**
  *
@@ -25,7 +25,7 @@ public class ServiceInfo {
     private final String baseName;
     private final String inputFile;
 
-    private final ServiceFacade service;
+    private final ServiceHandler service;
 
     private final List<MethodInfo> methods = new ArrayList<MethodInfo>();
     
@@ -34,12 +34,12 @@ public class ServiceInfo {
         this.gateway = gateway;
         
         this.inputFile = cl.getName().replaceAll("\\.", "\\/") + ".java";
-        this.baseName = cl.getName().replaceAll(".*\\.(.*)Service", "$1");
+        this.baseName = cl.getName().replaceAll(".*\\.(.*)ServiceHandler", "$1");
         this.packageDir = inputFile.replaceAll("(.*)/.*\\.java", "$1");
         this.packageName = packageDir.replaceAll("\\/", "\\.");
 
-        this.service = cl.getAnnotation(ServiceFacade.class);
-
+        this.service = cl.getAnnotation(ServiceHandler.class);
+        
         this.methods.addAll(methods);
     }
     
@@ -59,10 +59,6 @@ public class ServiceInfo {
         return packageDir;
     }
     
-    public ServiceFacade getServiceFacade() {
-        return service;
-    }
-    
     public List<String> getImports() {
         return importList;
     }
@@ -80,6 +76,6 @@ public class ServiceInfo {
     }
     
     public String getServiceName() {
-        return baseName.toLowerCase();
+        return service.value();
     }
 }

@@ -8,6 +8,12 @@ package com.rhythm.louie.generator;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.NoType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
+
 /**
  *
  * @author cjohnson
@@ -15,6 +21,7 @@ import java.util.Map;
 public class TypeUtils {
     private static final String DATATYPE_PREFIX = "com.rhythm.pb.DataTypeProtos.";
     
+    static final Map<String,String> pbMap;
     static final Map<String,String> typeMap;
     static {
         typeMap = new HashMap<String,String>();
@@ -44,13 +51,25 @@ public class TypeUtils {
         
         typeMap.put(DATATYPE_PREFIX+"DatePB","org.joda.time.LocalDate");
         typeMap.put(DATATYPE_PREFIX+"DateListPB",listOf("org.joda.time.LocalDate"));
+        
+        // Build the reverse
+        pbMap = new HashMap<String,String>();
+        for (Map.Entry<String, String> entry : typeMap.entrySet()) {
+            pbMap.put(entry.getValue(),entry.getKey());
+        }
+        
+        pbMap.put("Integer", DATATYPE_PREFIX+"UIntPB");
+        pbMap.put(listOf("Integer"), DATATYPE_PREFIX+"UIntListPB");
+        
+        pbMap.put("Long", DATATYPE_PREFIX+"LongPB");
+        pbMap.put(listOf("Long"),DATATYPE_PREFIX+"LongListPB");
     }
     
     private static String listOf(String type) {
         return "java.util.List<"+type+">";
     }
     
-    public static String convertPBType(String s) {
+    public static String convertFromPB(String s) {
         if (s.startsWith("List<") || s.startsWith("java.util.List<")) {
             String subType = s.replaceFirst(".*List<(.*)>", "$1");
             s = "java.util.List<" + mapSimplePB(subType) + ">";
@@ -71,6 +90,29 @@ public class TypeUtils {
         return type;
     }
     
+    public static String convertToPB(String s) {
+        return mapToSimplePB(s);
+//        if (s.startsWith("List<") || s.startsWith("java.util.List<")) {
+//            String subType = s.replaceFirst(".*List<(.*)>", "$1");
+//            return s.replaceFirst(".*List<(.*)>",  mapToSimplePB(subType));
+//        } else {
+//            return mapSimplePB(s);
+//        }
+    }
+    
+    public static boolean hasConversionToPB(String name) {
+        name = name.replaceFirst("java.lang.", "");
+        return pbMap.containsKey(name);
+    }
+    
+    public static String mapToSimplePB(String name) {
+        name = name.replaceFirst("java.lang.", "");
+        String type = pbMap.get(name);
+        if (type == null) {
+            return name;
+        }
+        return type;
+    }
     
     static final Map<String,String> pbtypeMap;
     static {
@@ -133,5 +175,35 @@ public class TypeUtils {
                 return name+"."+method+"()";
             }
         }
+    }
+    
+    public static boolean instanceOf(Types types, TypeMirror type, Class cl) {
+        return instanceOf(types,type,cl.getName());
+    }
+    
+    public static boolean instanceOf(Types types, TypeMirror type, String className) {
+        //System.out.println("instanceOf : "+type.toString()+":"+className);
+        
+        String baseType = type.toString();
+        if (type instanceof DeclaredType) {
+            baseType = ((DeclaredType)type).asElement().toString();
+        }
+        //System.out.println("BaseType: "+baseType);
+        
+        if (baseType.equals(className)) {
+            return true;
+        }
+        TypeElement elem = (TypeElement) types.asElement(type);
+        for (TypeMirror i : elem.getInterfaces()) {
+            if (instanceOf(types,i,className)) {
+                return true;
+            }
+        }
+        
+        TypeMirror sup =  elem.getSuperclass();
+        if (sup instanceof NoType) {
+            return false;
+        }
+        return (instanceOf(types,sup,className));
     }
 }

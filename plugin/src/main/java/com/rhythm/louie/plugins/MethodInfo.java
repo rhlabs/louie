@@ -8,7 +8,8 @@ package com.rhythm.louie.plugins;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import com.rhythm.louie.process.CommandDescriptor;
+import com.rhythm.louie.generator.ProcessorUtils;
+import com.rhythm.louie.process.ServiceCall;
 
 /**
  *
@@ -17,7 +18,8 @@ import com.rhythm.louie.process.CommandDescriptor;
 public class MethodInfo implements Comparable<MethodInfo> {
     protected final Method method;
     protected final List<ParamInfo> params = new ArrayList<ParamInfo>();
-    protected final CommandDescriptor command;
+    protected final ServiceCall serviceCall;
+    private final String description;
     
     protected static final Map<String, String> pbargMap;
     static {
@@ -46,12 +48,13 @@ public class MethodInfo implements Comparable<MethodInfo> {
 
     public MethodInfo(Method method) {
         this.method = method;
-        command = method.getAnnotation(CommandDescriptor.class);
+        serviceCall = method.getAnnotation(ServiceCall.class);
         int i = 0;
         for (Class<?> c : method.getParameterTypes()) {
-            params.add(new ParamInfo(c, command.args()[i]));
+            params.add(new ParamInfo(c, serviceCall.args()[i]));
             i++;
         }
+        description = ProcessorUtils.extractDescriptionFromJavadoc(serviceCall.javadoc());
     }
     
     public boolean isDeprecated() throws Exception {
@@ -103,7 +106,11 @@ public class MethodInfo implements Comparable<MethodInfo> {
     }
         
     public String getDescription() {
-        return command.description();
+        return description;
+    }
+    
+    public String getJavadoc() {
+        return serviceCall.javadoc();
     }
 
     @Override

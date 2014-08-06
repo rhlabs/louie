@@ -13,6 +13,8 @@ import java.net.UnknownHostException;
  * Created: Jul 21, 2011 5:39:57 PM
  */
 public class Constants {
+    public static final String DEFAULT_GATEWAY = "louie";
+    
     public static final int JDBC_IN_LIMIT=500;
 
     public static final String HOST;

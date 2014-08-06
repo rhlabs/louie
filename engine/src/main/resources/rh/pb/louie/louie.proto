@@ -20,6 +20,8 @@ message CommandPB {
     optional string       description       = 4;
     optional bool         deprecated        = 5 [default = false];
     optional bool         returnList        = 6 [default = false];
+
+    optional string       javadoc           = 10;
 }
 
 message ArgPB {

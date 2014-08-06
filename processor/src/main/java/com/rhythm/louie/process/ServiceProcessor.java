@@ -8,12 +8,7 @@ package com.rhythm.louie.process;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -26,12 +21,16 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.NoType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import com.rhythm.louie.generator.Generator;
+import com.rhythm.louie.generator.MethodInfo;
 import com.rhythm.louie.generator.ServiceInfo;
+import com.rhythm.louie.generator.TypeUtils;
 
 /**
  *
@@ -73,6 +72,8 @@ public class ServiceProcessor extends AbstractProcessor {
     public boolean process(Set annotations,
             RoundEnvironment roundEnv) {
         
+        Types types = processingEnv.getTypeUtils();
+        
         for (Element e : roundEnv.getElementsAnnotatedWith(ServiceFacade.class)) {
             if (e.getKind() != ElementKind.INTERFACE) {
                 processingEnv.getMessager().printMessage(
@@ -81,42 +82,35 @@ public class ServiceProcessor extends AbstractProcessor {
                 continue;
             }
             
-            Types types = processingEnv.getTypeUtils();
             TypeElement cl = (TypeElement) types.asElement(e.asType());
             
             try {
-                ServiceInfo info = new ServiceInfo(processingEnv,cl);
+                ServiceInfo info = processService(cl, processingEnv);
                 Generator.generate(info);
             } catch (Exception exc) {
                 processingEnv.getMessager().printMessage(
                             Diagnostic.Kind.NOTE,
                             "Error Processing Class: "+cl.getQualifiedName()+"\n"
                         + exc.toString(), e);
-            }
-            
-            try {
-                checkCommands(cl);
-            } catch (Exception exc) {
-                processingEnv.getMessager().printMessage(
-                            Diagnostic.Kind.NOTE,
-                            "Error Checking Commands: "+cl.getQualifiedName()+"\n"
-                        + exc.toString(), e);
+                exc.printStackTrace();
             }
         }
         return true;
     }
     
-    private void checkCommands(TypeElement cl) throws Exception {
+    private ServiceInfo processService(TypeElement cl, ProcessingEnvironment processingEnv) throws Exception {
+        ServiceInfo info = new ServiceInfo(processingEnv, cl);
+        
+        Types types = processingEnv.getTypeUtils();
+        
         Map<String, List<String>> methods = new HashMap<String, List<String>>();
-
+        
         for (Element e : cl.getEnclosedElements()) {
             if (e.getKind() != ElementKind.METHOD) {
                 continue;
             }
-            CommandDescriptor command = e.getAnnotation(CommandDescriptor.class);
-            if (command==null) {
-                continue;
-            }
+            
+            info.addMethod(new MethodInfo(processingEnv, (ExecutableElement) e));
             
             String methodName = e.getSimpleName().toString();
             List<String> methodParams = methods.get(methodName);
@@ -128,15 +122,32 @@ public class ServiceProcessor extends AbstractProcessor {
             try {
                 StringBuilder params = new StringBuilder();
                 ExecutableElement meth = ExecutableElement.class.cast(e);
-                Types types = processingEnv.getTypeUtils();
                 
-                // special check if for no parameters, since args gets populated with 1 blank element always
-                if (meth.getParameters().size()!=command.args().length && 
-                    (!(meth.getParameters().isEmpty() && command.args().length==1 && command.args()[0].isEmpty()))) {
-                    throw new Exception("Descriptor arg count does not much parameter count");
+                if (e.getAnnotation(Private.class)!=null) {
+                    continue;
                 }
+            
+                TypeMirror returnType = meth.getReturnType();
+                if (TypeUtils.instanceOf(types,returnType,Collection.class)) {
+                    if (TypeUtils.instanceOf(types,returnType, Map.class)) {
+                        throw new Exception("Return Type cannot be a Map!");
+                    }
+                    
+                    if (!(returnType instanceof DeclaredType)) {
+                        throw new Exception("Return Type Collection is not a DeclaredType!");
+                    }
+                    DeclaredType decType = (DeclaredType) returnType;
+                    if (decType.getTypeArguments().size() != 1) {
+                        throw new Exception("Return Type must have one and only one Parameter type");
+                    }
+                    TypeMirror returnParamType =  decType.getTypeArguments().get(0);
+                    if (!isValidType(types,returnParamType)) {
+                         throw new Exception("Return Type Parameter is not valid!  Must be a GeneratedMessage or be a supported dataType");
+                    }
+                } else if (!isValidType(types,returnType)) {
+                    throw new Exception("Return Type is not a valid type!  Must be a GeneratedMessage or be a supported dataType");
+                } 
                 
-                int index = 0;
                 for (VariableElement param : meth.getParameters()) {
                     if (params.length() > 0) {
                         params.append(",");
@@ -146,28 +157,27 @@ public class ServiceProcessor extends AbstractProcessor {
                         throw new Exception("Argument is a reserved word!");
                     }
                     
-                    String argName = command.args()[index++];
-                    if (!paramName.equals(argName)) {
-                        throw new Exception("Argument name does not match param name!");
+//                    TypeElement argcl = (TypeElement) types.asElement(param.asType());
+//                    String[] paramParts = argcl.getQualifiedName().toString().split("\\.");
+//                    params.append(paramParts[paramParts.length-1]);
+                    
+                    if (!isValidType(types, param.asType())) {
+                        throw new Exception("Argument :"+param.asType()+" is not a valid type!  Must be a GeneratedMessage or be a supported dataType");
                     }
                     
-                    TypeElement argcl = (TypeElement) types.asElement(param.asType());
-                    String[] paramParts = argcl.getQualifiedName().toString().split("\\.");
-                    params.append(paramParts[paramParts.length-1]);
-                    
-                    if (argcl == null) {
-                        throw new Exception("Argument is not a GeneratedMessage: Not a Declared Type");
-                    }
-                    if (argcl.getSuperclass() == null) {
-                        throw new Exception("Argument is not a GeneratedMessage: No Superclass");
-                    }
-                    if (argcl.getSuperclass() instanceof NoType) {
-                        throw new Exception("Argument is not a GeneratedMessage: No Type");
-                    }
-                    TypeElement sup = (TypeElement) types.asElement(argcl.getSuperclass());
-                    if (!sup.toString().equals("com.google.protobuf.GeneratedMessage")) {
-                        throw new Exception("Argument is not a GeneratedMessage");
-                    }
+//                    if (argcl == null) {
+//                        throw new Exception("Argument is not a GeneratedMessage: Not a Declared Type");
+//                    }
+//                    if (argcl.getSuperclass() == null) {
+//                        throw new Exception("Argument is not a GeneratedMessage: No Superclass");
+//                    }
+//                    if (argcl.getSuperclass() instanceof NoType) {
+//                        throw new Exception("Argument is not a GeneratedMessage: No Type");
+//                    }
+//                    TypeElement sup = (TypeElement) types.asElement(argcl.getSuperclass());
+//                    if (!sup.toString().equals("com.google.protobuf.GeneratedMessage")) {
+//                        throw new Exception("Argument is not a GeneratedMessage");
+//                    }
                 }
                 
                 Deprecated dep = e.getAnnotation(Deprecated.class);
@@ -176,9 +186,8 @@ public class ServiceProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(
                         Diagnostic.Kind.ERROR,
                         "Error Processing Method: " + e.getSimpleName().toString() + "\n"
-                        + exc.toString(), e);
+                        + exc.getMessage(), cl);
             }
-
         }
         for (Map.Entry<String, List<String>> method : methods.entrySet()) {
             if (method.getValue().size() > 1) {
@@ -195,5 +204,15 @@ public class ServiceProcessor extends AbstractProcessor {
                         message.toString());
             }
         }
+        
+        return info;
+    }
+    
+    public boolean isValidType(Types types, TypeMirror type) {
+        if (TypeUtils.instanceOf(types,type,"com.google.protobuf.GeneratedMessage")) {
+            return true;
+        }
+        
+        return TypeUtils.hasConversionToPB(type.toString());
     }
 }

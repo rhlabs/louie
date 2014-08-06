@@ -9,12 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.ServiceFacade;
 
 /**
@@ -29,6 +25,7 @@ public class ServiceInfo {
     private final String packageName;
     private final String baseName;
     private final String inputFile;
+    private final String serviceName;
     
     private final TypeElement cl;
     private final ServiceFacade service;
@@ -49,14 +46,15 @@ public class ServiceInfo {
         
         service = cl.getAnnotation(ServiceFacade.class);
         
-
-        for (Element child : cl.getEnclosedElements()) {
-            if (child.getKind() == ElementKind.METHOD
-                    && child.getAnnotation(CommandDescriptor.class) != null) {
-                methods.add(new MethodInfo((ExecutableElement) child));
-            }
-        }
-
+        serviceName = !service.name().isEmpty()?service.name():baseName.toLowerCase();
+    }
+    
+    public void addMethod(MethodInfo meth) {
+        methods.add(meth);
+    }
+    
+    public String getServiceClassName() {
+        return cl.getSimpleName().toString();
     }
     
     public TypeElement getTypeElement() {
@@ -83,7 +81,7 @@ public class ServiceInfo {
         return importList;
     }
     
-    public List<MethodInfo> getMethodInfos(){
+    public List<MethodInfo> getMethodInfos() {
         return methods;
     }
     
@@ -96,6 +94,6 @@ public class ServiceInfo {
     }
     
     public String getServiceName() {
-        return baseName.toLowerCase();
+        return serviceName;
     }
 }

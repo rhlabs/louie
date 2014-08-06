@@ -15,10 +15,12 @@ import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionBPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -27,7 +29,7 @@ import org.slf4j.MDC;
  *
  * @author cjohnson
  */
-public class AuthDMO implements AuthClient {
+public class AuthDMO implements AuthService {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthDMO.class);
     private final CacheManager cacheManager;
     

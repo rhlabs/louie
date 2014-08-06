@@ -2,26 +2,22 @@
 
 /*
  * ${className}.java
- *
- * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
 package ${info.packageName};
 
 public interface ${className} {
 #foreach($method in $info.methodInfos)
+#if ($method.isClientAccess()) 
 
     /**
-     * ${method.description}
-     *
-#foreach($param in $method.parameters)
-     * @param ${param.name}
+#foreach( $line in $method.javadoc.split("\n"))
+     * $line
 #end
-     * @return ${method.javadocConvertedReturnType}
-     * @throws ${method.throwsClause}
      */
 #if ( $method.isDeprecated() )
     @Deprecated
 #end
-    ${method.convertedReturnType} ${method.name}(${method.convertedParamString}) throws ${method.throwsClause};
+    ${method.clientReturnType} ${method.name}(${method.paramString})${method.throwsClause};
+#end
 #end
 }

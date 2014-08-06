@@ -2,8 +2,6 @@
 
 /*
  * ${className}.java
- *
- * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
 package ${info.packageName};
 
@@ -11,11 +9,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import java.util.Set;
+import java.util.List;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.TypeAnnotationsScanner;
-
+import com.rhythm.util.Classes;
 import com.rhythm.louie.Delegate;
 import com.rhythm.louie.Server;
 import com.rhythm.louie.ServiceProperties;
@@ -25,7 +21,6 @@ import com.rhythm.louie.process.CacheDelegate;
 import com.rhythm.louie.process.DAO;
 import com.rhythm.louie.process.Router;
 
-import com.rhythm.pb.command.Service;
 import com.rhythm.pb.command.ServiceFactory;
 
 public class ${className} implements ServiceFactory {
@@ -47,7 +42,7 @@ public class ${className} implements ServiceFactory {
         return serviceName;
     }
 
-    public ${baseName}Client getServiceClient() throws Exception {
+    public ${info.serviceClassName} getServiceClient() throws Exception {
         return getService().getDelegate();
     }
 
@@ -61,36 +56,35 @@ public class ${className} implements ServiceFactory {
         }
 
         ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-        Reflections reflections = new Reflections("${info.packageName}");
         
-        ${baseName}Client serviceClient;
+        ${info.serviceClassName} serviceImpl;
         if (useRemoteDAO(props)) {
             Server PRIMARY = Server.getServer(props.getMain());
             LouieConnection connection = LouieConnectionFactory.getConnectionForServer(PRIMARY);
-            serviceClient = ${baseName}ClientFactory.getClient(connection);
+            serviceImpl = new ${baseName}RemoteService(connection);
         } else {
-            serviceClient = loadLayer(props.getDAO(), "${baseName}DAO", reflections, DAO.class, false);
+            serviceImpl = loadLayer(props.getDAO(), "${baseName}DAO", DAO.class, false);
         }
-        if (serviceClient==null) {
+        if (serviceImpl==null) {
             throw new Exception("Must define at least a DAO layer");
         }
         
-        ${baseName}Client router = loadLayer(props.getRouter(),null,reflections,Router.class, true);
+        ${info.serviceClassName} router = loadLayer(props.getRouter(), null, Router.class, true);
         if (router!=null) {
-            ((Delegate<${baseName}Client>)router).setDelegate(serviceClient);
-            serviceClient = router;
+            ((Delegate<${info.serviceClassName}>)router).setDelegate(serviceImpl);
+            serviceImpl = router;
         }
         
         if (props.isCachingOn()) {
-            ${baseName}Client cache = loadLayer(props.getCache(),"${baseName}CacheDelegate",reflections,CacheDelegate.class,true);
+            ${info.serviceClassName} cache = loadLayer(props.getCache(), "${baseName}CacheDelegate", CacheDelegate.class, true);
             if (cache!=null) {
-                ((Delegate<${baseName}Client>)cache).setDelegate(serviceClient);
-                serviceClient = cache;
+                ((Delegate<${info.serviceClassName}>)cache).setDelegate(serviceImpl);
+                serviceImpl = cache;
             }
         }
         
         service = new ${baseName}ServiceHandler();
-        service.setDelegate(serviceClient);
+        service.setDelegate(serviceImpl);
         return service;
     }
 
@@ -108,16 +102,17 @@ public class ${className} implements ServiceFactory {
         return false;
     }
 
-    private ${baseName}Client loadLayer(String property, String defaultName,
-            Reflections reflections, Class<? extends Annotation> annotation, boolean delegate) throws Exception {
+    private ${info.serviceClassName} loadLayer(String property, String defaultName,
+            Class<? extends Annotation> annotation, boolean delegate) throws Exception {
         Class<?> layer = null;
         if (property==null) {
             // no layer override found, so search for the class tagged with the annotation
-            Set<Class<?>> caches = reflections.getTypesAnnotatedWith(annotation);
-            if (caches.size()>1) {
-                throw new Exception("Multiple @"+annotation.getSimpleName()+" layers found");
-            } else if (caches.size()==1) {
-                layer = caches.iterator().next();
+
+            List<Class<?>> classes = Classes.getTypesAnnotatedWith("${info.packageName}", annotation);
+            if (classes.size()>1) {
+                throw new Exception("Multiple @"+annotation.getSimpleName()+" classes found");
+            } else if (classes.size()==1) {
+                layer = classes.iterator().next();
             } else if (defaultName!=null && !defaultName.isEmpty()) {
                 // check to see if the default exists, this helps support legacy behavior
                 try {
@@ -131,25 +126,25 @@ public class ${className} implements ServiceFactory {
         if (layer == null) {
             return null;
         } else {
-            if (!${baseName}Client.class.isAssignableFrom(layer)) {
-                throw new Exception(layer.getCanonicalName()+" does not implement ${baseName}Client");
+            if (!${info.serviceClassName}.class.isAssignableFrom(layer)) {
+                throw new Exception(layer.getCanonicalName()+" does not implement ${info.serviceClassName}");
             }
             if (delegate) {
                 if (!Delegate.class.isAssignableFrom(layer)) {
-                    throw new Exception(layer.getCanonicalName()+" must implement Delegate<${baseName}Client>");
+                    throw new Exception(layer.getCanonicalName()+" must implement Delegate<${info.serviceClassName}>");
                 }
                 for (Type genericInterface : layer.getGenericInterfaces()) {
                     if (genericInterface instanceof Delegate) {
                         Type[] genericTypes = ((ParameterizedType) genericInterface).getActualTypeArguments();
                         for (Type genericType : genericTypes) {
-                            if (!(genericType instanceof ${baseName}Client)) {
-                                throw new Exception(layer.getCanonicalName()+" must implement Delegate<${baseName}Client>");
+                            if (!(genericType instanceof ${info.serviceClassName})) {
+                                throw new Exception(layer.getCanonicalName()+" must implement Delegate<${info.serviceClassName}>");
                             }
                         }
                     }
                 }
             }
-            return (${baseName}Client) layer.newInstance();
+            return (${info.serviceClassName}) layer.newInstance();
         }
     }
 }

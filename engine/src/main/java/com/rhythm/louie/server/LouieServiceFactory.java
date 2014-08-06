@@ -12,9 +12,9 @@ import com.rhythm.pb.command.ServiceFactory;
  *
  * @author cjohnson
  */
-public class LouieServiceFactory implements ServiceFactory{
+public class LouieServiceFactory implements ServiceFactory {
     
-    private static final String serviceName = "louie";
+    
     private static LouieServiceHandler service;
     
     public static LouieServiceFactory getInstance() {
@@ -23,7 +23,7 @@ public class LouieServiceFactory implements ServiceFactory{
 
     @Override
     public String getServiceName() {
-        return serviceName;
+        return LouieService.SERVICE_NAME;
     }
 
     private static class Holder {
@@ -39,7 +39,7 @@ public class LouieServiceFactory implements ServiceFactory{
         return service;
     }
     
-    public LouieClient getServiceClient() {
+    public LouieService getServiceClient() {
         return service.getDelegate();
     }
     

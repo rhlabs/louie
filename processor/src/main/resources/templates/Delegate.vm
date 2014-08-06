@@ -2,24 +2,22 @@
 
 /*
  * ${className}.java
- *
- * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
 package ${info.packageName};
 
 import com.rhythm.louie.Delegate;
 
-public class ${className} implements ${baseName}Client, Delegate<${baseName}Client> {
-    private ${baseName}Client delegate;
+public class ${className} implements ${info.serviceClassName}, Delegate<${info.serviceClassName}> {
+    private ${info.serviceClassName} delegate;
     public ${className}() {}
 
     @Override
-    public void setDelegate(${baseName}Client delegate) {
+    public void setDelegate(${info.serviceClassName} delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public ${baseName}Client getDelegate() {
+    public ${info.serviceClassName} getDelegate() {
         return delegate;
     }
 #foreach($method in $info.methodInfos)
@@ -28,7 +26,7 @@ public class ${className} implements ${baseName}Client, Delegate<${baseName}Clie
     @Deprecated
 #end
     @Override
-    public ${method.convertedReturnType} ${method.name}(${method.convertedParamString}) throws ${method.throwsClause} {
+    public ${method.returnType} ${method.name}(${method.paramString})${method.throwsClause} {
         return delegate.${method.name}(${method.paramNameString});
     }
 #end

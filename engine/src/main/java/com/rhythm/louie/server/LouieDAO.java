@@ -26,7 +26,7 @@ import com.rhythm.pb.louie.LouieProtos.ServicePB;
  * Created: Oct 27, 2011 11:36:00 AM
  */
 @DAO
-public class LouieDAO implements LouieClient {
+public class LouieDAO implements LouieService {
     public LouieDAO() {
     }
     

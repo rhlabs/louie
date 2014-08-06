@@ -25,6 +25,8 @@ public interface Service {
 
     String getServiceName();
     
+    Class<?> getServiceInterface();
+    
     void initialize() throws Exception;
     
     void shutdown() throws Exception;

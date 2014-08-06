@@ -24,15 +24,17 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.generator.ProcessorUtils;
+
 import com.rhythm.pb.data.DataParser;
 import com.rhythm.pb.data.DataParser.BuilderParser;
 import com.rhythm.pb.data.Param;
 import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
-import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.Grouping;
 import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.Streaming;
 import com.rhythm.louie.process.Updating;
 
@@ -46,7 +48,8 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     
     private final AnnotatedService service;
     private final Method method;
-    private final CommandDescriptor descriptor;
+    private final ServiceCall serviceCall;
+    private final String description;
     private final PBParamType params;
     private final List<PBParamType> paramList;
     private final Descriptor returnType;
@@ -54,35 +57,33 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     private final boolean returnList;
     private final String returnDisplay;
     private final List<DataParser<?>> parsers;
+    
     private final boolean isAnUpdater;
     private final Grouping group;
     private final boolean isPrivate;
     private final boolean isStreaming;
-    
     private final boolean deprecated;
     
     public ReflectCommand(final AnnotatedService service, final Method meth) throws Exception {
         this.service =service;
         this.method = meth;
         
-        this.descriptor = meth.getAnnotation(CommandDescriptor.class);
-        this.group = meth.isAnnotationPresent(Grouping.class) ? meth.getAnnotation(Grouping.class) : null;
+        group = meth.isAnnotationPresent(Grouping.class) ? meth.getAnnotation(Grouping.class) : null;
+        serviceCall = meth.getAnnotation(ServiceCall.class);
         
         isAnUpdater = meth.isAnnotationPresent(Updating.class);
         isPrivate = meth.isAnnotationPresent(Private.class);
         isStreaming = meth.isAnnotationPresent(Streaming.class);
         deprecated = meth.isAnnotationPresent(Deprecated.class);
         
+        description = ProcessorUtils.extractDescriptionFromJavadoc(serviceCall.javadoc());
+        
         parsers = new ArrayList<DataParser<?>>(meth.getParameterTypes().length);
         List<ArgType> args = new ArrayList<ArgType>(meth.getParameterTypes().length);
         int i=0;
         for (Class<?> arg : meth.getParameterTypes()) {
             Descriptor argDesc = getDescriptor(arg);
-            String name = "";
-            if (this.descriptor.args().length>i) {
-                name = this.descriptor.args()[i++];
-            }
-            args.add(new ArgType(argDesc,name));
+            args.add(new ArgType(argDesc,serviceCall.args()[i++]));
             parsers.add(new BuilderParser<Object>(getBuilder(arg)));
         }
         
@@ -230,7 +231,11 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
 
     @Override
     public String getDescription() {
-        return descriptor.description();
+        return description;
+    }
+    
+    public String getJavadoc() {
+        return serviceCall.javadoc();
     }
 
     @Override

@@ -19,6 +19,8 @@ import com.rhythm.util.CalcList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
 import com.rhythm.louie.TaskScheduler;
@@ -30,7 +32,7 @@ import com.rhythm.louie.stream.StreamingConsumer;
  * @author cjohnson
  */
 @DAO
-public class TestDAO implements TestClient {
+public class TestDAO implements TestService {
     private static final int THREAD_POOL_SIZE = 20;
     public TestDAO() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
@@ -159,6 +161,16 @@ public class TestDAO implements TestClient {
     @Override
     public String messageTest(String message) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public Map<String, String> mapTest() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Set<String> setTest() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

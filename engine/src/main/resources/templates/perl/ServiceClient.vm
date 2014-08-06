@@ -29,8 +29,6 @@ use warnings;
 use RH::Louie::Session;
 use RH::Pb::Datatype;
 use RH::Pb::${baseName}::${baseName};
-use RH::Pb::${baseName}::${baseName}Data;
-
 
 use constant CLASS  => 'class';
 use base qw(Logging::Base);

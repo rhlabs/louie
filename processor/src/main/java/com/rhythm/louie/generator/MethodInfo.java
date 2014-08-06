@@ -6,13 +6,23 @@
 package com.rhythm.louie.generator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
-import com.rhythm.louie.process.CommandDescriptor;
+import com.rhythm.louie.process.Disabled;
+import com.rhythm.louie.process.Grouping;
+import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.ServiceCall;
+import com.rhythm.louie.process.Streaming;
+import com.rhythm.louie.process.Updating;
 
 /**
  *
@@ -21,65 +31,124 @@ import com.rhythm.louie.process.CommandDescriptor;
 public class MethodInfo {
     private final ExecutableElement method;
     private final List<ParamInfo> params = new ArrayList<ParamInfo>();
-    private final CommandDescriptor command;
+    private String javaDoc;
     
-    public MethodInfo(ExecutableElement method) {
+    private final boolean returnsCollection;
+    private final Private priv;
+    private final Deprecated deprecated;
+    private final Disabled disabled;
+    private final Updating updating;
+    private final Streaming streaming;
+    private final Grouping grouping;
+    
+    private TypeMirror baseReturnType;
+    
+    public MethodInfo(ProcessingEnvironment processingEnv, ExecutableElement method) {
         this.method=method;
-        command = method.getAnnotation(CommandDescriptor.class);
         
         if (method.getParameters()!=null) {
             for (VariableElement param : method.getParameters()) {
                 params.add(new ParamInfo(param));
             }
         }
+        
+        priv = method.getAnnotation(Private.class);
+        disabled = method.getAnnotation(Disabled.class);
+        deprecated = method.getAnnotation(Deprecated.class);
+        updating = method.getAnnotation(Updating.class);
+        streaming = method.getAnnotation(Streaming.class);
+        grouping = method.getAnnotation(Grouping.class);
+                
+        Elements elems = processingEnv.getElementUtils();
+        javaDoc = elems.getDocComment(method);
+        if (javaDoc == null) {
+            javaDoc = "No Docs";
+        }
+        
+        TypeMirror returnType = method.getReturnType();
+         
+        Types types = processingEnv.getTypeUtils();
+        returnsCollection = TypeUtils.instanceOf(types,returnType,Collection.class);
+        
+        baseReturnType = returnType;
+        
+        if (returnsCollection && returnType instanceof DeclaredType) {
+            DeclaredType decType = (DeclaredType) returnType;
+            if (decType.getTypeArguments().size() == 1) {
+                baseReturnType = decType.getTypeArguments().get(0);
+            }
+        }
     }
     
-    public boolean isDeprecated() throws Exception {
-        return method.getAnnotation(Deprecated.class)!=null;
+    public boolean isPrivate() {
+        return priv!=null;
+    }
+    
+    public boolean isDeprecated() {
+        return deprecated!=null;
+    }
+    
+    public boolean isDisabled() {
+        return disabled!=null;
+    }
+    
+    public boolean isUpdating() {
+        return updating!=null;
+    }
+    
+    public boolean isStreaming() {
+        return streaming!=null;
+    }
+    
+    public boolean isClientAccess() {
+        return !isPrivate() && !isDisabled();
     }
     
     public List<ParamInfo> getParameters() {
         return params;
     }
     
+    public String getJavadoc() {
+        return javaDoc;
+    }
+    
     public TypeMirror getReturnType() {
         return method.getReturnType();
     }
     
+    public String getPbReturnType() {
+        return TypeUtils.convertToPB(method.getReturnType().toString());
+    }
+    
     public boolean returnsList() {
-        return getReturnType().toString().startsWith("List<") || 
-               getReturnType().toString().startsWith("java.util.List<");
+        return returnsCollection;
     }
     
-    public String getBaseReturnType() {
-        return getReturnType().toString().replaceFirst("(?:java\\.util\\.)?List<(.*)>","$1");
+    public boolean returnsPbList() {
+        return returnsCollection && getPbReturnType().startsWith("java.util.List");
     }
     
-    public String getJavadocReturnType() {
-        return getReturnType().toString().replaceAll(".*\\.(.*?)", "$1");
+    public TypeMirror getBaseReturnType() {
+        return baseReturnType;
     }
     
-    public String getJavadocConvertedReturnType() {
-        String returnType = getConvertedReturnType().toString();
-        String baseType = returnType.replaceFirst("(?:java\\.util\\.)?List<(.*)>","$1");
-        boolean list = !baseType.equals(returnType);
-        baseType = baseType.replaceFirst(".*\\.(.*?)", "$1");
-        if (list) {
-            return "List of "+baseType;
+    public String getBasePbReturnType() {
+        return TypeUtils.convertToPB(baseReturnType.toString());
+    }
+    
+    public String getClientReturnType() {
+        if (returnsCollection) {
+            return "java.util.List<"+getBaseReturnType()+">";
         }
-        return baseType;
+        return getReturnType().toString();
     }
     
-    public String getConvertedReturnType() {
-        return TypeUtils.convertPBType(method.getReturnType().toString());
-    }
-    
-    public String getReturnConvertCode(String variableName) {
-        return TypeUtils.getToValueCode(getReturnType().toString(),variableName);   
+    public String getReturnPbCode(String variableName) {
+        return TypeUtils.getToValueCode(getPbReturnType(),variableName);   
     }
     
     public String getReturnBuilderCode(String variableName) {
-        return TypeUtils.getPBBuilderCode(getReturnType().toString(),variableName);
+        return TypeUtils.getPBBuilderCode(getPbReturnType(),variableName);
     }
     
     public List<? extends TypeMirror> getThrows() {
@@ -92,14 +161,14 @@ public class MethodInfo {
     
     public String getThrowsClause() {
         if (!getThrows().isEmpty()) {
-            StringBuilder throwNames = new StringBuilder();
+            int i=0;
+            StringBuilder throwNames = new StringBuilder(" throws ");
             for (TypeMirror t : getThrows()) {
                 String s = t.toString();
                 if (s.equals("java.lang.Exception")) {
                     s = "Exception";
                 }
-                
-                if (throwNames.length()!=0) {
+                if (i++!=0) {
                     throwNames.append(", ");
                 }
                 throwNames.append(s);
@@ -112,7 +181,6 @@ public class MethodInfo {
     public String getName() {
         return method.getSimpleName().toString();
     }
-    
     
     public boolean hasParams() {
         return !params.isEmpty();
@@ -132,8 +200,7 @@ public class MethodInfo {
         return sb.toString();
     }
     
-    
-    public String getConvertedParamString() {
+    public String getPbParamString() {
         if (params.isEmpty()) {
             return "";
         }
@@ -142,7 +209,21 @@ public class MethodInfo {
             if (sb.length()>0) {
                 sb.append(", ");
             }
-            sb.append(param.getConvertedArgString());
+            sb.append(param.getPbArgString());
+        }
+        return sb.toString();
+    }
+    
+    public String getTypeString() {
+        if (params.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (ParamInfo param : params) {
+            if (sb.length()>0) {
+                sb.append(",");
+            }
+            sb.append(param.getType());
         }
         return sb.toString();
     }
@@ -156,12 +237,12 @@ public class MethodInfo {
             if (sb.length()>0) {
                 sb.append(", ");
             }
-            sb.append(TypeUtils.getPBBuilderCode(param.getType().toString(),param.getName()));
+            sb.append(TypeUtils.getPBBuilderCode(param.getPbType(),param.getName()));
         }
         return sb.toString();
     }
     
-    public String getConvertParamString() {
+    public String getPbToArgString() {
         if (params.isEmpty()) {
             return "";
         }
@@ -170,7 +251,7 @@ public class MethodInfo {
             if (sb.length()>0) {
                 sb.append(", ");
             }
-            sb.append(TypeUtils.getToValueCode(param.getType().toString(),param.getName()));
+            sb.append(TypeUtils.getToValueCode(param.getPbType(),param.getName()));
         }
         return sb.toString();
     }
@@ -189,8 +270,59 @@ public class MethodInfo {
         return sb.toString();
     }
     
-    public String getDescription() {
-        return command.description();
+    private void appendSimpleAnnotation(StringBuilder sb, String indent, Class cl, boolean newLine) {
+        if (sb.length()!=0) {
+            sb.append(indent);
+        }
+        sb.append("@").append(cl.getName());
+        if (newLine) {
+            sb.append("\n");
+        }
+    }
+    
+    public String getServiceCallString(String indent) {
+        StringBuilder sb = new StringBuilder();
+        if (isDeprecated()) {
+            appendSimpleAnnotation(sb, indent, Deprecated.class, true);
+        }
+        if (isStreaming()) {
+            appendSimpleAnnotation(sb, indent, Streaming.class, true);
+        }
+        if (isUpdating()) {
+            appendSimpleAnnotation(sb, indent, Updating.class, true);
+        }
+        if (grouping != null) {
+            appendSimpleAnnotation(sb, indent, Grouping.class, false);
+            sb.append("(");
+            if (grouping.groupOrder()>=0) {
+                sb.append("groupOrder=").append(grouping.groupOrder()).append(", ");
+            }
+            sb.append("group=\"").append(grouping.group()).append("\")\n");
+        }
+        appendSimpleAnnotation(sb, indent, ServiceCall.class, false);
+        sb.append("(javadoc=");
+        int i=0;
+        for(String line : getJavadoc().split("\n")) {
+            line = line.replaceAll("\\\"", "\\\\\"");
+            if (i++>0) {
+                sb.append("\\n\"\n").append(indent).append(indent).append(indent).append(" + ");
+            }
+            sb.append("\"").append(line.trim());
+        }
+        sb.append("\"");
+        if (!getParameters().isEmpty()) {
+            sb.append(",\n").append(indent).append(indent).append("args={");
+            i=0;
+            for (ParamInfo param : getParameters()) {
+                if (i++>0) {
+                    sb.append(", ");
+                }
+                sb.append("\"").append(param.getName()).append("\"");
+            }
+            sb.append("}");
+        }
+        sb.append(")");
+        return sb.toString();
     }
     
     public class ParamInfo {
@@ -203,8 +335,8 @@ public class MethodInfo {
             return param.asType();
         }
         
-        public String getConvertedType() {
-            return TypeUtils.convertPBType(param.asType().toString());
+        public String getPbType() {
+            return TypeUtils.convertToPB(param.asType().toString());
         }
         
         public String getName() {
@@ -215,8 +347,8 @@ public class MethodInfo {
             return param.asType().toString() + " " + getName();
         }
         
-        public String getConvertedArgString() {
-            return getConvertedType() + " " + getName();
+        public String getPbArgString() {
+            return getPbType() + " " + getName();
         }
     }
 }
