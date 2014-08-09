@@ -35,6 +35,7 @@
         <module>engine</module>
         <module>service</module>
         <module>server</module>
+        <module>plugin</module>
     </modules>
     
     <profiles>
