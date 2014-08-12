@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.serviceclient;
+package com.rhythm.louie.plugins;
 
 import java.io.*;
 import java.lang.reflect.Method;

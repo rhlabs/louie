@@ -32,10 +32,8 @@
     
     <modules>
         <module>processor</module>
-        <module>engine</module>
-        <module>service</module>
-        <module>server</module>
         <module>plugin</module>
+        <module>engine</module>
     </modules>
     
     <profiles>

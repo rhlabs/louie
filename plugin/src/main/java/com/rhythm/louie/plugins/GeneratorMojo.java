@@ -50,7 +50,7 @@ public class GeneratorMojo extends AbstractMojo{
                 }
             }
         }
-        com.rhythm.louie.serviceclient.Generator.main(args.toArray(new String[args.size()]));
+        com.rhythm.louie.plugins.Generator.main(args.toArray(new String[args.size()]));
     }
     
 }
