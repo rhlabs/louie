@@ -148,6 +148,38 @@ public class DefaultLouieConnection implements LouieConnection {
         }
     }
     
+    private Boolean first = true;
+    private URLConnection getConnection() throws Exception {
+        URL url;
+        if (first) {
+            url = getAuthURL();
+            first = false;
+        } else {
+            url = getPBURL();
+        }
+         
+        URLConnection connection = url.openConnection();
+        
+        // Prepare for both input and output
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
+
+        // Turn off caching
+        connection.setUseCaches(false);
+
+        // Set Content Type
+        connection.setRequestProperty("Content-Type", "application/x-protobuf");
+        //connection.setRequestProperty(, who)
+        
+        connection.setReadTimeout(30*1000);
+        connection.setConnectTimeout(15*1000);
+        
+        
+        
+        return connection;
+    }
+    
+    @Deprecated //in favor of swapping urls (really ports) dynamically
     private URLConnection getConnection(URL url) throws Exception {
         URLConnection connection = url.openConnection();
         
@@ -251,15 +283,8 @@ public class DefaultLouieConnection implements LouieConnection {
                     LOGGER.error("Error creating secure connection", e);
                     throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords.");
                 }
-            } else if (service.equals(AUTH_SERVICE)) {
-                try {
-                    connection = getConnection(getAuthURL());
-                } catch (Exception e) {
-                    LOGGER.warn("Error Connecting to Auth Port, Falling back to louieport");
-                    connection = getConnection(getPBURL());
-                }
             } else {
-                connection = getConnection(getPBURL());
+                connection = getConnection();
             }
             connection.connect();
         } catch (Exception e) {
