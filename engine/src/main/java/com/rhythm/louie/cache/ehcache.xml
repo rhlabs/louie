@@ -32,12 +32,4 @@
          overflowToDisk="true"
          memoryStoreEvictionPolicy="LRU">
   </cache>
-  <cache name="Auth_SessionStats"
-         maxEntriesLocalHeap="1000"
-         maxEntriesLocalDisk="1000000"
-         eternal="true"
-         diskPersistent="true"
-         overflowToDisk="true"
-         memoryStoreEvictionPolicy="LRU">
-  </cache> 
 </ehcache>

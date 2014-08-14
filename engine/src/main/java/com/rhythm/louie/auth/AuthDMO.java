@@ -5,10 +5,10 @@
  */
 package com.rhythm.louie.auth;
 
+import com.google.common.cache.CacheBuilderSpec;
 import com.rhythm.louie.Server;
 import com.rhythm.louie.cache.CacheManager;
-import com.rhythm.louie.cache.EhCache;
-import com.rhythm.louie.connection.DefaultLouieConnection;
+import com.rhythm.louie.cache.GuavaCache;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  *
@@ -30,14 +31,15 @@ public class AuthDMO implements AuthClient {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthDMO.class);
     private final CacheManager cacheManager;
     
-    private final EhCache<String,SessionStat> SESSION_STATS;
+    private final GuavaCache<String,SessionStat> SESSION_STATS;
     
     private Boolean centralAuthProvider = null;
     private AuthClient authClient = null;
     
     private AuthDMO() {
         cacheManager = CacheManager.createCacheManager("auth");
-        SESSION_STATS = cacheManager.createEHCache("Auth_SessionStats");
+        CacheBuilderSpec spec = CacheBuilderSpec.parse("expireAfterAccess=4h,maximumSize=1000000"); //4 hours of no calls it expires. max capacity is 1M sessions
+        SESSION_STATS = cacheManager.guavaCache("Auth_SessionStats", spec);
     }
     
     /**
@@ -52,11 +54,6 @@ public class AuthDMO implements AuthClient {
                 centralAuthProvider = Server.LOCAL.equals(Server.getCentralAuth());
             } else { // there is no configured central auth, revert to basic behavior
                 centralAuthProvider = true;
-            }
-            if (centralAuthProvider) {
-                LOGGER.debug("This host determined to be a central auth");
-            } else {
-                LOGGER.debug("Central auth determined to be located elsewhere");
             }
         }
         return centralAuthProvider;                                                                                                                 
@@ -103,10 +100,8 @@ public class AuthDMO implements AuthClient {
     public SessionStat getSessionStat(SessionKey sessionKey) throws Exception {
         SessionStat stat = SESSION_STATS.get(sessionKey.getKey());                                                                                  
         if (stat == null && !isCentralAuth()) {
-            LOGGER.trace("getSessionStat found a null key locally, gonna go look to central auth");
             SessionBPB statBPB = getAuthClient().getSession(sessionKey);                                                                            
             if (statBPB.hasKey()) { //check that this is not an empty instance                  
-                LOGGER.trace("getSession from central auth found something!");
                 stat = new SessionStat(statBPB.getKey(), statBPB.getIdentity());
                 SESSION_STATS.put(sessionKey.getKey(), stat);                                                                   
                 return stat;                                                                                                    
@@ -124,11 +119,20 @@ public class AuthDMO implements AuthClient {
         }                                                                                                                                           
         String key = nextSessionId();                                                                                                               
         while (SESSION_STATS.get(key)!=null) {                                                                                                      
-            LOGGER.warn("YOU HIT THE LOTTERY!!!!!");                                                                                         
             key = nextSessionId();                                                                                                                  
         }                                                                                                                                           
                                                                                                                                                     
         SessionKey skey = SessionKey.newBuilder().setKey(key).build();                                                                              
+        MDC.put("user", identity.getUser());
+        MDC.put("session", key);
+        MDC.put("language", identity.getLanguage());
+        MDC.put("program", identity.getProgram());
+        MDC.put("location", identity.getLocation());
+        MDC.put("machine", identity.getMachine());
+        MDC.put("processId", identity.getProcessId());
+        MDC.put("path", identity.getPath());
+        
+        LOGGER.info("");
         addSessionStat(skey, identity);                                                                                                             
         return skey;                                                                                                                                
     }
@@ -142,7 +146,6 @@ public class AuthDMO implements AuthClient {
         if (!isCentralAuth()) {                                                                                                                     
             SessionBPB statBPB = getAuthClient().getSession(sessionKey);              
             if (statBPB.hasKey()) {
-                LOGGER.trace("getSession found a non null stat from Central!");
                 SESSION_STATS.put(sessionKey.getKey(), new SessionStat(statBPB.getKey(), statBPB.getIdentity()));                                                                   
                 return statBPB;                                                                                                                     
             }
@@ -157,14 +160,11 @@ public class AuthDMO implements AuthClient {
             return Collections.singletonList(stat.toPB());
         } else {
             List<SessionBPB> found = new ArrayList<SessionBPB>();
-            for (Object key : SESSION_STATS.getCache().getKeys()) {
-                LOGGER.debug("KEY: {}", key);
+            for (Object key : SESSION_STATS.asMap().keySet()) {
                 
                 if (key.toString().startsWith(sessionKey.getKey())) {
-                    LOGGER.debug("Starts with!");
                     stat = SESSION_STATS.get(key.toString());
                     if (stat!=null) {
-                        LOGGER.debug("Found!");
                         found.add(stat.toPB());
                     }
                 }
@@ -192,7 +192,6 @@ public class AuthDMO implements AuthClient {
     @Override
     public Boolean isValidSession(SessionKey sessionKey) throws Exception {
         SessionStat stat = SESSION_STATS.get(sessionKey.getKey());
-        LOGGER.trace("isValidSession: {} : {}", sessionKey.getKey(), (stat!=null));
         if (stat!=null) {
             return Boolean.TRUE;
         }
