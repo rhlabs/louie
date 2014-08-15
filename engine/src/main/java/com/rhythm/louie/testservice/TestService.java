@@ -43,6 +43,9 @@ public interface TestService {
     @CommandDescriptor(description = "Echoes back the values listed, sleeping in between.\n"
             + "Client should be able to start processing immediately", args = {"numResults","resultSize","sleep", "hosts"})
     public List<ErrorPB> streamLoopTest(UIntPB numResults, UIntPB resultSize, UIntPB sleep, StringListPB hosts) throws Exception;
+ 
+    @CommandDescriptor(description = "Generates a message using the configured JMS adapter, and the same delegate should receive that message", args = {"message"})
+    public StringPB messageTest(StringPB message) throws Exception;
     
 }
 

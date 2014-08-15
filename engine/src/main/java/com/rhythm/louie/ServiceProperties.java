@@ -27,6 +27,7 @@ public class ServiceProperties {
     private static final String PROP_DAO = "dao";
     private static final String PROP_CACHE = "cache";
     private static final String PROP_ROUTER = "router";
+    private static final String PROP_JMS = "jmsadapter";
     
     private static final Map<String,ServiceProperties> SERVICES = 
             new ConcurrentHashMap<String,ServiceProperties>();
@@ -43,6 +44,7 @@ public class ServiceProperties {
     private String dao = null;
     private String cache = null;
     private String router = null;
+    private String jmsAdapter = null;
     
     private final Map<String,String> properties;
     
@@ -116,6 +118,10 @@ public class ServiceProperties {
         return router;
     }
     
+    public String getMessageAdapter() {
+        return jmsAdapter;
+    }
+    
     public String getCustomProperty(String attribute,String def) {
         String value = properties.get(attribute);
         if (value == null) {
@@ -146,6 +152,7 @@ public class ServiceProperties {
             DEFAULT.centralized = props.getProperty(DEFAULT_NAME+"."+PROP_CENTRAL,"false").equals("true");
             DEFAULT.readOnly = props.getProperty(DEFAULT_NAME+"."+PROP_READ_ONLY,"false").equals("true");
             DEFAULT.caching = props.getProperty(DEFAULT_NAME+"."+PROP_CACHING,"true").equals("true");
+            DEFAULT.jmsAdapter = props.getProperty(DEFAULT_NAME+"."+PROP_JMS, null);
             
             for (String key : props.stringPropertyNames()) {
                 String[] keyParts = key.split("\\.",2);

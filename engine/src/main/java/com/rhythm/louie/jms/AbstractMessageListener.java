@@ -10,7 +10,6 @@ import java.util.Collection;
 import javax.jms.*;
 
 import com.google.common.base.Joiner;
-import org.apache.activemq.ActiveMQConnectionFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +32,11 @@ public abstract class AbstractMessageListener implements MessageListener, Except
     private Thread connectThread;
     private Thread checkThread;
     
+    private final JmsAdapter jmsAdapter;
+    
     public AbstractMessageListener() {
+        jmsAdapter = MessageManager.getManager().getAdapter();
     }
-
-    public abstract String getBrokerUrl();
 
     public abstract Destination getDestination(Session session) throws Exception;
 
@@ -60,7 +60,8 @@ public abstract class AbstractMessageListener implements MessageListener, Except
             @Override
             public void run() {
                 try {
-                    ActiveMQConnectionFactory tcf = new ActiveMQConnectionFactory(getBrokerUrl());
+//                    jmsAdapter.configure(getBrokerUrl());
+                    QueueConnectionFactory tcf = jmsAdapter.getQueueConnectionFactory();
 
                     connection = tcf.createConnection();
                     session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -95,7 +96,7 @@ public abstract class AbstractMessageListener implements MessageListener, Except
                             if (connected) {
                                 break;
                             } else {
-                                LOGGER.error("UNABLE TO CONNECT to {}", getBrokerUrl());
+                                LOGGER.error("UNABLE TO CONNECT to message server");
                             }
                         }
                     } catch (InterruptedException ex) {

@@ -115,7 +115,7 @@ public class TestDAO implements TestClient {
         return consumer.getStreamList();
     }
     
-    
+
 //    @Override
 //    public List<TestServicePB> streamTest(Integer resultSize, Integer sleepTime) throws Exception {
 //        FutureList<TestServicePB> results = new FutureList<TestServicePB>();
@@ -155,5 +155,10 @@ public class TestDAO implements TestClient {
 //            return null;
 //        }
 //    }
+
+    @Override
+    public String messageTest(String message) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

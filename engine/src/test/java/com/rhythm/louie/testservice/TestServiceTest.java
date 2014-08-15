@@ -245,4 +245,12 @@ public class TestServiceTest {
 
     }
     
+    @Test
+    public void messageFeedbackTest() throws Exception {
+        String captured = client.messageTest("test1");
+        System.out.println("Captured: " + captured);
+//        captured = client.messageTest("test2");
+//        System.out.println("Captured: " + captured);
+    }
+    
 }

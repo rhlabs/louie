@@ -15,7 +15,7 @@ import javax.jms.*;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+//import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +30,11 @@ public class MessageTask implements Runnable {
     private final Logger LOGGER = LoggerFactory.getLogger(MessageTask.class);
             
     private final String service;
-    private final ActiveMQConnectionFactory louieTCF;
+    private final QueueConnectionFactory louieTCF;
     private final MessageAction action;
     private final Collection<Message> pbList;
 
-    public MessageTask(String service, ActiveMQConnectionFactory louieTCF, MessageAction action, Collection<Message> pbList) {
+    public MessageTask(String service, QueueConnectionFactory louieTCF, MessageAction action, Collection<Message> pbList) {
         this.service = service;
         this.louieTCF = louieTCF;
         this.action = action;

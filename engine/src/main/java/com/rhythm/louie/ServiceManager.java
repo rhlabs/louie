@@ -12,7 +12,7 @@ import com.rhythm.louie.auth.AuthServiceFactory;
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.email.EmailService;
-import com.rhythm.louie.jms.ActiveMQUpdate;
+import com.rhythm.louie.jms.MessageUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
 import com.rhythm.louie.server.LouieServiceFactory;
@@ -112,7 +112,7 @@ public class ServiceManager {
             LOGGER.info("This Server started as a router.");
             configureRoutes(context);
         }
-        
+
         // Services
         if(context !=null) {
             configureServices(context);
@@ -126,7 +126,7 @@ public class ServiceManager {
         // JMS
         mm = MessageManager.initializeMessageManager("localhost");
         try {
-            ActiveMQUpdate.getInstance().initialize();
+            MessageUpdate.getInstance().initialize();
         } catch (Exception ex) {
             LOGGER.error("Error initializing JMS service", ex);
         }
@@ -260,7 +260,7 @@ public class ServiceManager {
         }
         LOGGER.info("All services shutdown");
         
-        ActiveMQUpdate.getInstance().shutdown();
+        MessageUpdate.getInstance().shutdown();
         LOGGER.info("ActiveMQUpdate shutdown");
 
         TaskScheduler.getInstance().shutdown();

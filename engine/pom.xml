@@ -35,83 +35,18 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.4</version>
+                <groupId>com.rhythm.louie</groupId>
+                <artifactId>louie-maven-plugin</artifactId>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>protoc</id>
-                        <phase>process-resources</phase>
                         <goals>
-                            <goal>execute</goal>
+                            <goal>pbcompiler</goal>
                         </goals>
-                        <configuration>
-                            <source>
-                                import java.io.File
-                                
-                                println "Compiling proto files"
-                                
-                                def protoSrc = new File("${proto.src}") 
-                                if (!protoSrc.exists()) {
-                                    println "ERROR! Could not find directory: ${proto.src}"
-                                    return
-                                }
-
-                                def protoFiles = ""
-                                protoSrc.eachFileRecurse() {
-                                    if (it.name =~ /\.proto$/) {
-                                        protoFiles+=it.canonicalPath+" "
-                                    }
-                                }
-                                
-                                new File("${java.pbdir}").mkdirs()
-                                new File("${cpp.pbdir}").mkdirs()  
-                                new File("${python.pbdir}").mkdirs()  
-                                
-                                def protoc = "${protobuf.home}/bin/protoc";
-                                protoc+=" --proto_path=${proto.src}"
-                                protoc+=" --proto_path=${protobuf.home}/include"
-                                protoc+=" --java_out=${java.pbdir}"
-                                protoc+=" --python_out=${python.pbdir}"
-                                protoc+=" --cpp_out=${cpp.pbdir}"
-                                protoc+=" "+protoFiles
-                                
-                                println "Executing "+protoc
-                                def sout = new StringBuffer(), serr = new StringBuffer()
-                                def proc = protoc.execute()
-                                proc.consumeProcessOutput(sout, serr)
-                                proc.waitFor()
-                                
-                                if (sout.length()>0) {
-                                    println sout
-                                }
-                                if (serr.length()>0) {
-                                    println "ERROR! "+serr
-                                }
-                            </source>
-                        </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>add-groovy-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${java.pbdir}</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            </plugin>          
+           
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

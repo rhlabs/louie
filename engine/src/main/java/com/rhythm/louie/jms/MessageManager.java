@@ -5,6 +5,7 @@
  */
 package com.rhythm.louie.jms;
 
+import com.rhythm.louie.ServiceProperties;
 import java.util.*;
 
 import javax.jms.BytesMessage;
@@ -29,9 +30,10 @@ public class MessageManager {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 61616;
     
+    private static JmsAdapter jmsAdapter;
+    
     private final String host;
     private final int port;
-    private boolean failover = true;
     
     private final Map<String, List<MessageProcessor>> messageProcessors 
             = Collections.synchronizedMap(new HashMap<String, List<MessageProcessor>>());
@@ -43,24 +45,51 @@ public class MessageManager {
         this.port = port;
     }
     
+    private static MessageManager mgr;
+    
     public static MessageManager initializeMessageManager(String host) {
-        return new MessageManager(host,DEFAULT_PORT);
+        if (mgr == null) {
+            mgr = new MessageManager(host,DEFAULT_PORT);
+            loadJMSAdapter();
+        }
+        return mgr;
     }
     
     public static MessageManager initializeMessageManager(String host,int port) {
-        return new MessageManager(host,port);
-    }
-    
-    public void enableFailover(boolean enable) {
-        failover = enable;
-    }
-    
-    private String getBrokerUrl() {
-        if (failover) {
-            return "failover:(tcp://" + host + ":"+port+")";
-        } else {
-            return "tcp://" + host + ":"+port;
+        if (mgr == null) {
+            mgr = new MessageManager(host,port);
+            loadJMSAdapter();
         }
+        return mgr;
+    }
+    
+    public static MessageManager getManager() {
+        return mgr;
+    }
+    
+    private static void loadJMSAdapter() {
+        String adapterClass = ServiceProperties.getServiceProperties("louie").getMessageAdapter();
+        if (adapterClass != null) {
+            try {
+                jmsAdapter = (JmsAdapter) Class.forName(adapterClass).newInstance();
+            } catch (ClassNotFoundException e) {} catch (InstantiationException ex) {
+                LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
+            } catch (IllegalAccessException ex) {
+                LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
+            }
+        } else {
+            jmsAdapter = new ActiveMQAdapter();
+        }
+        ServiceProperties props = ServiceProperties.getServiceProperties("messaging");
+        Map<String,String> configHash = new HashMap<String,String>();
+        configHash.put(JmsAdapter.HOST_KEY, props.getCustomProperty("host", DEFAULT_HOST));
+        configHash.put(JmsAdapter.PORT_KEY, props.getCustomProperty("port", Integer.toString(DEFAULT_PORT)));
+        configHash.put(JmsAdapter.FAILOVER_KEY, props.getCustomProperty("failover", "true"));
+        jmsAdapter.configure(configHash);
+    }
+    
+    public JmsAdapter getAdapter() {
+        return jmsAdapter;
     }
     
     public void listenToTopic(String topicName) {
@@ -152,11 +181,6 @@ public class MessageManager {
         public ManagedListener(String destName, String messageSelector) {
             this.destName = destName;
             super.connect(messageSelector);
-        }
-
-        @Override
-        public String getBrokerUrl() {
-            return MessageManager.this.getBrokerUrl();
         }
         
         @Override
