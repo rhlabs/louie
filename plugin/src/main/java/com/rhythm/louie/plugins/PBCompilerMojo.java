@@ -116,15 +116,17 @@ public class PBCompilerMojo extends AbstractMojo{
         //Check existence of specified compiler and libraries ( GUESS A BUNCH )
         File compilerF = new File(compiler);
         int i = 0;
-        while (!compilerF.exists() && i++ < protocompiler.length) {
+        while (!compilerF.exists() && i < protocompiler.length) {
             compilerF = new File(protocompiler[i]);
+            i++;
         }
         i = 0;
         File libdir = new File(compilerlibs+"/google");
         String libmarker = compilerlibs;
-        while (!libdir.exists() && i++ < protolibs.length) {
+        while (!libdir.exists() && i < protolibs.length) {
             libdir = new File(protolibs[i]+"/google");
             libmarker = protolibs[i];
+            i++;
         }
          
         getLog().info("Compiling proto files with STANDARD compiler");
