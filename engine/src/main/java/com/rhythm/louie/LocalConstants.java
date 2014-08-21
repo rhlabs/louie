@@ -1,5 +1,5 @@
 /*
- * Constants.java
+ * LocalConstants.java
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
@@ -12,11 +12,7 @@ import java.net.UnknownHostException;
  * @author cjohnson
  * Created: Jul 21, 2011 5:39:57 PM
  */
-public class Constants {
-    public static final String DEFAULT_GATEWAY = "louie";
-    
-    public static final int JDBC_IN_LIMIT=500;
-
+public class LocalConstants {
     public static final String HOST;
     public static final String HOSTDOMAIN;
     public static final String DOMAIN;

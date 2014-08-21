@@ -13,10 +13,10 @@ import com.rhythm.louie.jms.AnnotatedMessageHandler;
 import com.rhythm.louie.jms.MessageAction;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageOperation;
-import com.rhythm.pb.DataTypeProtos;
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.command.CacheLayer;
+
 import java.util.List;
 
 /**
@@ -26,7 +26,7 @@ import java.util.List;
 public class TestCacheDelegate implements CacheLayer, TestClient, Delegate<TestClient> {
     private final String SERVICE_NAME = "test";
     private TestClient delegate;
-    private MessageHandler msgHandler;
+    private final MessageHandler msgHandler;
     
     public TestCacheDelegate() {
         msgHandler= new TestServiceMessageHandler();

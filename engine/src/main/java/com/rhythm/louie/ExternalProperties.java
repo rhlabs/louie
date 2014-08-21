@@ -104,7 +104,7 @@ public class ExternalProperties {
         }
 
         try {
-            Enumeration<URL> resources = Constants.class.getClassLoader()
+            Enumeration<URL> resources = LocalConstants.class.getClassLoader()
                     .getResources("META-INF/MANIFEST.MF");
             while (resources.hasMoreElements()) {
                 InputStream input = null;

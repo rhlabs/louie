@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.rhythm.louie.Constants;
 import com.rhythm.louie.DAOUtils;
 
 /**
@@ -43,17 +42,17 @@ public class Batcher {
         }
         
         public List<R> doQuery(Collection<A> fullargs) throws Exception {
-            if (fullargs.size() <= Constants.JDBC_IN_LIMIT) {
+            if (fullargs.size() <= JdbcConstants.JDBC_IN_LIMIT) {
                 return doQueryBatch(fullargs);
             } else {
                 List<R> results = new ArrayList<R>(fullargs.size());
 
                 int count = 0;
-                ArrayList<A> tmpList = new ArrayList<A>(Constants.JDBC_IN_LIMIT);
+                ArrayList<A> tmpList = new ArrayList<A>(JdbcConstants.JDBC_IN_LIMIT);
                 for (A i : fullargs) {
                     tmpList.add(i);
                     count++;
-                    if (count >= Constants.JDBC_IN_LIMIT) {
+                    if (count >= JdbcConstants.JDBC_IN_LIMIT) {
                         results.addAll(doQueryBatch(tmpList));
                         count = 0;
                         tmpList.clear();
@@ -144,15 +143,15 @@ public class Batcher {
         
         public Map<A,List<R>> doQuery(Collection<A> fullargs) throws Exception {
             Map<A,List<R>> results = new HashMap<A,List<R>>(fullargs.size());
-            if (fullargs.size() <= Constants.JDBC_IN_LIMIT) {
+            if (fullargs.size() <= JdbcConstants.JDBC_IN_LIMIT) {
                 doQueryBatch(fullargs,results);
             } else {
                 int count = 0;
-                ArrayList<A> tmpList = new ArrayList<A>(Constants.JDBC_IN_LIMIT);
+                ArrayList<A> tmpList = new ArrayList<A>(JdbcConstants.JDBC_IN_LIMIT);
                 for (A i : fullargs) {
                     tmpList.add(i);
                     count++;
-                    if (count >= Constants.JDBC_IN_LIMIT) {
+                    if (count >= JdbcConstants.JDBC_IN_LIMIT) {
                         doQueryBatch(tmpList,results);
                         count = 0;
                         tmpList.clear();

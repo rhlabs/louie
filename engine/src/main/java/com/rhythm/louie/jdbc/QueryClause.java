@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.rhythm.louie.Constants;
 import com.rhythm.louie.DAOUtils;
 
 /**
@@ -309,7 +308,7 @@ public class QueryClause {
         private int batchSize;
         private List<?> values;
         public BatchedInClause(String field, List<?> values, int sqlType) {
-            this(field,values,sqlType,Constants.JDBC_IN_LIMIT);
+            this(field,values,sqlType,JdbcConstants.JDBC_IN_LIMIT);
         }
         public BatchedInClause(String field, List<?> values, int sqlType, int batchSize) {
             super(field+" IN ", values, sqlType);

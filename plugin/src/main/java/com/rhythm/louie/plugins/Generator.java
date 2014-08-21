@@ -10,12 +10,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.Constants;
 import com.rhythm.louie.process.Disabled;
@@ -37,7 +36,7 @@ public class Generator {
     private static final String PERL_CLIENT_MODULE = "Client.pm";
     private static final String PYTHON_CLIENT_MODULE = "client.py";
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String host = "localhost";
         String gateway = Constants.DEFAULT_GATEWAY;
         String prefix = null;
@@ -54,7 +53,13 @@ public class Generator {
         }
         
         System.out.println("Find classes: "+prefix);
-        List<Class<?>> services = Classes.getRecursiveTypesAnnotatedWith(prefix, ServiceHandler.class);
+        List<Class<?>> services;
+        try {
+            services = Classes.getRecursiveTypesAnnotatedWith(prefix, ServiceHandler.class);
+        } catch (IOException e) {
+            LoggerFactory.getLogger(Generator.class).error("Error Finding Service Handlers", e);
+            return;
+        }
         
         for (Class<?> service : services) {
             List<MethodInfo> perlMethods = new ArrayList<MethodInfo>();
@@ -71,7 +76,7 @@ public class Generator {
                     }
                 }
             } catch (Exception e) {
-                Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, e);
+                LoggerFactory.getLogger(Generator.class).error("Error Processing Service Methods", e);
             }
             
             // Perl
@@ -80,7 +85,7 @@ public class Generator {
                 ServiceInfo info = new ServiceInfo(service, host, gateway, perlMethods);
                 generatePerl(info);
             } catch (Exception e) {
-                Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, e);
+                LoggerFactory.getLogger(Generator.class).error("Error Generating Perl Clients", e);
             }
             
             // Python
@@ -89,7 +94,7 @@ public class Generator {
                 ServiceInfo info = new ServiceInfo(service, host, gateway, pythonMethods);
                 generatePython(info);
             } catch (Exception e) {
-                Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, e);
+                LoggerFactory.getLogger(Generator.class).error("Error Generating Python Clients", e);
             }
         }
     }

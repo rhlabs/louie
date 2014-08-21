@@ -94,7 +94,7 @@ public class ServiceManager {
                 + "\n********************************************************\n"
                 + "{} : {}",
                 versionInfo,
-                Constants.HOST,Constants.HOSTDOMAIN);
+                LocalConstants.HOST,LocalConstants.HOSTDOMAIN);
         init = true;
          
         Identity.registerLouieIdentity();
@@ -207,7 +207,7 @@ public class ServiceManager {
         Properties props = new Properties();
         InputStream in = null;
         try {
-            File file = new File(context.getRealPath(dir + propFile+"."+Constants.HOST));
+            File file = new File(context.getRealPath(dir + propFile+"."+LocalConstants.HOST));
             if (!file.exists()) {
                 file = new File(context.getRealPath(dir + propFile));
             }

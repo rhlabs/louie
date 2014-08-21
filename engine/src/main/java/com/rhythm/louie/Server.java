@@ -173,7 +173,7 @@ public class Server {
                     sb.append(" (SSL)");
                 }
                 sb.append("\n");
-                if (server.getIp().equals(Constants.IP)) {
+                if (server.getIp().equals(LocalConstants.IP)) {
                     Server.LOCAL = server;
                 }
             }
@@ -186,7 +186,7 @@ public class Server {
             
             if (Server.LOCAL==UNKNOWN) {
                 LoggerFactory.getLogger(Server.class)
-                        .error("This Server: {} is UNKNOWN! Disabling all Services!", Constants.HOSTDOMAIN);
+                        .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
             }
         }
     }

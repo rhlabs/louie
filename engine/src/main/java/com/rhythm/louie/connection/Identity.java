@@ -9,7 +9,7 @@ package com.rhythm.louie.connection;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 
-import com.rhythm.louie.Constants;
+import com.rhythm.louie.LocalConstants;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
 
@@ -103,7 +103,7 @@ public class Identity {
         return defaultIdentity()
                 .setLanguage("LoUIE")
                 .setLanguageVersion("")
-                .setProgram("LoUIE/"+Constants.HOST)
+                .setProgram("LoUIE/"+LocalConstants.HOST)
                 .setUser("LoUIE")
                 .build();
     }

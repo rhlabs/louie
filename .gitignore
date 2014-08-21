@@ -1,6 +1,5 @@
 /engine/target/
 /processor/target/
-/service/target/
-/server/target/
+/plugin/target/
 /target/
 *~
