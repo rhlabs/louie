@@ -17,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.Disabled;
 import com.rhythm.louie.process.Grouping;
 import com.rhythm.louie.process.Private;
@@ -62,7 +63,12 @@ public class MethodInfo {
         Elements elems = processingEnv.getElementUtils();
         javaDoc = elems.getDocComment(method);
         if (javaDoc == null) {
-            javaDoc = "No Docs";
+            CommandDescriptor cmdDesc = method.getAnnotation(CommandDescriptor.class);
+            if (cmdDesc!=null && !cmdDesc.description().isEmpty()) {
+                javaDoc = cmdDesc.description();
+            } else {
+                javaDoc = "No Docs";
+            }
         }
         
         TypeMirror returnType = method.getReturnType();
@@ -120,12 +126,23 @@ public class MethodInfo {
         return TypeUtils.convertToPB(method.getReturnType().toString());
     }
     
+    public String getClientPbReturnType() {
+        String pbReturnType = TypeUtils.convertToPB(method.getReturnType().toString());
+        if (pbReturnType.equals(method.getReturnType().toString()) && returnsList()) {
+            if (!pbReturnType.startsWith("java.util.List")) {
+                return pbReturnType.replaceFirst(".*<(.*)>", "java.util.List<$1>");
+            }
+        }
+        return pbReturnType;
+    }
+    
     public boolean returnsList() {
         return returnsCollection;
     }
     
     public boolean returnsPbList() {
-        return returnsCollection && getPbReturnType().startsWith("java.util.List");
+        // TODO not really bullet proof here... but gets the job done
+        return returnsCollection && getPbReturnType().matches(".*<(.*)>");
     }
     
     public TypeMirror getBaseReturnType() {

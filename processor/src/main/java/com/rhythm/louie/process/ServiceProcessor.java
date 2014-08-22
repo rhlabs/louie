@@ -22,7 +22,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -157,10 +156,7 @@ public class ServiceProcessor extends AbstractProcessor {
                         throw new Exception("Argument is a reserved word!");
                     }
                     
-//                    TypeElement argcl = (TypeElement) types.asElement(param.asType());
-//                    String[] paramParts = argcl.getQualifiedName().toString().split("\\.");
-//                    params.append(paramParts[paramParts.length-1]);
-                    
+                    params.append(abbreviatedName(param.asType()));
                     if (!isValidType(types, param.asType())) {
                         throw new Exception("Argument :"+param.asType()+" is not a valid type!  Must be a GeneratedMessage or be a supported dataType");
                     }
@@ -186,7 +182,7 @@ public class ServiceProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(
                         Diagnostic.Kind.ERROR,
                         "Error Processing Method: " + e.getSimpleName().toString() + "\n"
-                        + exc.getMessage(), cl);
+                        + exc.getMessage(), e);
             }
         }
         for (Map.Entry<String, List<String>> method : methods.entrySet()) {
@@ -206,6 +202,23 @@ public class ServiceProcessor extends AbstractProcessor {
         }
         
         return info;
+    }
+    
+    private String abbreviatedName(TypeMirror type) {
+        String name = type.toString();
+        
+        String typeArgs = name.replaceFirst(".*<(.*)>", "$1");
+        if (name.equals(typeArgs)) {
+            typeArgs = "";
+        } else {
+            name = name.replaceFirst("(.*)<.*>", "$1");
+        }
+        name = name.replaceFirst(".*\\.(.*)", "$1");
+        
+        if (!typeArgs.isEmpty()) {
+            name+="<"+typeArgs.replaceFirst(".*\\.(.*)","$1")+">";
+        }
+        return name;
     }
     
     public boolean isValidType(Types types, TypeMirror type) {

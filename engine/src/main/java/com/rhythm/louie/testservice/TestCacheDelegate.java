@@ -13,19 +13,22 @@ import com.rhythm.louie.jms.AnnotatedMessageHandler;
 import com.rhythm.louie.jms.MessageAction;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageOperation;
+
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.command.CacheLayer;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
  * @author eyasukoc
  */
-public class TestCacheDelegate implements CacheLayer, TestClient, Delegate<TestClient> {
+public class TestCacheDelegate implements CacheLayer, TestService, Delegate<TestService> {
     private final String SERVICE_NAME = "test";
-    private TestClient delegate;
+    private TestService delegate;
     private final MessageHandler msgHandler;
     
     public TestCacheDelegate() {
@@ -49,12 +52,12 @@ public class TestCacheDelegate implements CacheLayer, TestClient, Delegate<TestC
     public void shutdown() throws Exception {}
 
     @Override
-    public void setDelegate(TestClient delegate) {
+    public void setDelegate(TestService delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public TestClient getDelegate() {
+    public TestService getDelegate() {
         return delegate;
     }
 
@@ -88,6 +91,16 @@ public class TestCacheDelegate implements CacheLayer, TestClient, Delegate<TestC
         MessageUpdate.getInstance().sendUpdate(SERVICE_NAME, MessageAction.UPDATE, StringPB.newBuilder().setValue(message).build());
         return "Test Service CacheDelegate received: " + message;
     }
+
+    @Override
+    public Map<String, String> mapTest() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Set<String> setTest() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
     public class TestServiceMessageHandler extends AnnotatedMessageHandler {
         
@@ -103,8 +116,5 @@ public class TestCacheDelegate implements CacheLayer, TestClient, Delegate<TestC
                 System.out.println("Test Service MessageHandler received UNKNOWN: " + received);
             }
         }
-        
     }
-    
-    
 }
