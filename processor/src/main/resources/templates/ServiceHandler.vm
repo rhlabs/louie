@@ -63,7 +63,7 @@ public class ${className} extends AnnotatedService implements Delegate<${info.se
 #if ($method.isClientAccess()) 
     ${method.getServiceCallString("    ")}
     public ${method.pbReturnType} ${method.name}(${method.pbParamString})${method.throwsClause} {
-        ${method.returnType} pb = delegate.${method.name}(${method.pbToArgString});
+        ${method.returnType} pb = this.delegate.${method.name}(${method.pbToArgString});
         return ${method.getReturnBuilderCode("pb")};
     }
 #end

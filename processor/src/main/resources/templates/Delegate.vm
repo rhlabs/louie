@@ -27,7 +27,7 @@ public class ${className} implements ${info.serviceClassName}, Delegate<${info.s
 #end
     @Override
     public ${method.returnType} ${method.name}(${method.paramString})${method.throwsClause} {
-        return delegate.${method.name}(${method.paramNameString});
+        return this.delegate.${method.name}(${method.paramNameString});
     }
 #end
 }

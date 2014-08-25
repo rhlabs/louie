@@ -25,7 +25,7 @@ public class ${className} implements ${info.serviceClassName} {
     @Override
     public ${method.returnType} ${method.name}(${method.paramString})${method.throwsClause} {
 #if ($method.isClientAccess()) 
-        return remoteClient.${method.name}(${method.paramNameString});
+        return this.remoteClient.${method.name}(${method.paramNameString});
 #else
         throw new UnsupportedOperationException("This method is Private and cannot be executed on a remote instance");
 #end

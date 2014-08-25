@@ -23,7 +23,7 @@ public class ${className} implements ${baseName}Client {
 #end
     @Override
     public ${method.clientReturnType} ${method.name}(${method.paramString})${method.throwsClause} {
-        return service.${method.name}(${method.paramNameString});
+        return this.service.${method.name}(${method.paramNameString});
     }
 #end
 #end
