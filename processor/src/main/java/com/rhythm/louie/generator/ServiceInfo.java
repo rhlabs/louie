@@ -36,17 +36,22 @@ public class ServiceInfo {
     
     @SuppressWarnings("unchecked")
     public ServiceInfo(ProcessingEnvironment processingEnv, TypeElement cl) throws Exception {
-        
-        this.inputFile=cl.getQualifiedName().toString().replaceAll("\\.", "\\/")+".java";
-        this.baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service", "$1");
-        this.packageDir = inputFile.replaceAll("(.*)/.*\\.java", "$1");
-        this.packageName = packageDir.replaceAll("\\/", "\\.");
-        this.cl = cl;
         this.processingEnv = processingEnv;
+        this.cl = cl;
+        
+        inputFile=cl.getQualifiedName().toString().replaceAll("\\.", "\\/")+".java";
+        packageDir = inputFile.replaceAll("(.*)/.*\\.java", "$1");
+        packageName = packageDir.replaceAll("\\/", "\\.");
         
         service = cl.getAnnotation(ServiceFacade.class);
         
-        serviceName = !service.name().isEmpty()?service.name():baseName.toLowerCase();
+        if (service.name().isEmpty()) {
+            baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service", "$1");
+            serviceName = baseName.toLowerCase();
+        } else {
+            serviceName = service.name();
+            baseName = Character.toUpperCase(serviceName.charAt(0)) + serviceName.substring(1);
+        }
     }
     
     public void addMethod(MethodInfo meth) {

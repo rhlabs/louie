@@ -38,6 +38,7 @@ public class Generator {
         processTemplate(info,"ServiceHandler.vm",info.getBaseName()+"ServiceHandler");
         processTemplate(info,"Delegate.vm",info.getBaseName()+"DelegateAdaptor");
         processTemplate(info,"RemoteService.vm",info.getBaseName()+"RemoteService");
+        processTemplate(info,"LocalClient.vm",info.getBaseName()+"LocalClient");
         
         if (info.getServiceFacade()!=null && info.getServiceFacade().factory()) {
             processTemplate(info,"ServiceFactory.vm",info.getBaseName()+"ServiceFactory");

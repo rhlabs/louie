@@ -1,0 +1,30 @@
+/*** GENERATED FROM ${info.inputFile} - DO NOT EDIT  ***/
+
+/*
+ * ${className}.java
+ */
+package ${info.packageName};
+
+public class ${className} implements ${baseName}Client {
+    private final ${info.serviceClassName} service;
+
+    public ${className}(${info.serviceClassName} service) {
+        this.service = service;
+    }
+
+    public ${info.serviceClassName} getService() {
+        return service;
+    }
+#foreach($method in $info.methodInfos)
+#if ($method.isClientAccess()) 
+
+#if ( $method.isDeprecated() )
+    @Deprecated
+#end
+    @Override
+    public ${method.clientReturnType} ${method.name}(${method.paramString})${method.throwsClause} {
+        return service.${method.name}(${method.paramNameString});
+    }
+#end
+#end
+}
