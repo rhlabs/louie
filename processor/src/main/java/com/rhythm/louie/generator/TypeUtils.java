@@ -28,13 +28,9 @@ public class TypeUtils {
         typeMap.put(DATATYPE_PREFIX+"StringPB","String");
         typeMap.put(DATATYPE_PREFIX+"StringListPB",listOf("String"));
         
-        typeMap.put(DATATYPE_PREFIX+"UIntPB","Integer");
-        typeMap.put(DATATYPE_PREFIX+"UIntListPB",listOf("Integer"));
         typeMap.put(DATATYPE_PREFIX+"IntPB","Integer");
         typeMap.put(DATATYPE_PREFIX+"IntListPB",listOf("Integer"));
         
-        typeMap.put(DATATYPE_PREFIX+"ULongPB","Long");
-        typeMap.put(DATATYPE_PREFIX+"ULongListPB",listOf("Long"));
         typeMap.put(DATATYPE_PREFIX+"LongPB","Long");
         typeMap.put(DATATYPE_PREFIX+"LongListPB",listOf("Long"));
         
@@ -58,8 +54,8 @@ public class TypeUtils {
             pbMap.put(entry.getValue(),entry.getKey());
         }
         
-        pbMap.put("Integer", DATATYPE_PREFIX+"UIntPB");
-        pbMap.put(listOf("Integer"), DATATYPE_PREFIX+"UIntListPB");
+        pbMap.put("Integer", DATATYPE_PREFIX+"IntPB");
+        pbMap.put(listOf("Integer"), DATATYPE_PREFIX+"IntListPB");
         
         pbMap.put("Long", DATATYPE_PREFIX+"LongPB");
         pbMap.put(listOf("Long"),DATATYPE_PREFIX+"LongListPB");
@@ -120,13 +116,9 @@ public class TypeUtils {
         pbtypeMap.put(DATATYPE_PREFIX+"StringPB","STRING");
         pbtypeMap.put(DATATYPE_PREFIX+"StringListPB","STRING_LIST");
         
-        pbtypeMap.put(DATATYPE_PREFIX+"UIntPB","UINT");
-        pbtypeMap.put(DATATYPE_PREFIX+"UIntListPB","UINT_LIST");
         pbtypeMap.put(DATATYPE_PREFIX+"IntPB","INT");
         pbtypeMap.put(DATATYPE_PREFIX+"IntListPB","INT_LIST");
         
-        pbtypeMap.put(DATATYPE_PREFIX+"ULongPB","ULONG");
-        pbtypeMap.put(DATATYPE_PREFIX+"ULongListPB","ULONG_LIST");
         pbtypeMap.put(DATATYPE_PREFIX+"LongPB","LONG");
         pbtypeMap.put(DATATYPE_PREFIX+"LongListPB","LONG_LIST");
         

@@ -31,10 +31,7 @@ import com.rhythm.pb.DataTypeProtos.LongListPB;
 import com.rhythm.pb.DataTypeProtos.LongPB;
 import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.StringPB;
-import com.rhythm.pb.DataTypeProtos.UIntListPB;
-import com.rhythm.pb.DataTypeProtos.UIntPB;
-import com.rhythm.pb.DataTypeProtos.ULongListPB;
-import com.rhythm.pb.DataTypeProtos.ULongPB;
+
 import com.rhythm.pb.data.Data;
 import com.rhythm.pb.data.DataParser;
 import com.rhythm.pb.data.PBBuilder;
@@ -98,42 +95,6 @@ public abstract class PBType<T,M extends Message> implements DataParser<T>, PBBu
 ******* Type Implementations *********
 *************************************/    
     
-    public static final PBType<Integer,UIntPB> UINT = new UIntType();
-    private static class UIntType extends PBType<Integer,UIntPB> {
-        public UIntType() {
-            super(UIntPB.getDescriptor(),"uint");
-        }
-        
-        @Override
-        public Integer parseData(Data data) throws Exception {
-            UIntPB.Builder builder = data.merge(UIntPB.newBuilder());
-            return builder.getValue();
-        }
-        
-        @Override
-        public UIntPB build(Integer i) {
-            return UIntPB.newBuilder().setValue(i).build();
-        }
-    };
-    
-    public static final PBType<Collection<Integer>,UIntListPB> UINT_LIST = new UIntListType();
-    private static class UIntListType extends PBType<Collection<Integer>,UIntListPB> {
-        public UIntListType() {
-            super(UIntListPB.getDescriptor());
-        }
-        
-        @Override
-        public Collection<Integer> parseData(Data data) throws Exception {
-            UIntListPB.Builder builder = data.merge(UIntListPB.newBuilder());
-            return builder.getValuesList();
-        }
-        
-        @Override
-        public UIntListPB build(Collection<Integer> list) {
-            return UIntListPB.newBuilder().addAllValues(list).build();
-        }
-    };
-    
     public static final PBType<Integer,IntPB> INT = new IntType();
     private static class IntType extends PBType<Integer,IntPB> {
         public IntType() {
@@ -168,42 +129,6 @@ public abstract class PBType<T,M extends Message> implements DataParser<T>, PBBu
         @Override
         public IntListPB build(Collection<Integer> list) {
             return IntListPB.newBuilder().addAllValues(list).build();
-        }
-    };
-    
-    public static final PBType<Long,ULongPB> ULONG = new ULongType();
-    private static class ULongType extends PBType<Long,ULongPB> {
-        public ULongType() {
-            super(ULongPB.getDescriptor().getFullName(),"ulong");
-        }
-        
-        @Override
-        public Long parseData(Data data) throws Exception {
-            ULongPB.Builder builder = data.merge(ULongPB.newBuilder());
-            return builder.getValue();
-        }
-        
-        @Override
-        public ULongPB build(Long l) {
-            return ULongPB.newBuilder().setValue(l).build();
-        }
-    };
-    
-    public static final PBType<Collection<Long>,ULongListPB> ULONG_LIST = new ULongListType();
-    private static class ULongListType extends PBType<Collection<Long>,ULongListPB> {
-        public ULongListType() {
-            super(ULongListPB.getDescriptor());
-        }
-        
-        @Override
-        public List<Long> parseData(Data data) throws Exception {
-            ULongListPB.Builder builder = data.merge(ULongListPB.newBuilder());
-            return builder.getValuesList();
-        }
-        
-        @Override
-        public ULongListPB build(Collection<Long> list) {
-            return ULongListPB.newBuilder().addAllValues(list).build();
         }
     };
     
