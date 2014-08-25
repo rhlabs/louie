@@ -16,10 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.ServiceProperties;
-//import com.rhythm.louie.generator.ProcessorUtils;
-import com.rhythm.louie.process.Disabled;
-import com.rhythm.louie.process.Private;
 import com.rhythm.louie.process.ServiceCall;
+import com.rhythm.louie.process.ServiceHandler;
 
 import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
@@ -33,12 +31,10 @@ public abstract class AnnotatedService implements Service {
             
     private final Map<PBCommandType,PBCommand<?,?>> commandMap;
     private final String name;
-//    private final Map<String,StoredMethodProps> props;
     
     protected AnnotatedService(String name) {
         this.name = name;
         commandMap = new ConcurrentHashMap<PBCommandType,PBCommand<?,?>>();
-//        props = ProcessorUtils.readStoredProps(getServiceInterface());
     }
     
     @Override
@@ -55,17 +51,13 @@ public abstract class AnnotatedService implements Service {
     public void shutdown() throws Exception {}
     
     private void processClass(Class<?> cl) {
-        //if (cl.isAnnotationPresent(ServiceFacade.class)) {
+        if (cl.getAnnotation(ServiceHandler.class)!=null) {
             getCommandsForClass(cl);
-       // }
+        }
         
-//        for (Class<?> iface : cl.getInterfaces()) {
-//            processClass(iface);
-//        }
-//        
-//        if (cl.getSuperclass()!=Object.class) {
-//            processClass(cl.getSuperclass());
-//        }
+        if (cl.getSuperclass() != Object.class) {
+            processClass(cl.getSuperclass());
+        }
     }
     
     private void getCommandsForClass(Class<?> cl) {
@@ -75,8 +67,6 @@ public abstract class AnnotatedService implements Service {
                         && Modifier.isPublic(meth.getModifiers())
                         && meth.isAnnotationPresent(ServiceCall.class)) {
                     
-//                    String methKey = ProcessorUtils.getStoredMethodKey(meth);
-//                    StoredMethodProps methProps = props.get(methKey);
                     ReflectCommand command = new ReflectCommand(this, meth);
                     if (!commandMap.containsKey(command.getCommandType())) {
                         commandMap.put(command.getCommandType(),command);

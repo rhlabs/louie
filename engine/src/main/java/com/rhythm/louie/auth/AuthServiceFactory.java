@@ -7,6 +7,7 @@ package com.rhythm.louie.auth;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.data.Param;
@@ -71,7 +72,8 @@ public class AuthServiceFactory implements ServiceFactory {
             
             Result result = super.executeCommand(req);
 
-            // SUPER HACK
+            // Store the newly created Identity into the request object 
+            // since a createSession does not pass one in
             if (req.getRequest().getMethod().equals("createSession")) {
                 try {
                     Param param = (Param) result.getArguments().get(0);
