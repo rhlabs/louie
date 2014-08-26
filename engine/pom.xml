@@ -14,14 +14,13 @@
     <properties>
         <skipTests>true</skipTests>
         <gen.cpp>false</gen.cpp>
-        <gen.perl>false</gen.perl>
+        <gen.python>false</gen.python>
     </properties>
   
     <profiles>
         <profile>
             <id>all</id>
             <properties>
-                <gen.python>true</gen.python>
                 <gen.cpp>false</gen.cpp>
                 <gen.python>false</gen.python>
             </properties>

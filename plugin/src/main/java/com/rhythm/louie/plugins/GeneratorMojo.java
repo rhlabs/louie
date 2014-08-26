@@ -49,19 +49,19 @@ public class GeneratorMojo extends AbstractMojo{
      * A list of package prefixes to look for
      * @parameter
      */
-    private List prefixes;
+    private List<String> prefixes;
     
     /**
      * A list of complete PACKAGES to blacklist (not just some prefix)
      * @parameter
      */
-    private List blacklist;
+    private List<String> blacklist;
     
     /**
      * A list of fully qualified CLASSES to whitelist
      * @parameter
      */
-    private List whitelist;
+    private List<String> whitelist;
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
