@@ -1,5 +1,6 @@
 /engine/target/
 /processor/target/
 /plugin/target/
+/activemq-adapter/target/
 /target/
 *~
