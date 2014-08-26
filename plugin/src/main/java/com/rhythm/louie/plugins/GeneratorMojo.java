@@ -63,6 +63,7 @@ public class GeneratorMojo extends AbstractMojo{
      */
     private List<String> whitelist;
     
+    @SuppressWarnings("unchecked")
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Executing LoUIE Service Client Generator");
