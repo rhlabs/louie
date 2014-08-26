@@ -21,8 +21,8 @@
         <profile>
             <id>all</id>
             <properties>
-                <gen.cpp>false</gen.cpp>
-                <gen.python>false</gen.python>
+                <gen.cpp>true</gen.cpp>
+                <gen.python>true</gen.python>
             </properties>
         </profile>
     </profiles>
