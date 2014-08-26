@@ -4,8 +4,9 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.jms;
+package com.rhythm.louie.activemq.adapter;
 
+import com.rhythm.louie.jms.JmsAdapter;
 import java.util.Map;
 import javax.jms.QueueConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;

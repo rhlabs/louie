@@ -12,14 +12,21 @@
     <name>LoUIE</name>
       
     <properties>
-        <protobuf.home>/opt/randh/protobuf-2.4.0a</protobuf.home>
-        <proto.src>${basedir}/src/main/resources</proto.src>
-        <proto.gen>${basedir}/target/generated-sources/protobuf</proto.gen>
-        <java.pbdir>${proto.gen}-java</java.pbdir>
-        <python.pbdir>${proto.gen}-python</python.pbdir>
-        <cpp.pbdir>${proto.gen}-cpp</cpp.pbdir>
         <skipTests>true</skipTests>
+        <gen.cpp>false</gen.cpp>
+        <gen.perl>false</gen.perl>
     </properties>
+  
+    <profiles>
+        <profile>
+            <id>all</id>
+            <properties>
+                <gen.python>true</gen.python>
+                <gen.cpp>false</gen.cpp>
+                <gen.python>false</gen.python>
+            </properties>
+        </profile>
+    </profiles>
   
     <build>
         <resources>
@@ -38,6 +45,10 @@
                 <groupId>com.rhythm.louie</groupId>
                 <artifactId>louie-maven-plugin</artifactId>
                 <version>${project.version}</version>
+                <configuration>
+                    <pythongen>${gen.python}</pythongen>
+                    <cppgen>${gen.cpp}</cppgen>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -126,11 +137,6 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-client</artifactId>
-            <version>5.9.0</version>
         </dependency>
         <dependency>
             <groupId>javax.ejb</groupId>

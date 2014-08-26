@@ -69,16 +69,15 @@ public class MessageManager {
     
     private static void loadJMSAdapter() {
         String adapterClass = ServiceProperties.getServiceProperties("louie").getMessageAdapter();
-        if (adapterClass != null) {
-            try {
-                jmsAdapter = (JmsAdapter) Class.forName(adapterClass).newInstance();
-            } catch (ClassNotFoundException e) {} catch (InstantiationException ex) {
-                LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
-            } catch (IllegalAccessException ex) {
-                LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
-            }
-        } else {
-            jmsAdapter = new ActiveMQAdapter();
+        if (adapterClass == null) {
+            adapterClass = "com.rhythm.louie.activemq.adapter.ActiveMQAdapter";
+        }
+        try {
+            jmsAdapter = (JmsAdapter) Class.forName(adapterClass).newInstance();
+        } catch (ClassNotFoundException e) {} catch (InstantiationException ex) {
+            LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
+        } catch (IllegalAccessException ex) {
+            LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
         }
         ServiceProperties props = ServiceProperties.getServiceProperties("messaging");
         Map<String,String> configHash = new HashMap<String,String>();

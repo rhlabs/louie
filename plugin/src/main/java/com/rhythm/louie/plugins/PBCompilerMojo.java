@@ -19,73 +19,91 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Configurable execution of two different Protocol Buffer compilers.
+ * Configurable execution of the Protocol Buffer compiler.
  * @author eyasukoc
+ * @goal pbcompiler
+ * @phase process-resources
  * 
  */
-@Mojo(name = "pbcompiler", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
+
 public class PBCompilerMojo extends AbstractMojo{
     /**
       * The current project representation.
+      * @parameter default-value="${project}"
+      * @required
+      * @read-only
       */
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
-     
     /**
      * The base directory for the project
+     * @parameter
+     * property="basedirectory"
+     * default-value="${basedir}"
      */
-    @Parameter(property = "pbcompiler.basedirectory", defaultValue="${basedir}")
     private String basedirectory;
     /**
      * The base build directory for the project
+     * @parameter
+     * property="builddirectory"
+     * default-value="${project.build.directory}"
      */
-    @Parameter(property = "pbcompiler.builddirectory", defaultValue="${project.build.directory}")
     private String builddirectory;
     /**
      * The Google Protocol Buffer compiler
+     * @parameter
+     * property="compiler"
+     * default-value="/opt/randh/protobuf-2.4.0a/bin/protoc"
      */
-    @Parameter(property = "pbcompiler.compiler", defaultValue = "/opt/randh/protobuf-2.4.0a/bin/protoc")
     private String compiler;
     /**
      * The Google Protocol Buffer lib (include) folder
+     * @parameter
+     * property="compilerlibs"
+     * default-value="/opt/randh/protobuf-2.4.0a/include"
      */
-    @Parameter(property = "pbcompiler.compilerlibs", defaultValue = "/opt/randh/protobuf-2.4.0a/include")
     private String compilerlibs;
     /**
      * The source directory within which we look for .proto files (relative to basedir)
+     * @parameter
+     * property="protosrc"
+     * default-value="src/main/resources"
      */
-    @Parameter(property = "pbcompiler.protosrc", defaultValue = "src/main/resources")
     private String protosrc;
     /**
      * Java generated PB output folder (relative to basedir)
+     * @parameter
+     * property="javaPbdir"
+     * default-value="target/generated-sources/protobuf-java"
      */
-    @Parameter(property = "pbcompiler.javaPbdir", defaultValue = "target/generated-sources/protobuf-java")
     private String javaPbdir;
     /**
      * Python generated PB output folder (relative to basedir)
+     * @parameter
+     * property="pythonPbdir"
+     * default-value="target/generated-sources/protobuf-python"
      */
-    @Parameter(property = "pbcompiler.pythonPbdir", defaultValue = "target/generated-sources/protobuf-python")
     private String pythonPbdir;
     /**
      * C++ generated PB output folder (relative to basedir)
+     * @parameter
+     * property="cppPbdir"
+     * default-value="target/generated-sources/protobuf-cpp"
      */
-    @Parameter(property = "pbcompiler.cppPbdir", defaultValue = "target/generated-sources/protobuf-cpp")
     private String cppPbdir;
     /**
      * Flag to enable or disable generation of Python PBs (default is false)
+     * @parameter
+     * property="pythongen"
      */
-    @Parameter(property = "pbcompiler.pythongen")
     private boolean pythongen;
     /**
      * Flag to enable or disable generation of C++ PBs (default is false)
+     * @parameter
+     * property="cppgen"
      */
-    @Parameter(property = "pbcompiler.cppgen")
     private boolean cppgen;
     
     // A list of compilers in possible linux locations
@@ -95,7 +113,6 @@ public class PBCompilerMojo extends AbstractMojo{
     
     @Override
     public void execute() throws MojoExecutionException {
-                
         //adjust directories according to basedir
         javaPbdir = basedirectory+"/"+javaPbdir;
         pythonPbdir = (pythongen) ? basedirectory+"/"+pythonPbdir : "" ;
@@ -134,7 +151,11 @@ public class PBCompilerMojo extends AbstractMojo{
         args.add(compilerF.toString());                                         //configurable protoc
         args.add("--proto_path="+basedirectory+"/"+protosrc);
         args.add("--proto_path="+libmarker);                                    //configurable libs
-        args.add("--proto_path="+builddirectory+"/maven-shared-archive-resources");
+        String archivePath = builddirectory+"/maven-shared-archive-resources";
+        File sharedArchive = new File(archivePath);
+        if (sharedArchive.exists()) {
+            args.add("--proto_path="+archivePath);
+        }
         args.add("--java_out="+javaPbdir);
         if (pythongen) args.add("--python_out="+pythonPbdir);
         if (cppgen) args.add("--cpp_out="+cppPbdir);

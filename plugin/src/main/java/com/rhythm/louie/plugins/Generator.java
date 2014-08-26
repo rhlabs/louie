@@ -1,4 +1,4 @@
-/*
+/*  
  * Generator.java
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
@@ -23,6 +23,7 @@ import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
 
 import com.rhythm.util.Classes;
+import java.net.URLClassLoader;
 
 /**
  *
@@ -39,7 +40,7 @@ public class Generator {
     public static void main(String[] args) {
         String host = "localhost";
         String gateway = Constants.DEFAULT_GATEWAY;
-        String prefix = null;
+        List<String> prefix = new ArrayList<String>();
         
         if (args.length>0 && args[0] != null) {
             host = args[0];
@@ -49,18 +50,37 @@ public class Generator {
         }
         
         if (args.length>2 && args[2] != null) {
-            prefix = args[2];
+            prefix.add(args[2]);
         }
+        exec(host,gateway,prefix,null,null);
+
+    }
+    
+    public static void exec(String host, String gateway, List<String> prefix, List<String> whitelist, List<String> blacklist) {
+//        if (blacklist != null) {
+//            for (String bl : blacklist) {
+//                System.out.println("Bl contains: " + bl);
+//            }
+//        } else {
+//            System.out.println("Blacklist null");
+//        }
+//        
+//        if (whitelist != null) {
+//            for (String bl : whitelist) {
+//                System.out.println("wl contains: " + bl);
+//            }
+//        } else {
+//            System.out.println("Whitelist null");
+//        }
         
-        System.out.println("Find classes: "+prefix);
         List<Class<?>> services;
+        
         try {
-            services = Classes.getRecursiveTypesAnnotatedWith(prefix, ServiceHandler.class);
+            services = Classes.getAnnotatedSpecialized(prefix, ServiceHandler.class, whitelist, blacklist);
         } catch (IOException e) {
             LoggerFactory.getLogger(Generator.class).error("Error Finding Service Handlers", e);
             return;
         }
-        
         for (Class<?> service : services) {
             List<MethodInfo> perlMethods = new ArrayList<MethodInfo>();
             List<MethodInfo> pythonMethods = new ArrayList<MethodInfo>();
