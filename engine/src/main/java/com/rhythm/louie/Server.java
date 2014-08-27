@@ -11,6 +11,8 @@ import java.util.*;
 
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.pb.louie.LouieProtos.ServerPB;
+
 /**
  *
  * @author cjohnson
@@ -37,9 +39,12 @@ public class Server {
             Collections.synchronizedMap(new HashMap<ServerKey,Server>());
     private static final Map<String,Server> SERVERS = 
             Collections.synchronizedMap(new HashMap<String,Server>());
-     private static final Map<String,Server> SERVERS_BY_LOCATION = 
+    private static final Map<String,Server> SERVERS_BY_LOCATION = 
             Collections.synchronizedMap(new HashMap<String,Server>());
+    
     private static List<Server> ALL_SERVERS = Collections.emptyList();
+    private static List<ServerPB> ALL_SERVER_PBS = Collections.emptyList();
+    private static List<String> SERVER_LOCATIONS = Collections.emptyList();
     
     private final String name;
     private String timezone;
@@ -54,6 +59,8 @@ public class Server {
     private String sslGateway;
     private String ip;
     private boolean router;
+    
+    private ServerPB pb;
     
     public static void processServerProperties(Properties props) {
         synchronized(SERVERS) {
@@ -162,6 +169,19 @@ public class Server {
             }
             
             ALL_SERVERS = Collections.unmodifiableList(new ArrayList<Server>(SERVERS.values()));
+            List<ServerPB> serverPBs = new ArrayList<ServerPB>(ALL_SERVERS.size());
+            for (Server server : Server.allServers()) {
+                server.pb = ServerPB.newBuilder()
+                        .setName(server.getName())
+                        .setHost(server.getHostName())
+                        .setLocation(server.getLocation())
+                        .setTimezone(server.getTimezone())
+                        .setDisplay(server.getDisplay())
+                        .build();
+                serverPBs.add(server.pb);
+            }
+            ALL_SERVER_PBS = Collections.unmodifiableList(serverPBs);
+            SERVER_LOCATIONS = Collections.unmodifiableList(new ArrayList<String>(SERVERS_BY_LOCATION.keySet()));
             
             //Print
             StringBuilder sb = new StringBuilder();
@@ -230,8 +250,8 @@ public class Server {
         return SERVERS_BY_LOCATION.get(location);
     }
     
-    public static Set<String> getServerLocations() {
-        return SERVERS_BY_LOCATION.keySet();
+    public static List<String> getServerLocations() {
+        return SERVER_LOCATIONS;
     }
     
     private Server(String name) {
@@ -252,6 +272,10 @@ public class Server {
      
     public static List<Server> allServers() {
         return ALL_SERVERS;
+    }
+    
+    public static List<ServerPB> allServerPbs() {
+        return ALL_SERVER_PBS;
     }
     
     public boolean isARouter() {
@@ -312,6 +336,10 @@ public class Server {
     
     public String getSSLGateway() {
         return sslGateway;
+    }
+    
+    public ServerPB toPB() {
+        return pb;
     }
     
     public static Server getCentralAuth() {

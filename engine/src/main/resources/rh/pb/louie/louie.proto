@@ -28,3 +28,11 @@ message ArgPB {
     optional string       name   = 1;
     optional string       type   = 2;
 }
+
+message ServerPB {
+    optional string       name       = 1;
+    optional string       timezone   = 2;
+    optional string       host       = 3;
+    optional string       display    = 4;
+    optional string       location   = 5;
+}

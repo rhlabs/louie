@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rhythm.louie.process.DAO;
+import com.rhythm.louie.Server;
 
 import com.rhythm.pb.command.ArgType;
 import com.rhythm.pb.command.PBCommand;
@@ -18,6 +19,7 @@ import com.rhythm.pb.command.PBParamType;
 import com.rhythm.pb.command.Service;
 import com.rhythm.pb.louie.LouieProtos.ArgPB;
 import com.rhythm.pb.louie.LouieProtos.CommandPB;
+import com.rhythm.pb.louie.LouieProtos.ServerPB;
 import com.rhythm.pb.louie.LouieProtos.ServicePB;
 
 
@@ -77,5 +79,15 @@ public class LouieDAO implements LouieService {
             }
         }
         return builder.build();
+    }
+
+    @Override
+    public List<String> getServerLocations() throws Exception {
+        return Server.getServerLocations();
+    }
+
+    @Override
+    public List<ServerPB> getServers() throws Exception {
+        return Server.allServerPbs();
     }
 }
