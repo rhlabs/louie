@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -20,6 +21,9 @@ import com.rhythm.pb.louie.LouieProtos.ServicePB;
 
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnectionFactory;
+
+import com.rhythm.pb.louie.LouieProtos.ServerPB;
+
 import static org.junit.Assert.*;
 
 /**
@@ -93,6 +97,38 @@ public class LouieClientTest {
         assertNotNull(result);
     
         System.out.println(result);
+    }
+    
+     /**
+     * Test of getService method, of class LouieClient.
+     */
+    @Test
+    public void testGetServerLocations() throws Exception {
+        System.out.println("getServerLocations");
+   
+        List<String> result = client.getServerLocations();
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    
+        for (String location : result) {
+            System.out.println(location);
+        }
+    }
+    
+     /**
+     * Test of getService method, of class LouieClient.
+     */
+    @Test
+    public void testGetServers() throws Exception {
+        System.out.println("getServers");
+   
+        List<ServerPB> result = client.getServers();
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    
+        for (ServerPB server : result) {
+            System.out.println(server);
+        }
     }
     
 }
