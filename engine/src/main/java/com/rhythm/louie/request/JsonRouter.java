@@ -1,10 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * JsonRouter.java
+ * 
+ * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
 package com.rhythm.louie.request;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.protobuf.Message;   
@@ -40,9 +41,7 @@ import net.sf.json.JSONSerializer;
  * 
  * @author eyasukoc
  */                
-
-
-public class JsonRouter implements JsonProcess{
+public class JsonRouter implements JsonProcess {
 
     private static final String VERSION = "version";
     private static final String USER = "user";      
