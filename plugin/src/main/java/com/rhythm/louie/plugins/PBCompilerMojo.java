@@ -24,7 +24,7 @@ import org.apache.maven.project.MavenProject;
 /**
  * Configurable execution of the Protocol Buffer compiler.
  * @author eyasukoc
- * @goal pbcompiler
+ * @goal pbcompile
  * @phase process-resources
  * 
  */

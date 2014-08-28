@@ -51,7 +51,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>pbcompiler</goal>
+                            <goal>pbcompile</goal>
                         </goals>
                     </execution>
                 </executions>

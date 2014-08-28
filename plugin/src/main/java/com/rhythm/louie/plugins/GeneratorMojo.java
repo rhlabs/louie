@@ -20,7 +20,7 @@ import org.apache.maven.project.MavenProject;
 /**
  * Executes com.rhythm.louie.serviceclient.Generator.main()
  * @author eyasukoc
- * @goal generator
+ * @goal generate
  * @requiresDependencyResolution test
  */
 public class GeneratorMojo extends AbstractMojo{
