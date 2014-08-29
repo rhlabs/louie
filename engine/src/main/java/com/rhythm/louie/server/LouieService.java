@@ -10,13 +10,13 @@ import java.util.List;
 import com.rhythm.pb.louie.LouieProtos.ServicePB;
 import com.rhythm.pb.louie.LouieProtos.ServerPB;
 
-import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.Service;
 
 /**
  *
  * @author cjohnson
  */
-@ServiceFacade(factory=false)
+@Service(factory=false)
 public interface LouieService {
     public static final String SERVICE_NAME = "louie";
     

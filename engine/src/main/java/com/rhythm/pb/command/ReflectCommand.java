@@ -33,7 +33,7 @@ import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
 import com.rhythm.louie.process.Grouping;
-import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.Internal;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.Streaming;
 import com.rhythm.louie.process.Updating;
@@ -60,7 +60,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     
     private final boolean isAnUpdater;
     private final Grouping group;
-    private final boolean isPrivate;
+    private final boolean isInternal;
     private final boolean isStreaming;
     private final boolean deprecated;
     
@@ -72,7 +72,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
         serviceCall = meth.getAnnotation(ServiceCall.class);
         
         isAnUpdater = meth.isAnnotationPresent(Updating.class);
-        isPrivate = meth.isAnnotationPresent(Private.class);
+        isInternal = meth.isAnnotationPresent(Internal.class);
         isStreaming = meth.isAnnotationPresent(Streaming.class);
         deprecated = meth.isAnnotationPresent(Deprecated.class);
         
@@ -284,8 +284,8 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     }
 
     @Override
-    public boolean isPrivate() {
-        return isPrivate;
+    public boolean isInternal() {
+        return isInternal;
     }
     
     @Override

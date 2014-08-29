@@ -20,7 +20,7 @@ import javax.lang.model.util.Types;
 import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.Disabled;
 import com.rhythm.louie.process.Grouping;
-import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.Internal;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.Streaming;
 import com.rhythm.louie.process.Updating;
@@ -35,7 +35,7 @@ public class MethodInfo {
     private String javaDoc;
     
     private final boolean returnsCollection;
-    private final Private priv;
+    private final Internal internal;
     private final Deprecated deprecated;
     private final Disabled disabled;
     private final Updating updating;
@@ -53,7 +53,7 @@ public class MethodInfo {
             }
         }
         
-        priv = method.getAnnotation(Private.class);
+        internal = method.getAnnotation(Internal.class);
         disabled = method.getAnnotation(Disabled.class);
         deprecated = method.getAnnotation(Deprecated.class);
         updating = method.getAnnotation(Updating.class);
@@ -86,8 +86,8 @@ public class MethodInfo {
         }
     }
     
-    public boolean isPrivate() {
-        return priv!=null;
+    public boolean isInternal() {
+        return internal!=null;
     }
     
     public boolean isDeprecated() {
@@ -107,7 +107,7 @@ public class MethodInfo {
     }
     
     public boolean isClientAccess() {
-        return !isPrivate() && !isDisabled();
+        return !isInternal() && !isDisabled();
     }
     
     public List<ParamInfo> getParameters() {

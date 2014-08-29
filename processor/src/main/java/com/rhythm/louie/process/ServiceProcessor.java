@@ -35,7 +35,7 @@ import com.rhythm.louie.generator.TypeUtils;
  *
  * @author cjohnson
  */
-@SupportedAnnotationTypes("com.rhythm.louie.process.ServiceFacade")
+@SupportedAnnotationTypes("com.rhythm.louie.process.Service")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class ServiceProcessor extends AbstractProcessor {
     final Set<String> RESERVED = new HashSet<String>();    
@@ -73,7 +73,7 @@ public class ServiceProcessor extends AbstractProcessor {
         
         Types types = processingEnv.getTypeUtils();
         
-        for (Element e : roundEnv.getElementsAnnotatedWith(ServiceFacade.class)) {
+        for (Element e : roundEnv.getElementsAnnotatedWith(Service.class)) {
             if (e.getKind() != ElementKind.INTERFACE) {
                 processingEnv.getMessager().printMessage(
                         Diagnostic.Kind.WARNING,
@@ -122,7 +122,7 @@ public class ServiceProcessor extends AbstractProcessor {
                 StringBuilder params = new StringBuilder();
                 ExecutableElement meth = ExecutableElement.class.cast(e);
                 
-                if (e.getAnnotation(Private.class)!=null) {
+                if (e.getAnnotation(Internal.class)!=null) {
                     continue;
                 }
             

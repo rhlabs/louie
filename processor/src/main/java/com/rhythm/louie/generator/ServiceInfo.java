@@ -11,7 +11,7 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
-import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.Service;
 
 /**
  *
@@ -28,7 +28,7 @@ public class ServiceInfo {
     private final String serviceName;
     
     private final TypeElement cl;
-    private final ServiceFacade service;
+    private final Service service;
     
     ProcessingEnvironment processingEnv;
     
@@ -43,7 +43,7 @@ public class ServiceInfo {
         packageDir = inputFile.replaceAll("(.*)/.*\\.java", "$1");
         packageName = packageDir.replaceAll("\\/", "\\.");
         
-        service = cl.getAnnotation(ServiceFacade.class);
+        service = cl.getAnnotation(Service.class);
         
         if (service.name().isEmpty()) {
             baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service", "$1");
@@ -78,7 +78,7 @@ public class ServiceInfo {
         return packageDir;
     }
     
-    public ServiceFacade getServiceFacade() {
+    public Service getService() {
         return service;
     }
     

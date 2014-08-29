@@ -1,5 +1,5 @@
 /*
- * ServiceFacade.java
+ * Service.java
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ServiceFacade {
+public @interface Service {
     boolean factory() default true;
     String name() default "";
 }

@@ -15,9 +15,6 @@ import com.rhythm.louie.connection.Response;
 import com.rhythm.louie.server.LouieClientTest;
 import com.rhythm.louie.stream.Consumer;
 
-import com.rhythm.pb.DataTypeProtos.StringListPB;
-import com.rhythm.pb.DataTypeProtos.StringPB;
-import com.rhythm.pb.PBParam;
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.RoutePathPB;
 
@@ -31,12 +28,9 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.rhythm.louie.connection.Request;
 import com.rhythm.louie.stream.Consumers;
 import com.rhythm.louie.stream.SingleConsumer;
 import com.rhythm.louie.stream.StreamingConsumer;
-
-import com.rhythm.pb.RequestProtos.ResponsePB;
 
 /**
  *
@@ -49,13 +43,8 @@ public class TestServiceTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-//        client = TestClientFactory.getClient(
-//                LouieConnectionFactory.getConnection("vans256",
-//                Identity.createJUnitIdentity()));
-        
         LouieConnection conn = LouieConnectionFactory.getLocalConnection(
                         Identity.createJUnitIdentity());
-        conn.setGateway("hsm");
         
         client = TestClientFactory.getClient(conn);
     }

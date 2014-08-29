@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.rhythm.louie.auth.AuthService;
-import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.Service;
 import com.rhythm.louie.server.LouieService;
 import com.rhythm.louie.testservice.TestService;
 
@@ -30,7 +30,7 @@ public class ClassesTest {
     public void testGetTypesAnnotatedWith() throws Exception {
         System.out.println("getTypesAnnotatedWith");
         
-        List<Class<?>> cl = Classes.getTypesAnnotatedWith("com.rhythm.louie.server", ServiceFacade.class);
+        List<Class<?>> cl = Classes.getTypesAnnotatedWith("com.rhythm.louie.server", Service.class);
         
         assertEquals(cl.size(), 1);
         assertEquals(cl.get(0).getName(), LouieService.class.getName());
@@ -44,7 +44,7 @@ public class ClassesTest {
     public void testGetRecursiveTypesAnnotatedWith() throws Exception {
         System.out.println("getRecursiveTypesAnnotatedWith");
         
-        List<Class<?>> cl = Classes.getRecursiveTypesAnnotatedWith("com.rhythm", ServiceFacade.class);
+        List<Class<?>> cl = Classes.getRecursiveTypesAnnotatedWith("com.rhythm", Service.class);
         
         assertEquals(cl.size(), 3);
         assertTrue(cl.contains(LouieService.class));
@@ -61,7 +61,7 @@ public class ClassesTest {
         System.out.println("Google");
         for (int i=0;i<10;i++) {
             long start = System.nanoTime();
-            Classes.getRecursiveTypesAnnotatedWith("com.rhythm", ServiceFacade.class);
+            Classes.getRecursiveTypesAnnotatedWith("com.rhythm", Service.class);
             long time = System.nanoTime()-start;
             System.out.println(time);
         }
@@ -70,7 +70,7 @@ public class ClassesTest {
         System.out.println("Google Package");
         for (int i=0;i<10;i++) {
             long start = System.nanoTime();
-            Classes.getTypesAnnotatedWith("com.rhythm.louie.server", ServiceFacade.class);
+            Classes.getTypesAnnotatedWith("com.rhythm.louie.server", Service.class);
             long time = System.nanoTime()-start;
             System.out.println(time);
         }

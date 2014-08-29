@@ -149,7 +149,7 @@ public class InfoServlet extends HttpServlet {
             
         });
         for (PBCommand<?, ?> command : pbcommands) {
-            if (command.isPrivate()) {
+            if (command.isInternal()) {
                 continue;
             }
             StringBuilder methodHTML = new StringBuilder();

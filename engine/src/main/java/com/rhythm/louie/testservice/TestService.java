@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.rhythm.louie.process.Private;
-import com.rhythm.louie.process.ServiceFacade;
+import com.rhythm.louie.process.Internal;
+import com.rhythm.louie.process.Service;
 import com.rhythm.louie.process.Streaming;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
@@ -21,7 +21,7 @@ import com.rhythm.pb.RequestProtos.ErrorPB;
  * @author cjohnson
  */
 
-@ServiceFacade
+@Service
 public interface TestService {
     /**
      * Echoes the value back after sleeping
@@ -92,10 +92,10 @@ public interface TestService {
     public String messageTest(String message) throws Exception;
     
     
-    @Private
+    @Internal
     public Map<String,String> mapTest() throws Exception;
 
-    @Private
+    @Internal
     public Set<String> setTest() throws Exception;
     
 }

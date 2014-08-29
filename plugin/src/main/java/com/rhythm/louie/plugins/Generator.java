@@ -18,11 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.Constants;
 import com.rhythm.louie.process.Disabled;
-import com.rhythm.louie.process.Private;
+import com.rhythm.louie.process.Internal;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
 
 import com.rhythm.util.Classes;
+
 import java.net.URLClassLoader;
 
 /**
@@ -89,7 +90,7 @@ public class Generator {
                     if (!Modifier.isStatic(method.getModifiers())
                                 && Modifier.isPublic(method.getModifiers())
                                 && method.isAnnotationPresent(ServiceCall.class)
-                                && !method.isAnnotationPresent(Private.class)
+                                && !method.isAnnotationPresent(Internal.class)
                                 && !method.isAnnotationPresent(Disabled.class)) {
                         perlMethods.add(new PerlMethodInfo(method));
                         pythonMethods.add(new PythonMethodInfo(method));

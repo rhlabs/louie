@@ -28,6 +28,6 @@ public interface PBCommand<A,R extends Message> {
     public boolean isUpdate();
     public String getGroup();
     public int getGroupOrder();
-    public boolean isPrivate();
+    public boolean isInternal();
     public boolean isStreaming();
 }

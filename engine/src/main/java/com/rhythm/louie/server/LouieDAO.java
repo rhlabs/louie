@@ -57,7 +57,7 @@ public class LouieDAO implements LouieService {
                 .setName(service.getServiceName());
         
         for (PBCommand<?,?> command : service.getCommands()) {
-            if (command.isPrivate()) {
+            if (command.isInternal()) {
                 continue;
             }
             CommandPB.Builder commandBuilder = CommandPB.newBuilder()

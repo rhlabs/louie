@@ -27,7 +27,7 @@ public class ${className} implements ${info.serviceClassName} {
 #if ($method.isClientAccess()) 
         return this.remoteClient.${method.name}(${method.paramNameString});
 #else
-        throw new UnsupportedOperationException("This method is Private and cannot be executed on a remote instance");
+        throw new UnsupportedOperationException("This method is Internal and cannot be executed on a remote instance");
 #end
     }
 #end

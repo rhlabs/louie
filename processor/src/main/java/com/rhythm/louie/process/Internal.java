@@ -1,5 +1,5 @@
 /*
- * Private.java
+ * Internal.java
  * 
  * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
@@ -16,6 +16,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Private {
+public @interface Internal {
     
 }

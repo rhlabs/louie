@@ -28,7 +28,7 @@ public class Generator {
     
     public static void generate(ServiceInfo info) throws Exception {
         System.out.print(info.getInputFile());
-        if (!info.getServiceFacade().factory()) {
+        if (!info.getService().factory()) {
             System.out.print(" (NO FACTORY)");
         }
         System.out.println();
@@ -40,7 +40,7 @@ public class Generator {
         processTemplate(info,"RemoteService.vm",info.getBaseName()+"RemoteService");
         processTemplate(info,"LocalClient.vm",info.getBaseName()+"LocalClient");
         
-        if (info.getServiceFacade()!=null && info.getServiceFacade().factory()) {
+        if (info.getService()!=null && info.getService().factory()) {
             processTemplate(info,"ServiceFactory.vm",info.getBaseName()+"ServiceFactory");
         }
         processTemplate(info,"ClientFactory.vm",info.getBaseName()+"ClientFactory");
