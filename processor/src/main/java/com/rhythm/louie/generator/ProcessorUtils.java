@@ -15,8 +15,7 @@ import java.util.*;
 public class ProcessorUtils {
     public static final Set<String> IMPORT_EXCLUDES = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
-                "com.rhythm.pb.command.Service",
-                "com.rhythm.pb.command.CommandDescriptor"
+                "com.rhythm.pb.command.Service"
                 )));
     public static final Set<String> IMPORT_INCLUDES = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(

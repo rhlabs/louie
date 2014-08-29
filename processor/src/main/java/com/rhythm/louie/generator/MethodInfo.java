@@ -17,7 +17,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import com.rhythm.louie.process.CommandDescriptor;
 import com.rhythm.louie.process.Disabled;
 import com.rhythm.louie.process.Grouping;
 import com.rhythm.louie.process.Internal;
@@ -63,12 +62,7 @@ public class MethodInfo {
         Elements elems = processingEnv.getElementUtils();
         javaDoc = elems.getDocComment(method);
         if (javaDoc == null) {
-            CommandDescriptor cmdDesc = method.getAnnotation(CommandDescriptor.class);
-            if (cmdDesc!=null && !cmdDesc.description().isEmpty()) {
-                javaDoc = cmdDesc.description();
-            } else {
-                javaDoc = "No Docs";
-            }
+            javaDoc = "No Docs";
         }
         
         TypeMirror returnType = method.getReturnType();
