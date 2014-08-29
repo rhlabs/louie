@@ -24,12 +24,10 @@ import org.slf4j.LoggerFactory;
  * @author cjohnson
  */
 public class CacheManager {
-    private static net.sf.ehcache.CacheManager defaultEhcacheManager;
     
     private static final Map<String,CacheManager> cacheManagers =
             Collections.synchronizedMap(new TreeMap<String,CacheManager>());
     
-    private net.sf.ehcache.CacheManager ehCacheManager;
     private final Map<String,Cache<?,?>> caches;
     private final String managerName;
     
@@ -39,22 +37,9 @@ public class CacheManager {
     }
     
     public synchronized static void shutdown() {
-        if (defaultEhcacheManager!=null) {
-            defaultEhcacheManager.shutdown();
-        }
-        for (CacheManager manager : cacheManagers.values()) {
-            if (manager.ehCacheManager!=null && manager.ehCacheManager!=defaultEhcacheManager) {
-                manager.ehCacheManager.shutdown();
-            }
-        }
         cacheManagers.clear();
     }
-    
-    public static synchronized CacheManager createEhCacheManager(String name, URL ehConfigURL) {
-        CacheManager cm = createCacheManager(name);
-        cm.ehCacheManager =  new net.sf.ehcache.CacheManager(ehConfigURL);
-        return cm;
-    }
+
     
     public static synchronized CacheManager createCacheManager(String name) {
         if (cacheManagers.containsKey(name)) {
@@ -84,13 +69,6 @@ public class CacheManager {
     
     public static Collection<CacheManager> getCacheManagers() {
         return cacheManagers.values();
-    }
-    
-    synchronized public static net.sf.ehcache.CacheManager getDefaultEhcacheManager() {
-        if (defaultEhcacheManager == null) {
-            defaultEhcacheManager = new net.sf.ehcache.CacheManager(CacheManager.class.getResource("ehcache.xml"));
-        }
-        return defaultEhcacheManager;
     }
     
     public String getName() {
@@ -141,19 +119,6 @@ public class CacheManager {
         }
     }
 
-    public <K, V> EhCache<K, V> createEHCache(String cacheName) {
-        synchronized (caches) {
-            if (ehCacheManager == null) {
-                ehCacheManager = getDefaultEhcacheManager();
-            }
-            checkName(cacheName);
-
-            EhCache<K, V> cache = new EhCache<K, V>(cacheName, ehCacheManager);
-            caches.put(cacheName, cache);
-            return cache;
-        }
-    }
-    
     /**
      * Creates a non-expiring cache
      * 
