@@ -1,0 +1,9 @@
+# services.properties
+# 
+# Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+
+default.enable = true
+default.main = BASE 
+default.centralized = false
+default.readonly = false
+

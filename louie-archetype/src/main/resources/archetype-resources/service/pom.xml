@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>${groupId}</groupId>
+        <artifactId>${rootArtifactId}-parent</artifactId>
+        <version>${version}</version>
+    </parent>
+
+    <name>LoUIE ${service_titlecase} Services</name>
+    <artifactId>${artifactId}</artifactId>
+    <url>http://www.rhythm.com</url>
+    <packaging>jar</packaging>    
+      
+    <properties>
+        <skipTests>true</skipTests>
+        <gen.python>false</gen.python>
+        <gen.cpp>false</gen.cpp>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>all</id>
+            <properties>
+                <gen.python>true</gen.python>
+                <gen.cpp>true</gen.cpp>
+            </properties>
+        </profile>
+    </profiles>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <resourceBundles>
+                        <resourceBundle>com.rhythm.louie:louie:${louie.version}</resourceBundle>
+                    </resourceBundles>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>com.rhythm.louie</groupId>
+                <artifactId>louie-maven-plugin</artifactId>
+                <version>${louie.version}</version>
+                <configuration>
+                    <pythongen>${gen.python}</pythongen>
+                    <cppgen>${gen.cpp}</cppgen>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>pbcompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>           
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <annotationProcessors>
+                        <annotationProcessor>
+                            com.rhythm.louie.process.ServiceProcessor
+                        </annotationProcessor>
+                    </annotationProcessors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+   
+    <dependencies>
+        <dependency>
+            <groupId>com.rhythm.louie</groupId>
+            <artifactId>louie</artifactId>
+            <version>${louie.version}</version>
+        </dependency>
+    </dependencies> 
+
+</project> 

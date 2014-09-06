@@ -1,0 +1,9 @@
+# servers.properties
+# 
+# Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+
+BASE               = localhost 
+BASE.display       = Base Host 
+BASE.timezone      = America/Los_Angeles
+BASE.location      = MAIN
+

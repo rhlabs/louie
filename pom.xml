@@ -35,6 +35,7 @@
         <module>plugin</module>
         <module>engine</module>
         <module>activemq-adapter</module>
+        <module>louie-archetype</module>
     </modules>
     
     <profiles>
