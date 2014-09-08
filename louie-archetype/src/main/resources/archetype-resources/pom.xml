@@ -7,7 +7,7 @@
     <version>${version}</version>
     <packaging>pom</packaging>
 
-    <name>LoUIE ${service_titlecase} Parent</name>
+    <name>${service_titlecase} Parent</name>
     <url>http://www.rhythm.com</url>
 
     <properties>

@@ -8,7 +8,7 @@
         <version>${version}</version>
     </parent>
 
-    <name>LoUIE ${service_titlecase} Services</name>
+    <name>${service_titlecase} Services</name>
     <artifactId>${artifactId}</artifactId>
     <url>http://www.rhythm.com</url>
     <packaging>jar</packaging>    
