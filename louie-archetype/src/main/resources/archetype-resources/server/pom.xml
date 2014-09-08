@@ -57,7 +57,7 @@
                     <gateway>${louieclient.gateway}</gateway>
                     <prefixes>
                         <prefix>com.rhythm</prefix>
-                        <prefix>com.ellison</prefix>
+                        <prefix>${package}</prefix>
                     </prefixes>
                 </configuration>
                 <executions>
