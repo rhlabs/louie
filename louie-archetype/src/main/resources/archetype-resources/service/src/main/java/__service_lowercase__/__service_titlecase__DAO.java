@@ -4,7 +4,9 @@
 package ${package}.${service_lowercase};
 
 import ${package}.pb.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
+import com.rhythm.louie.process.DAO;
 
+@DAO
 public class ${service_titlecase}DAO implements ${service_titlecase}Service{
 
     @Override

@@ -7,6 +7,12 @@
 
 package ${package}.${service_lowercase};
 
+import com.rhythm.louie.connection.Identity;
+import com.rhythm.louie.connection.LouieConnection;
+import com.rhythm.louie.connection.LouieConnectionFactory;
+import com.rhythm.pb.RequestProtos.IdentityPB;
+import ${package}.pb.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,11 +22,16 @@ import static org.junit.Assert.*;
 
 public class ${service_titlecase}Test {
     
+    private static ${service_titlecase}Client client;
+
     public ${service_titlecase}Test() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        IdentityPB id = Identity.createJUnitIdentity();
+        LouieConnection connection = LouieConnectionFactory.getConnection("localhost", id);
+        client = ${service_titlecase}ClientFactory.getClient(connection);
     }
     
     @AfterClass
@@ -35,10 +46,12 @@ public class ${service_titlecase}Test {
     public void tearDown() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
+    @Test
+    public void basicTest() throws Exception{
+        String example = "Hello World!";
+        ${service_titlecase}ResponsePB response = client.basicRequest(example);
+        System.out.println(response);
+        assertNotNull(response);
+    }
     
 }
