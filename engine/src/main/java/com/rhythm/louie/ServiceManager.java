@@ -12,6 +12,7 @@ import com.rhythm.louie.auth.AuthServiceFactory;
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.email.EmailService;
+import com.rhythm.louie.jms.MessageAdapterException;
 import com.rhythm.louie.jms.MessageUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
@@ -28,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,11 +71,11 @@ public class ServiceManager {
     
     private ServiceManager() {};
     
-    public static synchronized void initialize() {
+    public static synchronized void initialize() throws MessageAdapterException {
         initialize(null);
     }
     
-    public static synchronized void initialize(ServletContext context) {
+    public static synchronized void initialize(ServletContext context) throws MessageAdapterException {
         if (init) return;
         
         Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
@@ -165,6 +165,8 @@ public class ServiceManager {
                         sb.append(" || Read-Only");
                     }
                     sb.append("\n");
+                } catch (MessageAdapterException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     sb.append(" - ERROR: ")
                             .append(ex.toString())
@@ -229,7 +231,7 @@ public class ServiceManager {
         return props;
     }
     
-    private static void initializeService(ServiceFactory factory) throws Exception {
+    private static void initializeService(ServiceFactory factory) throws Exception, MessageAdapterException {
         Service service = factory.getService();
         service.initialize();
         MessageHandler mh = service.getMessageHandler();

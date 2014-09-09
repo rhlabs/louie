@@ -30,7 +30,7 @@ public class MessageManager {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 61616;
     
-    private static JmsAdapter jmsAdapter;
+    private static JmsAdapter jmsAdapter = null;
     
     private final String host;
     private final int port;
@@ -50,7 +50,6 @@ public class MessageManager {
     public static MessageManager initializeMessageManager(String host) {
         if (mgr == null) {
             mgr = new MessageManager(host,DEFAULT_PORT);
-            loadJMSAdapter();
         }
         return mgr;
     }
@@ -58,7 +57,6 @@ public class MessageManager {
     public static MessageManager initializeMessageManager(String host,int port) {
         if (mgr == null) {
             mgr = new MessageManager(host,port);
-            loadJMSAdapter();
         }
         return mgr;
     }
@@ -67,17 +65,20 @@ public class MessageManager {
         return mgr;
     }
     
-    private static void loadJMSAdapter() {
+    private static void loadJMSAdapter() throws MessageAdapterException{
         String adapterClass = ServiceProperties.getServiceProperties("louie").getMessageAdapter();
         if (adapterClass == null) {
-            adapterClass = "com.rhythm.louie.activemq.adapter.ActiveMQAdapter";
+            throw new MessageAdapterException("A message server adapter class "
+                    + "must be specified in the service configs!");
         }
         try {
             jmsAdapter = (JmsAdapter) Class.forName(adapterClass).newInstance();
-        } catch (ClassNotFoundException e) {} catch (InstantiationException ex) {
-            LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
+        } catch (ClassNotFoundException ex) {
+            throw new MessageAdapterException(ex);
+        } catch (InstantiationException ex) {
+            throw new MessageAdapterException(ex);
         } catch (IllegalAccessException ex) {
-            LoggerFactory.getLogger(MessageUpdate.class.getName()).error(ex.toString());
+            throw new MessageAdapterException(ex);
         }
         ServiceProperties props = ServiceProperties.getServiceProperties("messaging");
         Map<String,String> configHash = new HashMap<String,String>();
@@ -103,7 +104,10 @@ public class MessageManager {
         listeners.add(new ManagedQueueListener(queueName));
     }
     
-    public void addMessageHandler(MessageHandler mh) {
+    public void addMessageHandler(MessageHandler mh) throws MessageAdapterException {
+        if (jmsAdapter == null) {
+            loadJMSAdapter();
+        }
         for(MessageProcessor processor : mh.getMessageProcessors() ) {
             addMessageProcessor(processor.getType(), processor);
         }
