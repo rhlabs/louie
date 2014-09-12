@@ -32,41 +32,31 @@ public class MessageManager {
     
     private static JmsAdapter jmsAdapter = null;
     
-    private final String host;
-    private final int port;
-    
     private final Map<String, List<MessageProcessor>> messageProcessors 
             = Collections.synchronizedMap(new HashMap<String, List<MessageProcessor>>());
     
     private final List<ManagedListener> listeners = new ArrayList<ManagedListener>();
     
-    private MessageManager(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private MessageManager() {}
+    
+    public static MessageManager getInstance() {
+        return MessageManagerHolder.INSTANCE;
+    }
+
+    private static class MessageManagerHolder {
+        private static final MessageManager INSTANCE = new MessageManager();
     }
     
-    private static MessageManager mgr;
-    
-    public static MessageManager initializeMessageManager(String host) {
-        if (mgr == null) {
-            mgr = new MessageManager(host,DEFAULT_PORT);
+    synchronized private static void loadJMSAdapterIfNeeded() throws MessageAdapterException {
+        if (jmsAdapter == null) {
+            loadJMSAdapter();
         }
-        return mgr;
     }
     
-    public static MessageManager initializeMessageManager(String host,int port) {
-        if (mgr == null) {
-            mgr = new MessageManager(host,port);
-        }
-        return mgr;
-    }
-    
-    public static MessageManager getManager() {
-        return mgr;
-    }
-    
-    private static void loadJMSAdapter() throws MessageAdapterException{
-        String adapterClass = ServiceProperties.getServiceProperties("louie").getMessageAdapter();
+    private static void loadJMSAdapter() throws MessageAdapterException {
+        ServiceProperties defaultProps = ServiceProperties.getDefaultServiceProperties();
+        
+        String adapterClass = defaultProps.getMessageAdapter();
         if (adapterClass == null) {
             throw new MessageAdapterException("A message server adapter class "
                     + "must be specified in the service configs!");
@@ -80,34 +70,35 @@ public class MessageManager {
         } catch (IllegalAccessException ex) {
             throw new MessageAdapterException(ex);
         }
-        ServiceProperties props = ServiceProperties.getServiceProperties("messaging");
+        
         Map<String,String> configHash = new HashMap<String,String>();
-        configHash.put(JmsAdapter.HOST_KEY, props.getCustomProperty("host", DEFAULT_HOST));
-        configHash.put(JmsAdapter.PORT_KEY, props.getCustomProperty("port", Integer.toString(DEFAULT_PORT)));
-        configHash.put(JmsAdapter.FAILOVER_KEY, props.getCustomProperty("failover", "true"));
+        configHash.put(JmsAdapter.HOST_KEY, defaultProps.getCustomProperty(JmsAdapter.HOST_KEY, DEFAULT_HOST));
+        configHash.put(JmsAdapter.PORT_KEY, defaultProps.getCustomProperty(JmsAdapter.PORT_KEY, Integer.toString(DEFAULT_PORT)));
+        configHash.put(JmsAdapter.FAILOVER_KEY, defaultProps.getCustomProperty(JmsAdapter.FAILOVER_KEY, "true"));
         jmsAdapter.configure(configHash);
     }
     
-    public JmsAdapter getAdapter() {
+    public static JmsAdapter getAdapter() {
         return jmsAdapter;
     }
     
-    public void listenToTopic(String topicName) {
+    public void listenToTopic(String topicName) throws MessageAdapterException {
+        loadJMSAdapterIfNeeded();
         listeners.add(new ManagedTopicListener(topicName));
     }
     
-    public void listenToTopic(String topicName,Collection<MessageType> messageTypes) {
+    public void listenToTopic(String topicName,Collection<MessageType> messageTypes) throws MessageAdapterException {
+        loadJMSAdapterIfNeeded();
         listeners.add(new ManagedTopicListener(topicName,messageTypes));
     }
     
-    public void listenToQueue(String queueName) {
+    public void listenToQueue(String queueName) throws MessageAdapterException {
+        loadJMSAdapterIfNeeded();
         listeners.add(new ManagedQueueListener(queueName));
     }
     
     public void addMessageHandler(MessageHandler mh) throws MessageAdapterException {
-        if (jmsAdapter == null) {
-            loadJMSAdapter();
-        }
+        loadJMSAdapterIfNeeded();
         for(MessageProcessor processor : mh.getMessageProcessors() ) {
             addMessageProcessor(processor.getType(), processor);
         }

@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.activemq.adapter;
+package com.rhythm.louie.activemq;
 
 import com.rhythm.louie.jms.JmsAdapter;
 import java.util.Map;
@@ -15,7 +15,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
  * Connector class for ActiveMQ
  * @author eyasukoc
  */
-public class ActiveMQAdapter implements JmsAdapter{
+public class ActiveMQAdapter implements JmsAdapter {
 
     private ActiveMQConnectionFactory amqcf;
     private String host,port;

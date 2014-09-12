@@ -6,6 +6,9 @@
 package com.rhythm.louie.jms;
 
 import java.util.Collection;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.jms.*;
 
@@ -30,12 +33,10 @@ public abstract class AbstractMessageListener implements MessageListener, Except
     private final Object CONNECT_LOCK = new Object();
     
     private Thread connectThread;
-    private Thread checkThread;
-    
-    private final JmsAdapter jmsAdapter;
+    private final ScheduledExecutorService checkService;
     
     public AbstractMessageListener() {
-        jmsAdapter = MessageManager.getManager().getAdapter();
+        checkService = Executors.newSingleThreadScheduledExecutor();
     }
 
     public abstract Destination getDestination(Session session) throws Exception;
@@ -60,8 +61,13 @@ public abstract class AbstractMessageListener implements MessageListener, Except
             @Override
             public void run() {
                 try {
-//                    jmsAdapter.configure(getBrokerUrl());
-                    QueueConnectionFactory tcf = jmsAdapter.getQueueConnectionFactory();
+                    JmsAdapter jms = MessageManager.getAdapter();
+                    if (jms == null) {
+                        LoggerFactory.getLogger(this.getClass()).error("Unable to connect to Message Server: No adapter Configured!");
+                        return;
+                    }
+                    
+                    QueueConnectionFactory tcf = jms.getQueueConnectionFactory();
 
                     connection = tcf.createConnection();
                     session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -86,35 +92,26 @@ public abstract class AbstractMessageListener implements MessageListener, Except
         });
         connectThread.start();
         
-        checkThread = new Thread(new Runnable() {
+        checkService.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
-                while(true) {
-                    try {
-                        Thread.sleep(5000);
-                        synchronized (CONNECT_LOCK) {
-                            if (connected) {
-                                break;
-                            } else {
-                                LOGGER.error("UNABLE TO CONNECT to message server");
-                            }
-                        }
-                    } catch (InterruptedException ex) {
-                        LOGGER.error("Check thread interrupted", ex);
-                        break;
+                synchronized (CONNECT_LOCK) {
+                    if (!connected) {
+                        LOGGER.error("UNABLE TO CONNECT to message server");
+                    } else {
+                        checkService.shutdown();
                     }
                 }
             }
-        });
-        checkThread.start();
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     public void stop() {
         if (connectThread!=null && connectThread.isAlive()) {
             connectThread.interrupt();
         }
-        if (checkThread!=null && checkThread.isAlive()) {
-            checkThread.interrupt();
+        if (checkService!=null) {
+            checkService.shutdownNow();
         }
         
         if (consumer != null) {

@@ -40,7 +40,6 @@ public class ServiceManager {
     private static final Map<String, Service> servicesByName =
         Collections.synchronizedMap(new TreeMap<String, Service>());
     private static boolean init = false;
-    private static MessageManager mm;
     
     private static final Set<String> reservedServices;
     private static final List<ServiceFactory> serviceFactories;
@@ -98,7 +97,7 @@ public class ServiceManager {
         init = true;
          
         Identity.registerLouieIdentity();
-
+        
          // Servers
         if(context !=null) {
             configureServers(context);
@@ -124,7 +123,6 @@ public class ServiceManager {
         }
         
         // JMS
-        mm = MessageManager.initializeMessageManager("localhost");
         try {
             MessageUpdate.getInstance().initialize();
         } catch (Exception ex) {
@@ -236,8 +234,13 @@ public class ServiceManager {
         service.initialize();
         MessageHandler mh = service.getMessageHandler();
         if (mh!=null) {
-            mm.listenToQueue("Server.current." + service.getServiceName() + "Update");
-            mm.addMessageHandler(mh);
+            try {
+                MessageManager.getInstance().listenToQueue("Server.current." + service.getServiceName() + "Update");
+                MessageManager.getInstance().addMessageHandler(mh);
+            } catch (MessageAdapterException e) {
+                LoggerFactory.getLogger(ServiceManager.class).
+                        error("Unable to listen to messages for service: "+service.getServiceName(),e);
+            }
         }
         
         servicesByName.put(service.getServiceName(), service);
@@ -246,12 +249,9 @@ public class ServiceManager {
     public static synchronized void shutdown() {
         Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
         
-        LOGGER.info("RequestFactory - Shutdown");
+        LOGGER.info("LoUIE Shutdown Initiated");
         
-        if (mm!=null) {
-            mm.shutdown();
-            mm=null;
-        }
+        MessageManager.getInstance().shutdown();
         
         for (Service service : getServices()) {
             try {
@@ -260,22 +260,15 @@ public class ServiceManager {
                 LOGGER.error("Error shutting down service",ex);
             }
         }
-        LOGGER.info("All services shutdown");
         
         MessageUpdate.getInstance().shutdown();
-        LOGGER.info("ActiveMQUpdate shutdown");
-
         TaskScheduler.getInstance().shutdown();
-        LOGGER.info("TaskScheduler shutdown");
-        
         EmailService.getInstance().shutdown();
-        LOGGER.info("EmailService shutdown");
-        
         CacheManager.shutdown();
-        LOGGER.info("CacheManager shutdown");
         
         servicesByName.clear();
-        LOGGER.info("All services cleared");
+        
+        LOGGER.info("All LoUIE Services Shutdown");
     }
 
     public static Service getService(String serviceName) throws Exception {
