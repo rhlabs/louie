@@ -1,0 +1,17 @@
+package louie;
+
+option java_package = "com.rhythm.pb";
+option java_outer_classname = "SystemProtos";
+option java_generate_equals_and_hash = true;
+
+message SystemPropertiesPB {
+    optional uint64        serverTime     = 1;
+    repeated FieldTimePB   fields         = 2;
+    optional bool          sparse         = 3 [default = false];
+}
+
+message FieldTimePB {
+    optional uint32   fieldid         = 1;
+    optional uint64   serverTime      = 2;
+}
+

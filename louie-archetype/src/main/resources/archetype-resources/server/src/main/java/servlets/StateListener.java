@@ -33,10 +33,10 @@ public class StateListener implements ServletContextListener {
             ServiceManager.addService(${service_titlecase}ServiceFactory.getInstance());
 
             try {
-                Class c = Class.forName("com.rhythm.swagr.SwagrServiceFactory");
+                Class<?> c = Class.forName("com.rhythm.swagr.SwagrServiceFactory");
                 @SuppressWarnings("unchecked")
                 Method factoryMethod = c.getDeclaredMethod("getInstance");
-                ServiceFactory swagrFactory = (ServiceFactory) factoryMethod.invoke(null,(Object[]) null);
+                ServiceFactory swagrFactory = (ServiceFactory) factoryMethod.invoke(c);
                 ServiceManager.addService(swagrFactory);
             } catch (Exception ex){
                 LoggerFactory.getLogger(StateListener.class.getName()).error("SWAGr Service was not loaded");

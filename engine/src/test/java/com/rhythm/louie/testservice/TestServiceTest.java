@@ -12,7 +12,7 @@ import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.connection.Response;
-import com.rhythm.louie.server.LouieClientTest;
+import com.rhythm.louie.server.InfoClientTest;
 import com.rhythm.louie.stream.Consumer;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
@@ -73,7 +73,7 @@ public class TestServiceTest {
                         
                         System.out.println(result);
                     } catch (Exception ex) {
-                        Logger.getLogger(LouieClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(InfoClientTest.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });

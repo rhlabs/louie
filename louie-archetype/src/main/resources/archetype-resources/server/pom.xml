@@ -11,11 +11,11 @@
     <artifactId>${artifactId}</artifactId>
     <packaging>war</packaging>
 
-    <name>${service_titlecase} Server</name>
+    <name>${rootArtifactId} Server</name>
 
     <properties>
         <louieclient.host>localhost</louieclient.host>
-        <louieclient.gateway>louie</louieclient.gateway>
+        <louieclient.gateway>${rootArtifactId}</louieclient.gateway>
     </properties>
 
     <dependencyManagement>
@@ -36,7 +36,13 @@
             <artifactId>${rootArtifactId}-service</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${rootArtifactId}-service</artifactId>
+            <version>${project.version}</version>
+            <classifier>python</classifier>
+            <type>zip</type>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -66,26 +72,56 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.rhythm.louie</groupId> 
-                <artifactId>louie-maven-plugin</artifactId>
-                <version>${louie.version}</version>
-                <configuration>
-                    <hostname>${louieclient.host}</hostname>
-                    <gateway>${louieclient.gateway}</gateway>
-                    <prefixes>
-                        <prefix>com.rhythm</prefix>
-                        <prefix>${package}</prefix>
-                    </prefixes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>     
         </plugins>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>python</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.rhythm.louie</groupId> 
+                        <artifactId>louie-maven-plugin</artifactId>
+                        <version>${louie.version}</version>
+                        <configuration>
+                            <hostname>${louieclient.host}</hostname>
+                            <gateway>${louieclient.gateway}</gateway>
+                            <prefixes>
+                                <prefix>com.rhythm</prefix>
+                                <prefix>${package}</prefix>
+                            </prefixes>
+                            <pythonpackage>${python_package}</pythonpackage>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>  
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-distribution</id>
+                                <phase>package</phase>                
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>assembly/python.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>  

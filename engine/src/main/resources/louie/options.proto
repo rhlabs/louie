@@ -1,0 +1,35 @@
+package louie;
+
+import "google/protobuf/descriptor.proto"; 
+
+option java_package = "com.rhythm.pb";
+option java_outer_classname = "Options";
+option java_generate_equals_and_hash = true;
+
+
+extend google.protobuf.FieldOptions {
+  optional sint32 pk = 5000;
+}
+
+extend google.protobuf.FieldOptions {
+  optional bool date = 5010 [default=false];
+}
+extend google.protobuf.FieldOptions {
+  optional bool datetime = 5011 [default=false];
+}
+
+extend google.protobuf.FieldOptions {
+  optional bool readonly = 5012 [default=false];
+}
+
+extend google.protobuf.MessageOptions {
+  optional bool wrapper = 5050 [default=true];
+}
+
+extend google.protobuf.EnumValueOptions {
+   optional string label = 1000;
+}
+
+extend google.protobuf.EnumValueOptions {
+    optional string description = 1001;
+}

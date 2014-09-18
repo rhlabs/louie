@@ -8,26 +8,14 @@
         <version>${version}</version>
     </parent>
 
-    <name>${service_titlecase} Services</name>
+    <name>${rootArtifactId} Services</name>
     <artifactId>${artifactId}</artifactId>
-    <url>http://www.rhythm.com</url>
     <packaging>jar</packaging>    
       
     <properties>
         <skipTests>true</skipTests>
-        <gen.python>false</gen.python>
         <gen.cpp>false</gen.cpp>
     </properties>
-
-    <profiles>
-        <profile>
-            <id>all</id>
-            <properties>
-                <gen.python>true</gen.python>
-                <gen.cpp>true</gen.cpp>
-            </properties>
-        </profile>
-    </profiles>
     
     <build>
         <resources>
@@ -64,10 +52,6 @@
                 <groupId>com.rhythm.louie</groupId>
                 <artifactId>louie-maven-plugin</artifactId>
                 <version>${louie.version}</version>
-                <configuration>
-                    <pythongen>${gen.python}</pythongen>
-                    <cppgen>${gen.cpp}</cppgen>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -99,11 +83,62 @@
         </plugins>
     </build>
    
+   <profiles>
+        <profile>
+            <id>python</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.rhythm.louie</groupId>
+                        <artifactId>louie-maven-plugin</artifactId>
+                        <version>${louie.version}</version>
+                        <configuration>
+                            <pygen>true</pygen>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>otherpb</id>
+                                <goals>
+                                    <goal>extpbcompile</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>          
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-distribution</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>assembly/python.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+   
     <dependencies>
         <dependency>
             <groupId>com.rhythm.louie</groupId>
             <artifactId>louie</artifactId>
             <version>${louie.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rhythm.louie</groupId>
+            <artifactId>louie</artifactId>
+            <version>${louie.version}</version>
+            <classifier>python</classifier>
+            <type>zip</type>
         </dependency>
     </dependencies> 
 

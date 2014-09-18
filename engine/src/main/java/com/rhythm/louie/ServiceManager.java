@@ -16,7 +16,7 @@ import com.rhythm.louie.jms.MessageAdapterException;
 import com.rhythm.louie.jms.MessageUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
-import com.rhythm.louie.server.LouieServiceFactory;
+import com.rhythm.louie.server.InfoServiceFactory;
 import com.rhythm.louie.topology.Route;
 import com.rhythm.louie.testservice.TestServiceFactory;
 
@@ -45,7 +45,7 @@ public class ServiceManager {
     private static final List<ServiceFactory> serviceFactories;
     static {
         serviceFactories = new ArrayList<ServiceFactory>();
-        serviceFactories.add(LouieServiceFactory.getInstance());
+        serviceFactories.add(InfoServiceFactory.getInstance());
         serviceFactories.add(AuthServiceFactory.getInstance());
         serviceFactories.add(TestServiceFactory.getInstance());
         

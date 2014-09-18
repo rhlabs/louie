@@ -1,3 +1,6 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <context-param>
@@ -7,11 +10,13 @@
     <!--Fix the ApplicationShutdownHook issue-->
     <context-param>
         <param-name>log4jContextName</param-name>
-        <param-value>hsm</param-value>
+        <param-value>${rootArtifactId}</param-value>
     </context-param>
+    
     <listener>
-        <listener-class>com.rhythm.hsm.server.StateListener</listener-class>
+        <listener-class>${package}.servlets.StateListener</listener-class>
     </listener>
+    
     <servlet>
         <servlet-name>PBServlet</servlet-name>
         <servlet-class>com.rhythm.louie.servlets.PBServlet</servlet-class>
@@ -32,14 +37,6 @@
         <servlet-name>ProtoServlet</servlet-name>
         <servlet-class>com.rhythm.louie.servlets.ProtoServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>HsmTransferServlet</servlet-name>
-        <servlet-class>com.rhythm.hsm.HsmTransferServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>UploadServlet</servlet-name>
-        <servlet-class>com.rhythm.hsm.UploadServlet</servlet-class>
-    </servlet>
     <servlet-mapping>
         <servlet-name>InfoServlet</servlet-name>
         <url-pattern>/info</url-pattern>
@@ -59,14 +56,6 @@
     <servlet-mapping>
         <servlet-name>ProtoServlet</servlet-name>
         <url-pattern>/proto</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>HsmTransferServlet</servlet-name>
-        <url-pattern>/transfer</url-pattern>
-    </servlet-mapping>
-     <servlet-mapping>
-        <servlet-name>UploadServlet</servlet-name>
-        <url-pattern>/upload</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

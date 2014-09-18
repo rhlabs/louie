@@ -1,9 +1,8 @@
 # servers.properties
-# 
-# Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+# A properties file to drive multi-server setups 
 
-BASE               = localhost 
-BASE.display       = Base Host 
-BASE.timezone      = America/Los_Angeles
-BASE.location      = MAIN
+#BASE               = localhost 
+#BASE.display       = Base Host 
+#BASE.timezone      = America/Los_Angeles
+#BASE.location      = MAIN
 

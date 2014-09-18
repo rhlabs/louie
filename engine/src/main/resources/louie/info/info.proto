@@ -1,0 +1,38 @@
+package louie.info;
+
+import "louie/options.proto";
+import "louie/datatype.proto";
+import "google/protobuf/descriptor.proto"; 
+
+option java_package = "com.rhythm.pb.info";
+option java_outer_classname = "InfoProtos";
+option java_generate_equals_and_hash = true;
+
+message ServicePB {
+    optional string        name       = 1;
+    repeated CommandPB     commands   = 2;
+}
+
+message CommandPB {
+    optional string       name              = 1;
+    repeated ArgPB        args              = 2;
+    optional string       returntype        = 3;
+    optional string       description       = 4;
+    optional bool         deprecated        = 5 [default = false];
+    optional bool         returnList        = 6 [default = false];
+
+    optional string       javadoc           = 10;
+}
+
+message ArgPB {
+    optional string       name   = 1;
+    optional string       type   = 2;
+}
+
+message ServerPB {
+    optional string       name       = 1;
+    optional string       timezone   = 2;
+    optional string       host       = 3;
+    optional string       display    = 4;
+    optional string       location   = 5;
+}

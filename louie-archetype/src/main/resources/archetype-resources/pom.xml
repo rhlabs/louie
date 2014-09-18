@@ -7,11 +7,10 @@
     <version>${version}</version>
     <packaging>pom</packaging>
 
-    <name>${service_titlecase} Parent</name>
-    <url>http://www.rhythm.com</url>
+    <name>${rootArtifactId} Parent</name>
 
     <properties>
-        <louie.version>1.8</louie.version>
+        <louie.version>1.9-SNAPSHOT</louie.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -37,7 +36,6 @@
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.1</version>
             </plugin>
-            
             <plugin>
                 <artifactId>maven-scm-plugin</artifactId>
                 <version>1.9</version>
@@ -59,7 +57,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        
     </build>
 
     <dependencies>

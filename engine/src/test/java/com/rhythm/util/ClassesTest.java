@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.rhythm.louie.auth.AuthService;
 import com.rhythm.louie.process.Service;
-import com.rhythm.louie.server.LouieService;
+import com.rhythm.louie.server.InfoService;
 import com.rhythm.louie.testservice.TestService;
 
 import static org.junit.Assert.*;
@@ -33,7 +33,7 @@ public class ClassesTest {
         List<Class<?>> cl = Classes.getTypesAnnotatedWith("com.rhythm.louie.server", Service.class);
         
         assertEquals(cl.size(), 1);
-        assertEquals(cl.get(0).getName(), LouieService.class.getName());
+        assertEquals(cl.get(0).getName(), InfoService.class.getName());
         
         for (Class<?> c : cl) {
             System.out.println(c.getName());
@@ -47,7 +47,7 @@ public class ClassesTest {
         List<Class<?>> cl = Classes.getRecursiveTypesAnnotatedWith("com.rhythm", Service.class);
         
         assertEquals(cl.size(), 3);
-        assertTrue(cl.contains(LouieService.class));
+        assertTrue(cl.contains(InfoService.class));
         assertTrue(cl.contains(AuthService.class));
         assertTrue(cl.contains(TestService.class));
         

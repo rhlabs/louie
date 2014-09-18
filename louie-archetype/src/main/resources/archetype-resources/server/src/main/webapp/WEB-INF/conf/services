@@ -1,9 +1,9 @@
 # services.properties
-# 
-# Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
+# A properties file to drive LoUIE service behavior
+#
 
 default.enable = true
-default.main = BASE 
-default.centralized = false
-default.readonly = false
+#default.main = BASE 
+#default.centralized = false
+#default.readonly = false
 

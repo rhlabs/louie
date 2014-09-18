@@ -11,7 +11,7 @@ public interface ${service_titlecase}Service {
 
     /**
     * An example service method which accepts a String  
-    * and returns an ${service_titlecase}ResponsePB
+    * and returns a ${service_titlecase}ResponsePB
     *
     * @param request
     * @return ${service_titlecase}ResponsePB

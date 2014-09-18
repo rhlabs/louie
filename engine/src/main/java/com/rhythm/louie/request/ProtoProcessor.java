@@ -93,7 +93,7 @@ public class ProtoProcessor implements ProtoProcess{
             RoutePB localRoute = props.createRoute(request.getService());
             for (RoutePB route : request.getRouteList()) {
                 if (route.equals(localRoute)) {
-                    throw new Exception("Route Loop Detected!");
+                    throw new Exception("Route Loop Detected! "+route.getHostIp()+"/"+route.getGateway()+" visited twice!");
                 }
             }
             

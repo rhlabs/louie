@@ -11,7 +11,7 @@ import java.util.*;
 
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.pb.louie.LouieProtos.ServerPB;
+import com.rhythm.pb.info.InfoProtos.ServerPB;
 
 /**
  *

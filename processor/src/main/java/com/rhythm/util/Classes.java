@@ -56,24 +56,18 @@ public class Classes {
                 infos.addAll(cp.getTopLevelClasses(pkg));
             }
         }
-//        System.out.println("Located " + infos.size() + " classes");
         
         for (ClassInfo info : infos) {
             if (blacklist != null && blacklist.contains(info.getPackageName())) {
                 if (whitelist != null) {
                     if (!whitelist.contains(info.getName())) {
-//                        System.out.println("Blacklist blocked " + info.getName());
                         continue; //blacklisted, but not whitelisted
-                    } else {
-//                        System.out.println("Whitelist saved " + info.getName());
                     }
                 } else {
-//                    System.out.println("Blacklist blocked " + info.getName());
                     continue;
                 }
             }
             try {
-//                System.out.println("Loading: " +info.getName());
                 Class<?> cl = info.load();
                 Annotation ann = cl.getAnnotation(annotation);
                 if (ann != null) {

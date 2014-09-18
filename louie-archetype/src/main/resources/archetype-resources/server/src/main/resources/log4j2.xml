@@ -1,0 +1,116 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $sym_esc = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="com.sun.aas.instanceRoot">target</Property>
+    </Properties>
+    
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%m%n %throwable{15}"/>
+        </Console>
+        
+        <Routing name="JdbcRouter">
+            <Routes pattern="${symbol_dollar}{ctx:DB_KEY}">
+                <Route>
+                    <RollingFile name="${symbol_dollar}{ctx:DB_KEY}" 
+                                 fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/JDBC/${symbol_dollar}{ctx:DB_KEY}.log"
+                                 filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/JDBC/${symbol_dollar}{ctx:DB_KEY}.log.%d{yyyy-MM-dd}.gz">
+                        <PatternLayout>
+                            <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p] %m%n</Pattern>
+                        </PatternLayout>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                        </Policies>
+                        <DefaultRolloverStrategy max="7"/>
+                    </RollingFile>
+                </Route>
+            </Routes>
+        </Routing>
+        
+        <RollingFile name="AuthAppender" 
+                     fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/auth.log"
+                     filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/auth-%i.log">
+            <PatternLayout>
+                <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%X{user}|%X{session}|%X{language}|%X{program}|%X{location}|%X{machine}|%X{processId}|%X{path}] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>-->
+                <SizeBasedTriggeringPolicy size="2 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="4"/>
+        </RollingFile>
+        
+        <RollingFile name="RequestAppender" 
+                     fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/request.log"
+                     filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/request.log.%d{yyyy-MM-dd}.gz">
+            <PatternLayout>
+                <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p|%X{ip}|%X{session}|%X{language}|%X{module}|%X{exectime}/%X{time}ms|%X{bytes}b|%X{rows}] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+  
+         <RollingFile name="JmsAppender" 
+                     fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/jms.log"
+                     filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/jms.log.%d{yyyy-MM-dd}.gz">
+            <PatternLayout>
+                <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+  
+    </Appenders>
+    
+    
+    <Loggers>
+        
+        <logger name="louie.request" level="debug" additivity="false">
+            <appender-ref ref="RequestAppender" />
+        </logger>
+        
+        <logger name="org.apache.activemq" level="info" additivity="false">
+            <appender-ref ref="JmsAppender" />
+        </logger>
+        
+        <logger name="jdbc.sqlonly" level="fatal" additivity="false">
+            <appender-ref ref="JdbcRouter" />
+        </logger>
+        <logger name="jdbc.sqltiming" level="info" additivity="false">
+            <appender-ref ref="JdbcRouter" />
+        </logger>
+        <logger name="jdbc.audit" level="fatal" additivity="false">
+            <appender-ref ref="JdbcRouter" />
+        </logger>
+        <logger name="jdbc.resultset" level="fatal" additivity="false">
+            <appender-ref ref="JdbcRouter" />
+        </logger>
+        <logger name="jdbc.connection" level="fatal" additivity="false">
+            <appender-ref ref="JdbcRouter" />
+        </logger>
+        <logger name="com.rhythm.swagr" level="warn" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="com.rhythm.louie.request" level="warn" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="com.rhythm.louie.auth" level="info" additivity="false">
+            <appender-ref ref="AuthAppender"/>
+        </logger>
+        <logger name="org.reflections" level="warn" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+        
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+    
+</Configuration>

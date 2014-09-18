@@ -20,8 +20,8 @@ import com.rhythm.pb.RequestProtos.SessionKey;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.server.LouieClient;
-import com.rhythm.louie.server.LouieClientFactory;
+import com.rhythm.louie.server.InfoClient;
+import com.rhythm.louie.server.InfoClientFactory;
 
 import static org.junit.Assert.*;
 
@@ -184,7 +184,7 @@ public class AuthServiceTest {
         
         LouieConnection testConn =  LouieConnectionFactory.getLocalConnection(
                 Identity.createJUnitIdentity(),"NOTAKEY");
-        LouieClient louieClient = LouieClientFactory.getClient(testConn);
+        InfoClient louieClient = InfoClientFactory.getClient(testConn);
         
         System.out.println(connection.getSessionKey());
         
@@ -206,7 +206,7 @@ public class AuthServiceTest {
         LouieConnection testConn =  LouieConnectionFactory.getLocalConnection(
                 Identity.createJUnitIdentity(),"NOTAKEY");
         
-        LouieClient louieClient = LouieClientFactory.getClient(testConn);
+        InfoClient louieClient = InfoClientFactory.getClient(testConn);
         
         List<String> result = louieClient.getAllServiceNames();
         
