@@ -5,11 +5,13 @@
  */
 package com.rhythm.louie.servlets;
 
-import com.rhythm.louie.Server;
+import com.rhythm.louie.server.Server;
 import com.rhythm.louie.request.JsonProcess;
 import com.rhythm.louie.request.JsonProcessor;
 import com.rhythm.louie.request.JsonRouter;
+
 import java.io.IOException;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie;
+package com.rhythm.louie.server;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

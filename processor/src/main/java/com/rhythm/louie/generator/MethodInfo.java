@@ -17,12 +17,12 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import com.rhythm.louie.process.Disabled;
-import com.rhythm.louie.process.Grouping;
-import com.rhythm.louie.process.Internal;
+import com.rhythm.louie.Disabled;
+import com.rhythm.louie.Grouping;
+import com.rhythm.louie.Internal;
 import com.rhythm.louie.process.ServiceCall;
-import com.rhythm.louie.process.Streaming;
-import com.rhythm.louie.process.Updating;
+import com.rhythm.louie.Streaming;
+import com.rhythm.louie.Updating;
 
 /**
  *

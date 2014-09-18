@@ -6,12 +6,14 @@
 package com.rhythm.louie.auth;
 
 import com.google.common.cache.CacheBuilderSpec;
-import com.rhythm.louie.Server;
+
+import com.rhythm.louie.server.Server;
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.cache.GuavaCache;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
+
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionBPB;
 import com.rhythm.pb.RequestProtos.SessionKey;

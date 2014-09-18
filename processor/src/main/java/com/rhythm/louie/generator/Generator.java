@@ -27,11 +27,11 @@ import org.apache.velocity.app.VelocityEngine;
 public class Generator {
     
     public static void generate(ServiceInfo info) throws Exception {
-        System.out.print(info.getInputFile());
-        if (!info.getService().factory()) {
-            System.out.print(" (NO FACTORY)");
+        String header = info.getInputFile();
+        if (!info.createFactory()) {
+            header+=" (NO FACTORY)";
         }
-        System.out.println();
+        System.out.println(header);
         
         processTemplate(info,"Client.vm",info.getBaseName()+"Client");
         processTemplate(info,"ServiceClient.vm",info.getBaseName()+"ServiceClient");
@@ -40,7 +40,7 @@ public class Generator {
         processTemplate(info,"RemoteService.vm",info.getBaseName()+"RemoteService");
         processTemplate(info,"LocalClient.vm",info.getBaseName()+"LocalClient");
         
-        if (info.getService()!=null && info.getService().factory()) {
+        if (info.createFactory()) {
             processTemplate(info,"ServiceFactory.vm",info.getBaseName()+"ServiceFactory");
         }
         processTemplate(info,"ClientFactory.vm",info.getBaseName()+"ClientFactory");

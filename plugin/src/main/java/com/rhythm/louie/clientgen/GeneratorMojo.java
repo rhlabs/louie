@@ -5,11 +5,13 @@
  */
 package com.rhythm.louie.clientgen;
 
-import com.rhythm.louie.process.Disabled;
-import com.rhythm.louie.process.Internal;
+import com.rhythm.louie.Disabled;
+import com.rhythm.louie.Internal;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
-import com.rhythm.util.Classes;
+
+import com.rhythm.louie.Classes;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;

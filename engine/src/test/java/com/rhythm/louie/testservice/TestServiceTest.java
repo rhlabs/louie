@@ -12,7 +12,7 @@ import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.connection.Response;
-import com.rhythm.louie.server.InfoClientTest;
+import com.rhythm.louie.info.InfoClientTest;
 import com.rhythm.louie.stream.Consumer;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;

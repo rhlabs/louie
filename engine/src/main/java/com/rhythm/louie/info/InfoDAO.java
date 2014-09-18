@@ -3,15 +3,15 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.server;
+package com.rhythm.louie.info;
 
 import com.rhythm.louie.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rhythm.louie.process.DAO;
-import com.rhythm.louie.Server;
+import com.rhythm.louie.DAO;
+import com.rhythm.louie.server.Server;
 
 import com.rhythm.pb.command.ArgType;
 import com.rhythm.pb.command.PBCommand;

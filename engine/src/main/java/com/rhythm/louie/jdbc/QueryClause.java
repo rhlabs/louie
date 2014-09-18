@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.rhythm.louie.DAOUtils;
+import com.rhythm.louie.util.DAOUtils;
 
 /**
  * This class is to be used in conjunction with QueryBuilder to aid in constructing 

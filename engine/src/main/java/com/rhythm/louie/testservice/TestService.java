@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.rhythm.louie.process.Internal;
-import com.rhythm.louie.process.Service;
-import com.rhythm.louie.process.Streaming;
+import com.rhythm.louie.Internal;
+import com.rhythm.louie.Service;
+import com.rhythm.louie.Streaming;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
 

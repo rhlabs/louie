@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.louie.ServiceProperties;
+import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
 

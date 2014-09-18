@@ -20,8 +20,8 @@ import com.rhythm.pb.RequestProtos.SessionKey;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.server.InfoClient;
-import com.rhythm.louie.server.InfoClientFactory;
+import com.rhythm.louie.info.InfoClient;
+import com.rhythm.louie.info.InfoClientFactory;
 
 import static org.junit.Assert.*;
 

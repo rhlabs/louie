@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights RESERVED.
  */
-package com.rhythm.louie.process;
+package com.rhythm.louie;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -35,8 +35,8 @@ import com.rhythm.louie.generator.TypeUtils;
  *
  * @author cjohnson
  */
-@SupportedAnnotationTypes("com.rhythm.louie.process.Service")
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedAnnotationTypes("com.rhythm.louie.Service")
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class ServiceProcessor extends AbstractProcessor {
     final Set<String> RESERVED = new HashSet<String>();    
     public ServiceProcessor() {

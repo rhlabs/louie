@@ -32,11 +32,11 @@ import com.rhythm.pb.data.Param;
 import com.rhythm.pb.data.RequestContext;
 import com.rhythm.pb.data.Result;
 
-import com.rhythm.louie.process.Grouping;
-import com.rhythm.louie.process.Internal;
+import com.rhythm.louie.Grouping;
+import com.rhythm.louie.Internal;
 import com.rhythm.louie.process.ServiceCall;
-import com.rhythm.louie.process.Streaming;
-import com.rhythm.louie.process.Updating;
+import com.rhythm.louie.Streaming;
+import com.rhythm.louie.Updating;
 
 /**
  * @author cjohnson

@@ -7,7 +7,7 @@ package com.rhythm.louie.connection;
 
 import com.google.protobuf.Message;
 
-import com.rhythm.louie.Server;
+import com.rhythm.louie.server.Server;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;

@@ -6,13 +6,15 @@
 
 package com.rhythm.util;
 
+import com.rhythm.louie.Classes;
+
 import java.util.List;
 
 import org.junit.Test;
 
 import com.rhythm.louie.auth.AuthService;
-import com.rhythm.louie.process.Service;
-import com.rhythm.louie.server.InfoService;
+import com.rhythm.louie.Service;
+import com.rhythm.louie.info.InfoService;
 import com.rhythm.louie.testservice.TestService;
 
 import static org.junit.Assert.*;

@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie;
+package com.rhythm.louie.util;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 

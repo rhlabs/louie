@@ -11,7 +11,8 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
-import com.rhythm.louie.process.Service;
+import com.rhythm.louie.NoFactory;
+import com.rhythm.louie.Service;
 
 /**
  *
@@ -29,6 +30,7 @@ public class ServiceInfo {
     
     private final TypeElement cl;
     private final Service service;
+    private boolean factory;
     
     ProcessingEnvironment processingEnv;
     
@@ -44,6 +46,7 @@ public class ServiceInfo {
         packageName = packageDir.replaceAll("\\/", "\\.");
         
         service = cl.getAnnotation(Service.class);
+        factory = cl.getAnnotation(NoFactory.class)==null;
         
         if (service.name().isEmpty()) {
             baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service", "$1");
@@ -100,5 +103,9 @@ public class ServiceInfo {
     
     public String getServiceName() {
         return serviceName;
+    }
+    
+    public boolean createFactory() {
+        return factory;
     }
 }

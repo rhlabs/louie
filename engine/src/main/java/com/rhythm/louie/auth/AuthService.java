@@ -7,7 +7,8 @@ package com.rhythm.louie.auth;
 
 import java.util.List;
 
-import com.rhythm.louie.process.Service;
+import com.rhythm.louie.NoFactory;
+import com.rhythm.louie.Service;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionBPB;
@@ -17,7 +18,8 @@ import com.rhythm.pb.RequestProtos.SessionKey;
  *
  * @author cjohnson
  */
-@Service(factory=false)
+@NoFactory
+@Service
 public interface AuthService {
     public static final String SERVICE_NAME = "auth";
     

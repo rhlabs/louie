@@ -3,7 +3,9 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie;
+package com.rhythm.louie.server;
+
+import com.rhythm.louie.ServiceManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +64,7 @@ public class ServiceProperties {
         return DEFAULT;
     }
     
-    protected static void initReservedProperties(String name) {
+    public static void initReservedProperties(String name) {
         ServiceProperties props = getServiceProperties(name);
         props.enable = true;
         props.main="";

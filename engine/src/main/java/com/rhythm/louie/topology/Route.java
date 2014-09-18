@@ -6,12 +6,14 @@
 
 package com.rhythm.louie.topology;
 
-import com.rhythm.louie.Server;
+import com.rhythm.louie.server.Server;
 import com.rhythm.louie.request.ProtoRouter;
+
 import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

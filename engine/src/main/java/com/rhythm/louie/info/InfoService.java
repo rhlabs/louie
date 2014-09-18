@@ -3,20 +3,21 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.server;
+package com.rhythm.louie.info;
 
 import java.util.List;
 
-import com.rhythm.pb.info.InfoProtos.ServicePB;
-import com.rhythm.pb.info.InfoProtos.ServerPB;
+import com.rhythm.louie.NoFactory;
+import com.rhythm.louie.Service;
 
-import com.rhythm.louie.process.Service;
+import com.rhythm.pb.info.InfoProtos.*;
 
 /**
  *
  * @author cjohnson
  */
-@Service(factory=false)
+@NoFactory
+@Service
 public interface InfoService {
     public static final String SERVICE_NAME = "info";
     

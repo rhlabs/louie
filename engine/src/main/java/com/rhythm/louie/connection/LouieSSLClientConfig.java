@@ -5,7 +5,7 @@
  */
 package com.rhythm.louie.connection;
 
-import com.rhythm.louie.Server;
+import com.rhythm.louie.server.Server;
 
 /**
  *

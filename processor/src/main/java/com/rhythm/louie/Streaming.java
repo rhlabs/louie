@@ -1,10 +1,10 @@
 /*
- * DAO.java
+ * Streaming.java
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.process;
+package com.rhythm.louie;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,7 +15,8 @@ import java.lang.annotation.Target;
  *
  * @author cjohnson
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DAO {
+public @interface Streaming {
+    
 }

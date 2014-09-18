@@ -15,9 +15,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.rhythm.louie.ExternalProperties;
+import com.rhythm.louie.server.ExternalProperties;
 import com.rhythm.louie.ServiceManager;
-import com.rhythm.louie.ServiceProperties;
+import com.rhythm.louie.server.ServiceProperties;
 
 import com.rhythm.pb.command.ArgType;
 import com.rhythm.pb.command.PBCommand;

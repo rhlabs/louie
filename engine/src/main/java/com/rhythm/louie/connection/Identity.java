@@ -9,7 +9,7 @@ package com.rhythm.louie.connection;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 
-import com.rhythm.louie.LocalConstants;
+import com.rhythm.louie.server.LocalConstants;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
 

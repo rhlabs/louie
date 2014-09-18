@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.rhythm.louie.DAOUtils;
+import com.rhythm.louie.util.DAOUtils;
 
 /**
  * @author cjohnson

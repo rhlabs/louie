@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
-import com.rhythm.louie.TaskScheduler;
-import com.rhythm.louie.process.DAO;
+import com.rhythm.louie.server.TaskScheduler;
+import com.rhythm.louie.DAO;
 import com.rhythm.louie.stream.StreamingConsumer;
 
 /**

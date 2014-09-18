@@ -5,7 +5,8 @@
  */
 package com.rhythm.louie.jms;
 
-import com.rhythm.louie.ServiceProperties;
+import com.rhythm.louie.server.ServiceProperties;
+
 import java.util.*;
 
 import javax.jms.BytesMessage;

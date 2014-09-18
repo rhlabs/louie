@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.util;
+package com.rhythm.louie;
 
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;

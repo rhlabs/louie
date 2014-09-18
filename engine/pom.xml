@@ -53,7 +53,7 @@
                 <configuration>
                     <annotationProcessors>
                         <annotationProcessor>
-                            com.rhythm.louie.process.ServiceProcessor
+                            com.rhythm.louie.ServiceProcessor
                         </annotationProcessor>
                     </annotationProcessors>
                 </configuration>
