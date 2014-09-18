@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.generator;
+package com.rhythm.louie.clientgen;
 
 import java.util.*;
 

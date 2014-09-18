@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.generator;
+package com.rhythm.louie.clientgen;
 
 import com.rhythm.louie.process.Disabled;
 import com.rhythm.louie.process.Internal;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
