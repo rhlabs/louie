@@ -69,7 +69,6 @@ public class GeneratorMojo extends AbstractMojo{
      * python client package name
      * @parameter
      * property="pythonpackage"
-     * default-value="rh.louie"
      */
     private String pythonpackage = "";
     /**
@@ -141,7 +140,7 @@ public class GeneratorMojo extends AbstractMojo{
         if (whitelist == null) whitelist = new ArrayList<String>();
         whitelist.add("com.rhythm.louie.auth.AuthServiceHandler");
         whitelist.add("com.rhythm.louie.testservice.TestServiceHandler");
-        whitelist.add("com.rhythm.louie.server.LouieServiceHandler");
+        whitelist.add("com.rhythm.louie.server.InfoServiceHandler");
         
         ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
         Thread.currentThread().setContextClassLoader(cl);

@@ -8,9 +8,6 @@
         <requiredProperty key="service_lowercase">
             <defaultValue/>
         </requiredProperty>
-        <requiredProperty key="python_package">
-            <defaultValue/>
-        </requiredProperty>
     </requiredProperties>
     
     <modules>

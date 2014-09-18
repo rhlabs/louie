@@ -14,7 +14,7 @@
       
     <properties>
         <skipTests>true</skipTests>
-        <gen.cpp>false</gen.cpp>
+        <gen.python>false</gen.python>
     </properties>
     
     <build>
@@ -52,6 +52,10 @@
                 <groupId>com.rhythm.louie</groupId>
                 <artifactId>louie-maven-plugin</artifactId>
                 <version>${louie.version}</version>
+                <configuration>
+                    <javagen>true</javagen>
+                    <pygen>${gen.python}</pygen>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -86,24 +90,20 @@
    <profiles>
         <profile>
             <id>python</id>
+            <properties>
+                <gen.python>true</gen.python>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.rhythm.louie</groupId>
+                    <artifactId>louie</artifactId>
+                    <version>${louie.version}</version>
+                    <classifier>python</classifier>
+                    <type>zip</type>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.rhythm.louie</groupId>
-                        <artifactId>louie-maven-plugin</artifactId>
-                        <version>${louie.version}</version>
-                        <configuration>
-                            <pygen>true</pygen>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>otherpb</id>
-                                <goals>
-                                    <goal>extpbcompile</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>          
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -132,13 +132,6 @@
             <groupId>com.rhythm.louie</groupId>
             <artifactId>louie</artifactId>
             <version>${louie.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.rhythm.louie</groupId>
-            <artifactId>louie</artifactId>
-            <version>${louie.version}</version>
-            <classifier>python</classifier>
-            <type>zip</type>
         </dependency>
     </dependencies> 
 

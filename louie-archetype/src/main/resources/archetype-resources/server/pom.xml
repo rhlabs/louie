@@ -37,13 +37,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>${rootArtifactId}-service</artifactId>
-            <version>${project.version}</version>
-            <classifier>python</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
@@ -78,6 +71,15 @@
     <profiles>
         <profile>
             <id>python</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>${rootArtifactId}-service</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>python</classifier>
+                    <type>zip</type>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -91,7 +93,7 @@
                                 <prefix>com.rhythm</prefix>
                                 <prefix>${package}</prefix>
                             </prefixes>
-                            <pythonpackage>${python_package}</pythonpackage>
+                            <pythonpackage></pythonpackage>
                         </configuration>
                         <executions>
                             <execution>

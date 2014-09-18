@@ -3,7 +3,7 @@
 #set( $symbol_escape = '\' )
 ${symbol_pound}!/usr/bin/python
 
-from ${python_package}.${service_lowercase}.client import ${service_titlecase}Client
+from ${service_lowercase}.client import ${service_titlecase}Client
 
 def main():
     outgoing = 'HELLO WORLD!'

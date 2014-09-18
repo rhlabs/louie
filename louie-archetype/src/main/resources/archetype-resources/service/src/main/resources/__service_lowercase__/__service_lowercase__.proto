@@ -1,9 +1,9 @@
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
-package ${python_package}.${service_lowercase};
+package ${service_lowercase};
 
-option java_package = "${package}.pb.${service_lowercase}";
+option java_package = "${package}.${service_lowercase}";
 option java_outer_classname = "${service_titlecase}Protos";
 option java_generate_equals_and_hash = true;
 

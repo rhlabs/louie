@@ -10,6 +10,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileVisitResult;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +88,38 @@ public class PBCompilerMojo extends AbstractMojo{
      * default-value="target/generated-sources/java"
      */
     private String javadir;
-
+    /**
+     * Python generated PB output folder (relative to basedir)
+     * @parameter
+     * property="pythondir"
+     * default-value="target/generated-sources/python"
+     */
+    private String pythondir;
+    /**
+     * C++ generated PB output folder (relative to basedir)
+     * @parameter
+     * property="cppdir"
+     * default-value="target/generated-sources/cpp"
+     */
+    private String cppdir;
+    /**
+     * Flag to enable or disable generation of Java PBs (default is false)
+     * @parameter
+     * property="javagen"
+     */
+    private boolean javagen;
+    /**
+     * Flag to enable or disable generation of C++ PBs (default is false)
+     * @parameter
+     * property="cppgen"
+     */
+    private boolean cppgen;
+    /**
+     * Flag to enable or disable generation of py PBs (default is false)
+     * @parameter
+     * property="pygen"
+     */
+    private boolean pygen;
     
     // A list of compilers in possible linux locations
     private final String[] protocompiler = {"/usr/bin/protoc","/usr/sbin/protoc"};
@@ -90,19 +130,26 @@ public class PBCompilerMojo extends AbstractMojo{
     
     @Override
     public void execute() throws MojoExecutionException {
-        //adjust directories according to basedir
-        javadir = basedirectory+"/"+javadir;
-
-
-        //do mkdirs
-        getLog().debug("Creating directories");
-        
-        File jf = new File(javadir);
-        if (!jf.exists()) {
-            jf.mkdirs();
+        if (!cppgen && !pygen && !javagen) {
+            getLog().warn("PB Compiler had nothing to run!");
+            return;
         }
+        
+        //adjust directories according to basedir, and create if necessary
+        if (javagen) {
+            javadir = basedirectory+"/"+javadir;
+            makeDir(javadir);
+        }
+        if (pygen) {
+            pythondir = basedirectory+"/"+pythondir ;
+            makeDir(pythondir);
+        }
+        if (cppgen) {
+            cppdir = basedirectory+"/"+cppdir;
+            makeDir(cppdir);
+        }  
 
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
 
         //Check existence of specified compiler and libraries ( GUESS A BUNCH )
         File compilerF = new File(compiler);
@@ -128,7 +175,9 @@ public class PBCompilerMojo extends AbstractMojo{
         if (sharedArchive.exists()) {
             args.add("--proto_path="+archivePath);
         }
-        args.add("--java_out="+javadir);
+        if (javagen) args.add("--java_out="+javadir);
+        if (pygen) args.add("--python_out="+pythondir);
+        if (cppgen) args.add("--cpp_out="+cppdir);
 
         //Find the proto files 
         File dir = new File(basedirectory+"/"+protosrc);
@@ -171,10 +220,72 @@ public class PBCompilerMojo extends AbstractMojo{
             }
         }
         
-        //Add the gen'ed java dir back into maven resources
-        getLog().debug("Injecting the Java PB dir into the compile time source root");
-        project.addCompileSourceRoot(javadir);
+        if (pygen) {
+            //Generate __init__ files throughout tree where necessary
+            Path pybase = Paths.get(pythondir);
+            PlacePyInit pf = new PlacePyInit();
+            pf.start = pybase;
+            try {
+                Files.walkFileTree(pybase, pf);
+            } catch (IOException ex) {
+                getLog().error(ex.toString());
+            }
+        }
+        
+        if (javagen) {
+            //Add the gen'ed java dir back into maven resources
+            getLog().debug("Injecting the Java PB dir into the compile time source root");
+            project.addCompileSourceRoot(javadir);
+        }
         
     }
+ 
+    private void makeDir(String path) {
+        File f = new File(path);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+    }
     
+    /**
+     * A file visitor (java 7) that will generate __init__ files in relevant
+     * py directories that it finds.
+     */
+    public static class PlacePyInit extends SimpleFileVisitor<Path> {
+        public Path start = null;
+        String initTemplate = "__version__ = '${project.version}'";
+        @Override
+
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+            if (!dir.equals(start)) {
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+                    boolean containsinit = false;
+                    for (Path file: stream) {
+                        if (file.endsWith("__init__.py")) {
+                            containsinit = true;
+                        }
+                    }
+                    if (!containsinit) {
+                        Path init = Paths.get(dir.toString(), "__init__.py");
+                        try {
+                            Files.write(init, initTemplate.getBytes());
+                        } catch (FileAlreadyExistsException ex) {
+                        } catch (IOException ex) {
+                            System.out.println("Failed to create __init__.py in " + dir.toString());
+                        }
+                    }
+                } catch (IOException | DirectoryIteratorException x) {
+                    System.err.println(x);
+                }
+            }
+            return CONTINUE;
+        }
+        
+        @Override
+        public FileVisitResult visitFileFailed(Path file,
+                                           IOException exc) {
+            System.err.println(exc);
+            return CONTINUE;
+        }
+    }
 }

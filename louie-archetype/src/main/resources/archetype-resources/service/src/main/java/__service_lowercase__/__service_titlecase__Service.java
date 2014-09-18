@@ -3,7 +3,7 @@
 #set( $symbol_escape = '\' )
 package ${package}.${service_lowercase};
 
-import ${package}.pb.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
+import ${package}.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
 import com.rhythm.louie.process.Service;
 
 @Service

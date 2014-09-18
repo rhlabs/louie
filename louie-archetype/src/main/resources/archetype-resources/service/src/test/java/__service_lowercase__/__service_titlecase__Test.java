@@ -11,7 +11,7 @@ import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.pb.RequestProtos.IdentityPB;
-import ${package}.pb.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
+import ${package}.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
 
 import org.junit.After;
 import org.junit.AfterClass;
