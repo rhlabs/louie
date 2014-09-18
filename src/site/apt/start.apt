@@ -1,0 +1,26 @@
+ ------
+ Getting Started
+ ------
+
+Getting Started
+
+ To develop with louie you will need to be familiar with java development using {{{}maven}}. Using an IDE is advised as well, we prefer {{{}netbeans}}. You can find documentation on using these tools on their respective sites.
+
+* Creating a louie project
+
+ To create a louie project from scratch, you will need to invoke the louie archetype. You can do this through the new project dialog in your ide, if it supports maven, or via the command line:
+
++-----+
+mvn archetype:generate -DarchetypeGroupId='com.rhythm.louie' -DarchetypeArtifactId='louie-archetype' -DarchetypeVersion='1.9-SNAPSHOT'
+
+Define value for property 'groupId': : com.yourcompany
+Define value for property 'artifactId': : myfirstserver
+Define value for property 'version':  1.0-SNAPSHOT: :
+Define value for property 'package':  com.yourcompany: :
+Define value for property 'python_package':  : : first
+Define value for property 'service_lowercase':  : : stuff
+Define value for property 'service_titlecase':  : : Stuff
+
++-----+
+
+

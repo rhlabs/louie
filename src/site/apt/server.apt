@@ -1,0 +1,109 @@
+ ------
+ Server Configuration
+ ------
+
+Server Configuration
+
+ LoUIE can be used on any Java Application Server. Development has been done primarily 
+ using Glassfish. For the purposes of this document, we will be describing a setup 
+ using the Glassfish server on a unix based os. Additionally, LoUIE out of the box has
+ logging settings and other templated configurations geared to working with glassfish, 
+ but you can change those to work with the server you are most comfortable with..
+
+* Installation
+
+ To install Glassfish, download the full platform zip {{{https://glassfish.java.net/download.html}here}}
+
+ To install, just unzip it in your desired location.
+
+ To start the server:
+
++-----+
+$GF_HOME/bin/asadmin start-domain domain1
++-----+
+
+* Glassfish as a Service
+
+ It usually is best to configure glassfish as a service and have it configured to start as root.  If this is for a development machine you should set the GF_USER to yourself. This will work better when used with an IDE.
+
+ Place {{{./glassfish}this script}} in your /etc/init.d/ and modify it to specify the GF_HOME, JAVA_HOME, and GF_USER you want the server to run as.
+
+ Configure the service to start at boot
+
++-----+
+sudo /sbin/chkconfig glassfish on
++-----+
+
+* Server Admin
+
+ Once the server is started you can go to the admin interface and configure the server. The default admin password is admin.
+
++-----+
+https://localhost:4848
++-----+
+
+ For the most part the defaults are fine for a developers box.  Here are a few tweaks that are useful:
+
+ Under Configurations->server-config->JVM Settings : JVM Options Tab
+
++-----+
+# Log garbage collections
+-verbose:gc
+-Xloggc:{PATH_TO_GF_INSTALL}/glassfish/domains/domain1/logs/GC.log
+-XX:+PrintGCDetails
+-XX:+PrintGCDateStamps
+
+# Suppress Class loading/unloading
+-XX:-TraceClassUnloading
+-XX:-TraceClassLoading
+
+# optionally alter the vm for your environment
+replace -client with -server
+-d64 (if needed)
++-----+
+
+ You can also modify these properties via command line with the asadmin tool found at:
+
++-----+
+ {PATH_TO_GF_INSTALL}/glassfish4/glassfish/bin/asadmin 
++-----+
+
+ Here are some other things that may be useful:
+
++-----+
+# enable remote access to the admin portal
+asadmin enable-secure-admin
+
+# change the server.log output format (I find this more appealing)
+asadmin set-log-file-format --target server ULF
+
+# Suppress some log outputs
+asadmin set-log-levels javax.enterprise.system.tools.deployment=WARNING
+adadmin set-log-levels org.glassfish.admingui=WARNING
+
+# Change the acceptor threads to the number of cores that your box has
+asadmin set configs.config.server-config.network-config.transports.transport.tcp.acceptor-threads={NUMCORES}
+
+# Suppress "Powered By" response headers
+asadmin set server.network-config.protocols.protocol.http-listener-1.http.xpowered-by=false
++-----+
+
+
+* Database Pool Configuration
+
+ A very useful feature to utilize in an application server like glassfish is database connection pooling. The base JDBC functionality in LoUIE is designed with database pooling in mind. It is made very easy to lookup and use a server configured pool.
+
+ To setup a mysql pool, first install the connector library, ie mysql-connector-java-5.1.28-bin.jar in  {PATH_TO_GF_INSTALL}/glassfish4/glassfish/domains/domain1/lib/ and restart the server. You can find the latest mysql connector {{{http://dev.mysql.com/downloads/connector/j/5.1.html}here}}
+
+ Once you have installed the jdbc connector, you can add a pool and a datasource through the admin interface, but for simplicity here is an example of adding a mysql database connection pool "TestPool" and it's corresponding datasource "jdbc/TestDS". The following will setup a pool that connects to a database called test on your local machine.
+
++-----+
+asadmin create-jdbc-connection-pool --datasourceclassname=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource --restype=javax.sql.ConnectionPoolDataSource --isconnectvalidatereq=true --validationclassname=org.glassfish.api.jdbc.validation.MySQLConnectionValidation --validationmethod=custom-validation --steadypoolsize=2 --maxpoolsize=32 --maxwait=60000 --poolresize=2 --idletimeout=300 --property ServerName=localhost:DatabaseName=test:AutoReconnect=true TestPool
+
+# if you need add a username and password to the pool, change the --property to
+--property ServerName=localhost:DatabaseName=test:AutoReconnect=true:User=USER:Password=PASSWORD
+
+asadmin create-jdbc-resource --connectionpoolid TestPool --enabled=true jdbc/TestDS
++-----+
+
+

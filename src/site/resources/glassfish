@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# glassfish:           Starts the Glassfish service
+#
+# Version:              @(#) /etc/rc.d/init.d/glassfish 1.0
+#
+### BEGIN INIT INFO
+# Provides:       glassfish
+# Required-Start: $network 
+# Required-Stop:  $network
+# Default-Start:  2 3 5
+# Default-Stop: i  0 1 6
+# Description:    Starts the Glassfish Application Server
+#
+#
+### END INIT INFO
+
+# Configure these values for your environment
+GF_USER=%YOUR_USERNAME%
+GF_HOME=%PATH_TO_GFDIR%/glassfish4
+JAVAHOME=%PATH_TO_YOUR_JDK%
+
+ASADMIN=$GF_HOME/bin/asadmin
+[ -x $ASADMIN ] || exit 0
+
+SU="su $GF_USER -s /bin/tcsh --command "
+export JAVA_HOME=$JAVAHOME
+export AS_JAVA="$JAVA_HOME"
+
+# See how we were called.
+case "$1" in
+  start)
+        echo -n "Starting Glassfish Server: "
+        $SU "$ASADMIN start-domain domain1"
+	;;
+  stop)
+	echo -n "Shutting down Glassfish Server: "
+	$SU "$ASADMIN stop-domain domain1"
+	;;
+  restart)
+	echo -n "Shutting down Glassfish Server: "
+	$SU "$ASADMIN stop-domain domain1"
+	echo
+        echo -n "Starting Glassfish Server: "
+        $SU "$ASADMIN start-domain domain1"
+	;;
+  *)
+	echo "Usage: glassfish {start|stop|restart}"
+	exit 1
+esac
+
+exit 0
+
