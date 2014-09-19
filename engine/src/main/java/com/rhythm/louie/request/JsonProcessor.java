@@ -9,6 +9,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.protobuf.Message;
 import com.googlecode.protobuf.format.JsonFormat;
+
 import com.rhythm.pb.DataTypeProtos;
 import com.rhythm.pb.DataTypeProtos.IntPB;
 
@@ -16,22 +17,26 @@ import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.UIntPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
-import com.rhythm.pb.data.DataType;
-import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+
+import com.rhythm.louie.request.data.DataType;
+import com.rhythm.louie.request.data.Param;
+import com.rhythm.louie.request.data.Result;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

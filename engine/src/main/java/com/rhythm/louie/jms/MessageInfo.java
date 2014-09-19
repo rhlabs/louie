@@ -6,8 +6,7 @@
 
 package com.rhythm.louie.jms;
 
-import com.rhythm.pb.jms.JmsProtos.ContentPB;
-import com.rhythm.pb.jms.JmsProtos.MessageBPB;
+import com.rhythm.louie.jms.JmsProtos.*;
 
 /**
  *

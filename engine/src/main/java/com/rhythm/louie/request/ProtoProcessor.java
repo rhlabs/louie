@@ -7,9 +7,11 @@ package com.rhythm.louie.request;
 
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
+
 import com.rhythm.louie.auth.AuthUtils;
 import com.rhythm.louie.auth.SessionStat;
 import com.rhythm.louie.auth.UnauthorizedSessionException;
+
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
@@ -18,9 +20,10 @@ import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;
 import com.rhythm.pb.RequestProtos.RoutePB;
 import com.rhythm.pb.RequestProtos.SessionKey;
-import com.rhythm.pb.data.DataType;
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+
+import com.rhythm.louie.request.data.DataType;
+import com.rhythm.louie.request.data.Result;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +32,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

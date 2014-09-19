@@ -10,7 +10,7 @@ import java.util.List;
 import com.rhythm.louie.NoFactory;
 import com.rhythm.louie.Service;
 
-import com.rhythm.pb.info.InfoProtos.*;
+import com.rhythm.louie.info.InfoProtos.*;
 
 /**
  *

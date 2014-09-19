@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2013 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.command;
+package com.rhythm.louie.service;
 
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.jms.MessageHandler;

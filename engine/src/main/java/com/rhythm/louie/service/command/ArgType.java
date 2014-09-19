@@ -3,11 +3,12 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.command;
+package com.rhythm.louie.service.command;
 
 import com.google.protobuf.Descriptors.Descriptor;
 
-import com.rhythm.pb.PBType;
+import com.rhythm.louie.pb.PBType;
+
 import java.io.Serializable;
 
 /**

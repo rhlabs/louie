@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.command;
+package com.rhythm.louie.service;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -19,8 +19,12 @@ import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
 
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.service.command.PBCommand;
+import com.rhythm.louie.service.command.PBCommandType;
+import com.rhythm.louie.service.command.PBParamType;
+import com.rhythm.louie.service.command.ReflectCommand;
 
 /**
  * @author cjohnson
@@ -34,7 +38,7 @@ public abstract class AnnotatedService implements Service {
     
     protected AnnotatedService(String name) {
         this.name = name;
-        commandMap = new ConcurrentHashMap<PBCommandType,PBCommand<?,?>>();
+        commandMap = new ConcurrentHashMap<>();
     }
     
     @Override

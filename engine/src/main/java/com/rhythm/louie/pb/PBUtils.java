@@ -4,10 +4,11 @@
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.pb;
+package com.rhythm.louie.pb;
 
-import com.rhythm.pb.data.Data;
-import com.rhythm.pb.data.Param;
+import com.rhythm.louie.request.data.Data;
+import com.rhythm.louie.request.data.Param;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ import java.util.Set;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.MessageOrBuilder;
+
+import com.rhythm.pb.DataTypeProtos;
+
 import org.joda.time.LocalDate;
 
 /**

@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.util;
+package com.rhythm.louie.util;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

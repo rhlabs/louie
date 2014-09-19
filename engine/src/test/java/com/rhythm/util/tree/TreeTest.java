@@ -6,6 +6,9 @@
 
 package com.rhythm.util.tree;
 
+import com.rhythm.louie.util.tree.Tree;
+import com.rhythm.louie.util.tree.TreeNode;
+
 import java.util.List;
 import java.util.Set;
 

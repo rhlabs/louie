@@ -7,6 +7,7 @@
 package com.rhythm.louie.client.connection;
 
 import com.rhythm.louie.connection.Identity;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -22,7 +23,6 @@ import com.google.common.base.Joiner;
 import com.google.protobuf.GeneratedMessage;
 import com.googlecode.protobuf.format.JsonFormat;
 
-import com.rhythm.pb.JsonReader;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;

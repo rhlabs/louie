@@ -11,7 +11,8 @@ import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.pb.RequestProtos.IdentityPB;
-import ${package}.${service_lowercase}.${service_titlecase}Protos.${service_titlecase}ResponsePB;
+
+import ${package}.${service_lowercase}.${service_titlecase}Protos.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,6 +32,8 @@ public class ${service_titlecase}Test {
     public static void setUpClass() {
         IdentityPB id = Identity.createJUnitIdentity();
         LouieConnection connection = LouieConnectionFactory.getConnection("localhost", id);
+        connection.setGateway("${rootArtifactId}");
+
         client = ${service_titlecase}ClientFactory.getClient(connection);
     }
     
@@ -47,7 +50,7 @@ public class ${service_titlecase}Test {
     }
 
     @Test
-    public void basicTest() throws Exception{
+    public void basicTest() throws Exception {
         String example = "Hello World!";
         ${service_titlecase}ResponsePB response = client.basicRequest(example);
         System.out.println(response);

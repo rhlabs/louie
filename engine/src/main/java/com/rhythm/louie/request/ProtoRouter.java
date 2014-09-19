@@ -27,9 +27,9 @@ import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;                 
 import com.rhythm.pb.RequestProtos.RoutePB;                  
 import com.rhythm.pb.RequestProtos.SessionKey;                   
-import com.rhythm.pb.data.DataType;                            
-import com.rhythm.pb.data.RequestContext;                     
-import com.rhythm.pb.data.Result;                     
+
+import com.rhythm.louie.request.data.DataType;                            
+import com.rhythm.louie.request.data.Result;                     
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -23,10 +23,10 @@ import org.slf4j.MDC;
 
 import com.rhythm.louie.ServiceManager;
 
-import com.rhythm.pb.command.Service;
-import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.service.Service;
+
+import com.rhythm.louie.request.data.Param;
+import com.rhythm.louie.request.data.Result;
 
 /**
  * @author cjohnson

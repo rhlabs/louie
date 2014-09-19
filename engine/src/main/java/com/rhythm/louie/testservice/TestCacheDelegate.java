@@ -16,7 +16,8 @@ import com.rhythm.louie.jms.MessageOperation;
 
 import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.pb.RequestProtos.ErrorPB;
-import com.rhythm.pb.command.CacheLayer;
+
+import com.rhythm.louie.service.CacheLayer;
 
 import java.util.List;
 import java.util.Map;

@@ -22,10 +22,10 @@ import com.rhythm.pb.DataTypeProtos.IntPB;
 import com.rhythm.pb.DataTypeProtos.UIntListPB;                 
 import com.rhythm.pb.DataTypeProtos.UIntPB;                  
 import com.rhythm.pb.RequestProtos;              
-import com.rhythm.pb.data.DataType;                        
-import com.rhythm.pb.data.Param;                        
-import com.rhythm.pb.data.RequestContext;                        
-import com.rhythm.pb.data.Result;                       
+
+import com.rhythm.louie.request.data.DataType;                        
+import com.rhythm.louie.request.data.Param;                        
+import com.rhythm.louie.request.data.Result;                       
 
 import java.io.ByteArrayOutputStream;                        
 import java.io.IOException;

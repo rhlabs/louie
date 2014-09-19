@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb;
+package com.rhythm.louie.pb;
 
 import com.google.protobuf.Message;
 

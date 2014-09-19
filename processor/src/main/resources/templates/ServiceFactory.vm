@@ -21,7 +21,7 @@ import com.rhythm.louie.CacheDelegate;
 import com.rhythm.louie.DAO;
 import com.rhythm.louie.Router;
 
-import com.rhythm.pb.command.ServiceFactory;
+import com.rhythm.louie.service.ServiceFactory;
 
 public class ${className} implements ServiceFactory {
 

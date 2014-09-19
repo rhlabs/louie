@@ -6,6 +6,8 @@
 
 package com.rhythm.util;
 
+import com.rhythm.louie.util.CalcList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;

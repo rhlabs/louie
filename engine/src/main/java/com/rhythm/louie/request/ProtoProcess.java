@@ -6,7 +6,8 @@
 
 package com.rhythm.louie.request;
 
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.request.data.Result;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;

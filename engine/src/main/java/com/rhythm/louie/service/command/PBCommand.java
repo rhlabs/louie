@@ -4,14 +4,14 @@
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.pb.command;
+package com.rhythm.louie.service.command;
 
 import java.util.List;
 
 import com.google.protobuf.Message;
 
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.Result;
 
 /**
  * @author cjohnson

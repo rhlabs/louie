@@ -4,7 +4,7 @@ import "louie/options.proto";
 import "louie/datatype.proto";
 import "google/protobuf/descriptor.proto"; 
 
-option java_package = "com.rhythm.pb.jms";
+option java_package = "com.rhythm.louie.jms";
 option java_outer_classname = "JmsProtos";
 option java_generate_equals_and_hash = true;
 

@@ -17,9 +17,8 @@ import javax.jms.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.pb.data.Data;
-import com.rhythm.pb.jms.JmsProtos.ContentPB;
-import com.rhythm.pb.jms.JmsProtos.MessageBPB;
+import com.rhythm.louie.request.data.Data;
+import com.rhythm.louie.jms.JmsProtos.*;
 
 /**
  *

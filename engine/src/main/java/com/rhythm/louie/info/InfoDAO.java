@@ -13,15 +13,12 @@ import java.util.List;
 import com.rhythm.louie.DAO;
 import com.rhythm.louie.server.Server;
 
-import com.rhythm.pb.command.ArgType;
-import com.rhythm.pb.command.PBCommand;
-import com.rhythm.pb.command.PBParamType;
-import com.rhythm.pb.command.Service;
-import com.rhythm.pb.info.InfoProtos.ArgPB;
-import com.rhythm.pb.info.InfoProtos.CommandPB;
-import com.rhythm.pb.info.InfoProtos.ServerPB;
-import com.rhythm.pb.info.InfoProtos.ServicePB;
+import com.rhythm.louie.service.command.ArgType;
+import com.rhythm.louie.service.command.PBCommand;
+import com.rhythm.louie.service.command.PBParamType;
+import com.rhythm.louie.service.Service;
 
+import com.rhythm.louie.info.InfoProtos.*;
 
 /**
  * @author cjohnson

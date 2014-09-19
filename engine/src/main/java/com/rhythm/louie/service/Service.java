@@ -3,14 +3,15 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.command;
+package com.rhythm.louie.service;
 
 import java.util.Collection;
 
 import com.rhythm.louie.jms.MessageHandler;
 
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.service.command.PBCommand;
 
 /**
  *

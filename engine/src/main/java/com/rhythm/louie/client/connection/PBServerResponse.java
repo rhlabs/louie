@@ -14,7 +14,8 @@ import java.util.List;
 import com.google.protobuf.Message;
 
 import com.rhythm.pb.RequestProtos.ResponsePB;
-import com.rhythm.pb.data.Data;
+
+import com.rhythm.louie.request.data.Data;
 
 /**
  * @author cjohnson

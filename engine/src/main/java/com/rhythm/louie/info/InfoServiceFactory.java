@@ -5,8 +5,8 @@
  */
 package com.rhythm.louie.info;
 
-import com.rhythm.pb.command.Service;
-import com.rhythm.pb.command.ServiceFactory;
+import com.rhythm.louie.service.Service;
+import com.rhythm.louie.service.ServiceFactory;
 
 /**
  *

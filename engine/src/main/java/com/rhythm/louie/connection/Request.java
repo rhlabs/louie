@@ -8,7 +8,7 @@ package com.rhythm.louie.connection;
 
 import com.rhythm.louie.stream.Consumer;
 import com.rhythm.louie.stream.ListConsumer;
-import com.rhythm.pb.PBParam;
+import com.rhythm.louie.pb.PBParam;
 
 /**
  *

@@ -26,8 +26,8 @@ import com.rhythm.louie.server.TaskScheduler;
 import com.rhythm.louie.topology.Route;
 import com.rhythm.louie.testservice.TestServiceFactory;
 
-import com.rhythm.pb.command.Service;
-import com.rhythm.pb.command.ServiceFactory;
+import com.rhythm.louie.service.Service;
+import com.rhythm.louie.service.ServiceFactory;
 
 import java.io.File;
 import java.io.FileInputStream;

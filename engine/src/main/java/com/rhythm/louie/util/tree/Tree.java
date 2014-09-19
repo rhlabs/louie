@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.util.tree;
+package com.rhythm.louie.util.tree;
 
 import java.util.ArrayList;
 import java.util.Collection;

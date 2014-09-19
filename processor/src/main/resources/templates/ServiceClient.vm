@@ -13,8 +13,8 @@ import com.rhythm.louie.stream.SingleConsumer;
 import com.rhythm.louie.stream.Consumer;
 import com.rhythm.louie.stream.Consumers;
 
-import com.rhythm.pb.PBParam;
-import com.rhythm.pb.PBType;
+import com.rhythm.louie.pb.PBParam;
+import com.rhythm.louie.pb.PBType;
 
 public class ${className} implements ${baseName}Client {
 

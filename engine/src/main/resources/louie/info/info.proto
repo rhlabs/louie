@@ -4,7 +4,7 @@ import "louie/options.proto";
 import "louie/datatype.proto";
 import "google/protobuf/descriptor.proto"; 
 
-option java_package = "com.rhythm.pb.info";
+option java_package = "com.rhythm.louie.info";
 option java_outer_classname = "InfoProtos";
 option java_generate_equals_and_hash = true;
 

@@ -9,7 +9,7 @@ import com.rhythm.louie.server.Server;
 import com.rhythm.louie.auth.UnauthorizedSessionException;
 import com.rhythm.louie.exception.LouieRouteException;
 
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.request.data.Result;
 
 import java.io.IOException;
 import java.net.InetAddress;

@@ -48,11 +48,11 @@ public class ServiceInfo {
         service = cl.getAnnotation(Service.class);
         factory = cl.getAnnotation(NoFactory.class)==null;
         
-        if (service.name().isEmpty()) {
+        if (service.value().isEmpty()) {
             baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service", "$1");
             serviceName = baseName.toLowerCase();
         } else {
-            serviceName = service.name();
+            serviceName = service.value();
             baseName = Character.toUpperCase(serviceName.charAt(0)) + serviceName.substring(1);
         }
     }

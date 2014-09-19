@@ -6,8 +6,6 @@
 
 package com.rhythm.louie.request;
 
-import com.rhythm.pb.data.RequestContext;
-
 /**
  *
  * @author cjohnson

@@ -13,14 +13,16 @@ import com.rhythm.louie.request.RequestContextManager;
 import com.rhythm.louie.stream.Consumers;
 import com.rhythm.louie.stream.SingleConsumer;
 
-import com.rhythm.pb.PBParam;
+import com.rhythm.louie.pb.PBParam;
+
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;
 import com.rhythm.pb.RequestProtos.SessionKey;
-import com.rhythm.pb.data.RequestContext;
+
+import com.rhythm.louie.request.RequestContext;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -42,7 +44,7 @@ import com.rhythm.louie.server.LocalConstants;
 import com.rhythm.louie.auth.AuthService;
 import com.rhythm.louie.stream.Consumer;
 
-import com.rhythm.pb.data.Data;
+import com.rhythm.louie.request.data.Data;
 
 /**
  * @author cjohnson

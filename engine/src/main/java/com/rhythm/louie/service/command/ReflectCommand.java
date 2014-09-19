@@ -3,7 +3,9 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.command;
+package com.rhythm.louie.service.command;
+
+import com.rhythm.louie.service.AnnotatedService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,11 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.generator.ProcessorUtils;
 
-import com.rhythm.pb.data.DataParser;
-import com.rhythm.pb.data.DataParser.BuilderParser;
-import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
+import com.rhythm.louie.request.data.DataParser;
+import com.rhythm.louie.request.data.DataParser.BuilderParser;
+import com.rhythm.louie.request.data.Param;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.Result;
 
 import com.rhythm.louie.Grouping;
 import com.rhythm.louie.Internal;

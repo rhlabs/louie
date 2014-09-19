@@ -7,16 +7,17 @@
 package ${package}.servlets; 
 
 import com.rhythm.louie.ServiceManager;
-
-import com.rhythm.pb.command.ServiceFactory;
+import com.rhythm.louie.service.ServiceFactory;
 
 import ${package}.${service_lowercase}.${service_titlecase}ServiceFactory;
 
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
 import org.slf4j.LoggerFactory;
 
 /**

@@ -3,7 +3,10 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.data;
+package com.rhythm.louie.request;
+
+import com.rhythm.louie.request.data.DataType;
+import com.rhythm.louie.request.data.Param;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -16,7 +19,8 @@ import com.rhythm.pb.RequestProtos.RequestPB;
 import com.rhythm.pb.RequestProtos.RoutePB;
 import com.rhythm.pb.RequestProtos.RoutePathPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
-import com.rhythm.pb.command.PBParamType;
+
+import com.rhythm.louie.service.command.PBParamType;
 
 /**
  * @author cjohnson

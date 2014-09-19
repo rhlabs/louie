@@ -9,14 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
-import com.rhythm.pb.command.Service;
-import com.rhythm.pb.data.Param;
-import com.rhythm.pb.data.RequestContext;
-import com.rhythm.pb.data.Result;
 
+import com.rhythm.louie.service.Service;
+import com.rhythm.louie.request.data.Param;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.Result;
 import com.rhythm.louie.connection.DefaultLouieConnection;
 
-import com.rhythm.pb.command.ServiceFactory;
+import com.rhythm.louie.service.ServiceFactory;
 
 /**
  *

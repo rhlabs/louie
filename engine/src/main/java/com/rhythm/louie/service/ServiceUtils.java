@@ -14,9 +14,9 @@ import com.rhythm.louie.Service;
 public class ServiceUtils {
     @SuppressWarnings("unchecked")
     public static String getServiceName(Class clz) {
-        Service serv = (Service) clz.getAnnotation(Service.class);
-        if (serv!=null) {
-            return serv.name();
+        Service service = (Service) clz.getAnnotation(Service.class);
+        if (service!=null) {
+            return service.value();
         } else {
             return "unknown";
         }

@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb;
+package com.rhythm.louie.pb;
 
 import java.util.*;
 
@@ -32,9 +32,9 @@ import com.rhythm.pb.DataTypeProtos.LongPB;
 import com.rhythm.pb.DataTypeProtos.StringListPB;
 import com.rhythm.pb.DataTypeProtos.StringPB;
 
-import com.rhythm.pb.data.Data;
-import com.rhythm.pb.data.DataParser;
-import com.rhythm.pb.data.PBBuilder;
+import com.rhythm.louie.request.data.Data;
+import com.rhythm.louie.request.data.DataParser;
+import com.rhythm.louie.request.data.PBBuilder;
 
 /**
  * @author cjohnson

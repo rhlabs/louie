@@ -13,12 +13,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.rhythm.pb.info.InfoProtos.ServicePB;
-
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 
-import com.rhythm.pb.info.InfoProtos.ServerPB;
+import com.rhythm.louie.info.InfoProtos.*;
 
 import static org.junit.Assert.*;
 

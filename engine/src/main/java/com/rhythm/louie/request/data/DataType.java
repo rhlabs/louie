@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.pb.data;
+package com.rhythm.louie.request.data;
 
 /**
  * @author cjohnson

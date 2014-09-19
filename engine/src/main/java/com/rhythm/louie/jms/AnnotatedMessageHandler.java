@@ -18,9 +18,9 @@ import com.google.protobuf.Descriptors.Descriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.pb.data.Data;
-import com.rhythm.pb.data.DataParser;
-import com.rhythm.pb.data.DataParser.BuilderParser;
+import com.rhythm.louie.request.data.Data;
+import com.rhythm.louie.request.data.DataParser;
+import com.rhythm.louie.request.data.DataParser.BuilderParser;
 
 /**
  *

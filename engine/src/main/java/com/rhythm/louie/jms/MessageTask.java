@@ -19,8 +19,7 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.pb.jms.JmsProtos.ContentPB;
-import com.rhythm.pb.jms.JmsProtos.MessageBPB;
+import com.rhythm.louie.jms.JmsProtos.*;
 
 /**
  *

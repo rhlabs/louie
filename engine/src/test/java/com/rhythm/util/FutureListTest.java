@@ -6,6 +6,8 @@
 
 package com.rhythm.util;
 
+import com.rhythm.louie.util.FutureList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

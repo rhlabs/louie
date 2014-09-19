@@ -19,10 +19,10 @@ import com.rhythm.louie.server.ExternalProperties;
 import com.rhythm.louie.ServiceManager;
 import com.rhythm.louie.server.ServiceProperties;
 
-import com.rhythm.pb.command.ArgType;
-import com.rhythm.pb.command.PBCommand;
-import com.rhythm.pb.command.PBParamType;
-import com.rhythm.pb.command.Service;
+import com.rhythm.louie.service.command.ArgType;
+import com.rhythm.louie.service.command.PBCommand;
+import com.rhythm.louie.service.command.PBParamType;
+import com.rhythm.louie.service.Service;
 
 /**
  *

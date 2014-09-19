@@ -7,7 +7,7 @@ package com.rhythm.louie.jms;
 
 import java.util.Collection;
 
-import com.rhythm.pb.data.Data;
+import com.rhythm.louie.request.data.Data;
 
 /**
  *

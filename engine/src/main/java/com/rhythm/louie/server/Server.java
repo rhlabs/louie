@@ -13,7 +13,7 @@ import java.util.*;
 
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.pb.info.InfoProtos.ServerPB;
+import com.rhythm.louie.info.InfoProtos.ServerPB;
 
 /**
  *

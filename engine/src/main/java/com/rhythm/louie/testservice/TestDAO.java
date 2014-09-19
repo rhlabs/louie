@@ -15,7 +15,7 @@ import com.rhythm.louie.request.RequestContextManager;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
 
-import com.rhythm.util.CalcList;
+import com.rhythm.louie.util.CalcList;
 
 import java.util.ArrayList;
 import java.util.List;
