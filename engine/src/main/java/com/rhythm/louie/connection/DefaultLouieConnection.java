@@ -62,7 +62,7 @@ public class DefaultLouieConnection implements LouieConnection {
     private String host;
     private SessionKey key;
 
-    
+    private boolean authBehaviorEnabled = false;
     private boolean requestOnSSL = false;
     private SSLConfig sslConfig;
     
@@ -131,7 +131,11 @@ public class DefaultLouieConnection implements LouieConnection {
         this.gateway = gateway;
     }
     
-
+    @Override
+    public void enableAuthPort(boolean enable){
+        this.authBehaviorEnabled = enable;
+    }
+    
     private URL getAuthURL() {
         return getUrl("http://"+this.host+":"+AUTH_PORT+"/"+this.gateway+"/pb");
     }
@@ -164,7 +168,7 @@ public class DefaultLouieConnection implements LouieConnection {
     private Boolean first = true;
     private URLConnection getConnection() throws Exception {
         URL url;
-        if (first) {
+        if (first && authBehaviorEnabled) {
             url = getAuthURL();
             first = false;
         } else {

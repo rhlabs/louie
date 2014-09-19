@@ -32,6 +32,8 @@ public interface LouieConnection {
     
     boolean getRetryEnable();
     
+    void enableAuthPort(boolean enable);
+    
     void setGateway(String gateway);
     
     void setPort(int port);

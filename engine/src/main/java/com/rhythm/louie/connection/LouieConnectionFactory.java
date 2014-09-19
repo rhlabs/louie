@@ -15,6 +15,8 @@ import com.rhythm.pb.RequestProtos.SessionKey;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.slf4j.LoggerFactory;
 
@@ -150,6 +152,16 @@ public class LouieConnectionFactory {
         @Override
         public <T extends Message> Response request(Request<T> req) throws Exception {
             return getDelegate().request(req);
+        }
+
+        @Override
+        public void enableAuthPort(boolean enable) {
+            try {
+                getDelegate().enableAuthPort(enable);
+            } catch (Exception ex) {
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error setting auth port behavior", ex);
+            }
         }
     }
     

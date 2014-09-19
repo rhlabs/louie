@@ -158,9 +158,9 @@ public class GeneratorMojo extends AbstractMojo{
     private static final String PYTHON_TEMPLATE = "templates/python/ServiceClient.vm";
     private static final String PYTHON_CLIENT_MODULE = "client.py";
     
-    private static final String AUTH_SERVICE = "auth";
-    private static final String INFO_SERVICE = "info";
-    private static final String TEST_SERVICE = "test";
+    protected static final String AUTH_SERVICE = "auth";
+    protected static final String INFO_SERVICE = "info";
+    protected static final String TEST_SERVICE = "test";
     
     public void exec(String host, String gateway, List<String> prefix, List<String> whitelist, List<String> blacklist, String pypackage) {
         
@@ -204,12 +204,12 @@ public class GeneratorMojo extends AbstractMojo{
         }
     }
     
-    private void printServiceInfo(ServiceInfo info) {
+    protected void printServiceInfo(ServiceInfo info) {
         getLog().info(info.getInputFile()+ " "+info.getServiceName());
     }
     
     String initTemplate = "__version__ = '${project.version}'";
-    private void generatePython(ServiceInfo info, String pypath) throws Exception {
+    protected void generatePython(ServiceInfo info, String pypath) throws Exception {
         printServiceInfo(info);
         String serviceName = info.getServiceName().toLowerCase();
         StringBuilder output = new StringBuilder();
@@ -235,7 +235,7 @@ public class GeneratorMojo extends AbstractMojo{
         }
     }
     
-    private void processTemplate(ServiceInfo info, String template, String output) throws Exception {
+    protected void processTemplate(ServiceInfo info, String template, String output) throws Exception {
         Properties props = new Properties();
         URL url = GeneratorMojo.class.getClassLoader().getResource("config/velocity.properties");
         props.load(url.openStream());
