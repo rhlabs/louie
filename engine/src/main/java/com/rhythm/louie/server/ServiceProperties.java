@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.service.ServiceUtils;
+
 /**
  *
  * @author cjohnson
@@ -32,10 +34,10 @@ public class ServiceProperties {
     private static final String PROP_ROUTER = "router";
     private static final String PROP_JMS = "jmsadapter";
     
-    private static final Map<String,ServiceProperties> SERVICES = 
-            new ConcurrentHashMap<String,ServiceProperties>();
+    private static final Map<String,ServiceProperties> SERVICES = new ConcurrentHashMap<>();
 
-    private static final ServiceProperties DEFAULT = new ServiceProperties(DEFAULT_NAME,false,"",false,false,true);
+    private static final ServiceProperties DEFAULT 
+            = new ServiceProperties(DEFAULT_NAME,false,"",false,false,true);
     
     private final String name;
     private boolean enable;
@@ -51,6 +53,13 @@ public class ServiceProperties {
     
     private final Map<String,String> properties;
     
+    /**
+     * Returns properties for a service by name, it is recommended to use the 
+     * method that takes a class to avoid discrepancies storing the name directly
+     * 
+     * @param name the name of the service
+     * @return 
+     */
     public static ServiceProperties getServiceProperties(String name) {
         ServiceProperties service = SERVICES.get(name);
         if (service==null) {
@@ -58,6 +67,16 @@ public class ServiceProperties {
             SERVICES.put(name, service);
         }
         return service;
+    }
+    
+    /**
+     * Returns the service properties for a class by determining the Service that it implements
+     * 
+     * @param cl a class in the service hierarchy
+     * @return 
+     */
+    public static ServiceProperties getServiceProperties(Class cl) {
+        return getServiceProperties(ServiceUtils.getServiceName(cl));
     }
     
     public static ServiceProperties getDefaultServiceProperties() {
@@ -81,7 +100,7 @@ public class ServiceProperties {
         this.centralized = centralized;
         this.readOnly = readOnly;
         this.caching = caching;
-        properties = new ConcurrentHashMap<String, String>();
+        properties = new ConcurrentHashMap<>();
     }
     
     private ServiceProperties(String name) { 
@@ -92,7 +111,7 @@ public class ServiceProperties {
         this.readOnly = DEFAULT.readOnly;
         this.caching = DEFAULT.caching;
         this.jmsAdapter = DEFAULT.jmsAdapter;
-        properties = new ConcurrentHashMap<String, String>();
+        properties = new ConcurrentHashMap<>();
     }
      
     public String getName() {
@@ -111,11 +130,11 @@ public class ServiceProperties {
         return centralized;
     }
     
-    public boolean isReadOnly(){
+    public boolean isReadOnly() {
         return readOnly;
     }
     
-    public boolean isCachingOn(){
+    public boolean isCachingOn() {
         return caching;
     }
     
@@ -160,7 +179,7 @@ public class ServiceProperties {
     public static void processServiceProperties(Properties props) {
         synchronized(SERVICES) {
             // Load up defaults first
-            Map<String,String> nonDefaultProps = new HashMap<String,String>();
+            Map<String,String> nonDefaultProps = new HashMap<>();
             for (String key : props.stringPropertyNames()) {
                 String[] keyParts = key.split("\\.",2);
                 if (keyParts.length!=2) {
@@ -201,32 +220,40 @@ public class ServiceProperties {
             service = getServiceProperties(serviceName);
         }
             
-        if (attribute.equals(PROP_ENABLE)) {
-            service.enable = value.equals("true");
-        } else if (attribute.equals(PROP_MAIN)) {
-            service.main = value;
-        } else if (attribute.equals(PROP_CENTRAL)) {
-            service.centralized = value.equals("true");
-        } else if (attribute.equals(PROP_READ_ONLY)) {
-            service.readOnly = value.equals("true");
-        } else if (attribute.equals(PROP_CACHING)) {
-            service.caching = value.equals("true");
-        } else if (attribute.equals(PROP_JMS)) {
-            service.jmsAdapter = value;
-        } else if (attribute.equals(PROP_DAO)) {
-            if (!serviceName.equals(DEFAULT_NAME)) {
-                service.dao = value;
-            }
-        } else if (attribute.equals(PROP_ROUTER)) {
-            if (!serviceName.equals(DEFAULT_NAME)) {
-                service.router = value;
-            }
-        } else if (attribute.equals(PROP_CACHE)) {
-            if (!serviceName.equals(DEFAULT_NAME)) {
-                service.cache = value;
-            }
-        } else {
-            service.properties.put(attribute, value);
+        switch (attribute) {
+            case PROP_ENABLE:
+                service.enable = Boolean.parseBoolean(value);
+                break;
+            case PROP_MAIN:
+                service.main = value;
+                break;
+            case PROP_CENTRAL:
+                service.centralized = Boolean.parseBoolean(value);
+                break;
+            case PROP_READ_ONLY:
+                service.readOnly = Boolean.parseBoolean(value);
+                break;
+            case PROP_CACHING:
+                service.caching = Boolean.parseBoolean(value);
+                break;
+            case PROP_JMS:
+                service.jmsAdapter = value;
+                break;
+            case PROP_DAO:
+                if (!serviceName.equals(DEFAULT_NAME)) {
+                    service.dao = value;
+                }   break;
+            case PROP_ROUTER:
+                if (!serviceName.equals(DEFAULT_NAME)) {
+                    service.router = value;
+                }   break;
+            case PROP_CACHE:
+                if (!serviceName.equals(DEFAULT_NAME)) {
+                    service.cache = value;
+            }   break;
+            default:
+                service.properties.put(attribute, value);
+                break;
         }
     }
 }

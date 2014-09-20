@@ -20,7 +20,7 @@ import com.rhythm.louie.Service;
  */
 public class ServiceInfo {
        
-    private final List<String> importList = new ArrayList<String>();
+    private final List<String> importList = new ArrayList<>();
     
     private final String packageDir;
     private final String packageName;
@@ -30,11 +30,11 @@ public class ServiceInfo {
     
     private final TypeElement cl;
     private final Service service;
-    private boolean factory;
+    private final boolean factory;
     
-    ProcessingEnvironment processingEnv;
+    private final ProcessingEnvironment processingEnv;
     
-    List<MethodInfo> methods = new ArrayList<MethodInfo>();
+    private final List<MethodInfo> methods = new ArrayList<>();
     
     @SuppressWarnings("unchecked")
     public ServiceInfo(ProcessingEnvironment processingEnv, TypeElement cl) throws Exception {
@@ -48,13 +48,8 @@ public class ServiceInfo {
         service = cl.getAnnotation(Service.class);
         factory = cl.getAnnotation(NoFactory.class)==null;
         
-        if (service.value().isEmpty()) {
-            baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service", "$1");
-            serviceName = baseName.toLowerCase();
-        } else {
-            serviceName = service.value();
-            baseName = Character.toUpperCase(serviceName.charAt(0)) + serviceName.substring(1);
-        }
+        baseName = cl.getQualifiedName().toString().replaceAll(".*\\.(.*)Service$", "$1");
+        serviceName = baseName.toLowerCase();
     }
     
     public void addMethod(MethodInfo meth) {

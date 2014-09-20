@@ -80,4 +80,33 @@ public class Classes {
         
         return found;
     }
+    
+    /**
+     * Finds the first class, superclass, or interface that has the annotation
+     * 
+     * Note: method is fairly expensive, as it is crawling the class hierarchy 
+     * If you need the value often, it is recommended to cache the the value
+     * 
+     * @param <A>
+     * @param cl the base class to search
+     * @param ann
+     * @return 
+     */
+    public static <A extends Annotation> Class<?> findAnnotatedClass(Class cl, Class<A> ann) {
+        if (cl.getAnnotation(ann)!=null) {
+            return cl;
+        }
+        
+        for (Class<?> iface : cl.getInterfaces()) {
+            Class<?> found = findAnnotatedClass(iface, ann);
+            if (found !=null) {
+                return found;
+            }
+        }
+        
+        if (cl.getSuperclass() !=null && cl.getSuperclass() != Object.class) {
+            return findAnnotatedClass(cl.getSuperclass(),ann);
+        }
+        return null;
+    }
 }
