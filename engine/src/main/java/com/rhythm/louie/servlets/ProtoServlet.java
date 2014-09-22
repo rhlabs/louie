@@ -5,6 +5,12 @@
  */
 package com.rhythm.louie.servlets;
 
+import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
+import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
+import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Type;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,27 +18,21 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
-import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
-import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Type;
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author chris
@@ -42,40 +42,55 @@ public class ProtoServlet extends HttpServlet {
 
     private final Map<String,File> packageMap = Collections.synchronizedMap(new HashMap<String,File>());
     private final Map<String,File> pathMap = Collections.synchronizedMap(new HashMap<String,File>());
-    //private final Map<String,Class<?>> messageMap = Collections.synchronizedMap(new HashMap<String,Class<?>>());
+    private final Map<String,File> pbMap = new ConcurrentHashMap<>();
     
     @Override
     public void init() throws ServletException {
             super.init();
-            
-            URL url = getClass().getClassLoader().getResource("rh/pb/");
-            File pbdir = new File(url.getPath());
-            processPbDir(pbdir);
     }
     
-    private final Pattern protoPathPattern = Pattern.compile("(?:.*)(rh/pb/.*)$");
-    
-    private void processPbDir(File dir) {
+    private void processPbDir(File dir, String prepkg) {
+        Pattern pathPattern = Pattern.compile("(?:.*)("+prepkg+".*)$");
         for (File f : dir.listFiles()) {
             if (f.isDirectory()) {
-                processPbDir(f);
+                processPbDir(f,prepkg);
             } else if (f.getName().endsWith(".proto")) {
                 String path = f.getParent(); 
-                Matcher match = protoPathPattern.matcher(f.getParent());
+                Matcher match = pathPattern.matcher(f.getParent());
                 if (match.matches()) {
                     path = match.replaceFirst("$1");
-                } else if (f.getParent().endsWith("rh/pb") && f.getName().equals("datatype.proto")) {
-                    path = "rh/pb";
+                } else if (f.getParent().endsWith("louie") && f.getName().equals("datatype.proto")) {
+                    path = "louie";
                 }
                 
                 pathMap.put(path, f);
-                
                 String pkg = path.replaceAll("/", ".");
+                for (String pbname : parseProtoFile(f)) {
+                    pbMap.put(pkg+"."+pbname, f);
+                }
                 packageMap.put(pkg, f);
             }
         }
     }
-
+    
+    private final Pattern messagePattern = Pattern.compile("message\\s*(\\w+)\\s*\\{");
+    private List<String> parseProtoFile(File proto) {
+        List<String> pbs = new ArrayList<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(proto))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Matcher m = messagePattern.matcher(line);
+                if (m.matches()) {
+                    pbs.add(m.group(1).trim());
+                } else {
+                }
+            }
+        } catch (IOException ex) {
+            LoggerFactory.getLogger(ProtoServlet.class).error(ex.toString());
+        }
+        return pbs;
+    }
 
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -88,23 +103,28 @@ public class ProtoServlet extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("text");
-        PrintWriter writer = response.getWriter();
-
-        
-        String pkg = request.getParameter("package");
-        String file = request.getParameter("file");
-        String pb = request.getParameter("pb");
-        if (pkg!=null && !pkg.isEmpty()) {
-            writeTextFile(packageMap.get(pkg),writer);
-        } else if (file!=null && !file.isEmpty()) {
-            writeTextFile(pathMap.get(file),writer);
-        } else if (pb!=null && !pb.isEmpty()) {
-            writeTextFile(packageMap.get(getPackage(pb)),writer);
-        } else {
-            writer.write("Error! Must specify a package,file, or pb.\n");
+        try (PrintWriter writer = response.getWriter()) {
+            String pb = request.getParameter("pb");
+            
+            if (pb!=null && !pb.isEmpty()) {
+                String pbpkg = getPackage(pb);
+                File target = pbMap.get(pb);
+                if (target == null) {
+                    String pbfile = packageToFile(pbpkg);
+                    URL base = getClass().getClassLoader().getResource(pbfile);
+                    File fullDir = new File(base.getPath());
+                    processPbDir(fullDir,pbfile);
+                    target = pbMap.get(pb);
+                }
+                writeTextFile(target,writer);
+            } else {
+                writer.write("Error! Must specify a package,file, or pb.\n");
+            }
         }
-        
-        writer.close();
+    }
+    
+    private String packageToFile(String pkg){
+        return pkg.replaceAll("\\.", "\\/");
     }
     
     private final Pattern protoPattern = Pattern.compile("(.*)(?:\\..+?)$");
