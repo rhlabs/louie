@@ -1,0 +1,49 @@
+ ------
+ Java Setup
+ ------
+
+Setting up Java
+
+  If you are new to Java development you will need to install a Java Development Kit (JDK) and an IDE like {{{https://netbeans.org/}Netbeans}} or {{{https://www.eclipse.org/}Eclipse}}. 
+
+  JDK 7 or later is required for using LoUIE. You can download the latest 7.x JDK with NetBeans IDE Java SE bundle {{{http://www.oracle.com/technetwork/java/javase/downloads/jdk-7-netbeans-download-432126.html}here}}.
+  This is the environment that has been used for all the primary development and testing for LoUIE.
+
+  Alternatively you install the latest standalone (8.x) version {{{http://www.oracle.com/technetwork/java/javase/downloads/index.html}here}}
+
+  If you are managing your java installations independently, it is recommended that 
+  you setup a symlink to the major java version you are using. 
+  This enables you to have all of your IDE and servers run off an easily updatable 
+  version of java, rather than modifying each config separately.
+
++-------+
+jdk1.7 -> jdk1.7.0_55/
+jdk1.7.0_55/
++-------+
+
+
+
+Netbeans Configuration
+
+  {{{https://netbeans.org/}Netbeans}} for the most part will simply just work out of the box.  If you need to
+  modify startup options you can change them here: NETBEANS_INSTALL/etc/netbeans.conf 
+  or pass args to the netbeans command.
+
+  If you want to update netbeans itself from with the application, you will want 
+  to ensure that the netbeans installation dir is also writable by you.
+
+
+Maven
+
+  LoUIE uses {{{http://maven.apache.org/}Maven}} for build management.  
+  Netbeans comes bundled with Maven, so inside of the IDE you will be able to use all 
+  of the features of LoUIE including starting new projects with the louie archetype.  
+ 
+  If you need to build from the command line you can install maven through a package 
+  manager or simply use the maven in netbeans found in the MAVEN_INSTALL/java/maven directory.
+
+  In the case of using netbeans it may be handy to setup an alias then to run mvn: 
+
++-------+
+alias mvn "/usr/apps/netbeans/netbeans-8.0.1/java/maven/bin/mvn"
++-------+

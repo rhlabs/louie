@@ -6,7 +6,7 @@
     <version>1.9-SNAPSHOT</version>
   
     <packaging>pom</packaging>
-    <name>LoUIE Parent</name>
+    <name>LoUIE</name>
     
     <scm>
         <connection>scm:git:/src/mis/git/louie.git</connection>
@@ -74,6 +74,8 @@
         </profile>
     </profiles>
     
+
+
     <build>
         <plugins>
             <plugin>

@@ -1,0 +1,57 @@
+ -------
+ Optional Configurations
+ -------
+
+Git
+
+ {{{http://git-scm.com/}Git}} is a version control system. If you are using git with
+  your project you will want to include a .gitignore file like below in your project root.
+
+  Example .gitignore
+
++--------+
+/service/target/
+/server/target/
+/target/
+*~
++--------+
+
+Nexus server
+
+  {{{http://www.sonatype.org/nexus/}Sonatype Nexus}} is a repository management system.
+  It is very useful to integrate a Nexus server into your workflow as it allows you to 
+  store your own binaries for other developers to use.  If your work environment is 
+  configured for Nexus, you will need to setup a settings.xml like {{{./settings.xml}this}} 
+  in your .m2 directory. From now on, all maven artifacts will be retrieved via the nexus server.  
+  "nexushost" in the example settins should of course be replaced by whatever host is 
+  running your server. 
+
+
+Working with a Fileserver
+
+  If your work environment runs home directories off of a file server it is highly 
+  recommended that you move some internal directories to a local file system. This 
+  pattern has proven useful for our development pattern, you may have different results,
+  so please take these suggestions as they are, suggestions.
+ 
+  You can store this data in your preferred local directory such as /opt/blah or 
+  /usr/local/blah or /usr/blah, for instance. Just ensure that this directory is writable by you,
+
+  Netbeans will index your projects and store quite alot of data, so no need to run that over the network.
+  To run netbeans with a local cache, you can modify the file found in NETBEANS_INSTALL/etc/netbeans.conf,
+  or this can be done with an alias, ie:
+
++-------+
+alias netbeans  '/usr/apps/netbeans/netbeans-8.0.1/bin/netbeans --cachedir "/usr/local/blah/netbeans_cache" &'
++-------+
+
+
+  Also as above with netbeans, it is recommended that you symlink your maven and netbeans 
+  config directories to your local drive, ie:
+ 
++-------+
+.m2 -> /usr/local/blah/maven/
+.netbeans -> /usr/local/blah/.netbeans
++-------+
+
+  It is also recommended that any project that you develop or work on has a development directory on your local disk as well.

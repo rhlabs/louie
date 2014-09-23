@@ -9,7 +9,7 @@
     <artifactId>louie</artifactId>
   
     <packaging>jar</packaging>
-    <name>LoUIE</name>
+    <name>LoUIE Engine</name>
       
     <properties>
         <skipTests>true</skipTests>

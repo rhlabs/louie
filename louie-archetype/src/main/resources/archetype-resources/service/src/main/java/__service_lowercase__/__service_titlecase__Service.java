@@ -10,14 +10,14 @@ import com.rhythm.louie.Service;
 @Service
 public interface ${service_titlecase}Service {
 
-/**
-    * An example service method which accepts a String  
-    * and returns a ${service_titlecase}ResponsePB
-    *
-    * @param request
-    * @return ${service_titlecase}ResponsePB
-    * @throws Exception
-    */
+    /**
+     * An example service method which accepts a String  
+     * and returns a ${service_titlecase}ResponsePB
+     *
+     * @param request
+     * @return ${service_titlecase}ResponsePB
+     * @throws Exception
+     */
     ${service_titlecase}ResponsePB basicRequest(String request) throws Exception;
 
 }

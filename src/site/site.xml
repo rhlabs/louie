@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project xmlns="http://maven.apache.org/DECORATION/1.3.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0
-    http://maven.apache.org/xsd/decoration-1.3.0.xsd">
-<body>
-    <menu name="Overview">
-      <item name="Introduction" href="index.html"/>
-    </menu>
+<project name="LoUIE">
+  <body>
+    <!-- <menu name="LoUIE" inherit="top">
+      <item name="About" href="about.html"/>
+      <item name="Download" href="download.html"/>
+      <item name="Guidelines" href="guidelines.html"/>
+      <item name="Javadoc" href="javadoc.html"/>
+      <item name="FAQ" href="faq.html"/>
+    </menu> -->
 
-    <menu name="Tutorials">
+    <menu name="Manual" inherit="top">
+      <item name="Introduction" href="intro.html"/>
+      <item name="Setup" href="java.html">
+        <item name="Other" href="optional.html"/>
+        <item name="Server Configuration" href="server.html"/>
+      </item>
       <item name="Getting Started" href="start.html"/>
-      <item name="Server Configuration" href="server.html"/>
       <!-- <item name="Python" href="python.html"/> -->
+      
+      <item name="Protocol Buffers" href="pb.html"/>
+      <item name="Service" href="service.html"/>
     </menu>
-
   </body>
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.3.1</version>
+  </skin>
 </project>
