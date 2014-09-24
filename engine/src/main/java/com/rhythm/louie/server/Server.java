@@ -79,7 +79,7 @@ public class Server {
                 }
                 
                 if (keyParts.length==1) {
-                    server.host=value;
+                    server.host=value.trim();
                 } else {
                     String attribute = keyParts[1];
                     if (attribute.equals("display")) {

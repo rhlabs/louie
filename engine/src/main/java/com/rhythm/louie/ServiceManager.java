@@ -214,11 +214,10 @@ public class ServiceManager {
         Properties props = new Properties();
         InputStream in = null;
         try {
-            File file = new File(context.getRealPath(dir + propFile+"."+LocalConstants.HOST));
-            if (!file.exists()) {
-                file = new File(context.getRealPath(dir + propFile));
+            in = context.getResourceAsStream(dir + propFile+"."+LocalConstants.HOST);
+            if (in == null){
+                in = context.getResourceAsStream(dir + propFile);
             }
-            in = new FileInputStream(file);
             props.load(in);
         } catch (IOException ex) {
             LoggerFactory.getLogger(ServiceManager.class).warn(ex.getMessage());
