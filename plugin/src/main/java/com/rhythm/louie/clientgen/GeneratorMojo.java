@@ -41,7 +41,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.LoggerFactory;
 
 /**
- * Executes com.rhythm.louie.serviceclient.Generator.main()
+ * Executes the LoUIE client generator
  * @author eyasukoc
  * @goal generate
  * @requiresDependencyResolution test
@@ -199,7 +199,7 @@ public class GeneratorMojo extends AbstractMojo{
             try {
                 Collections.sort(pythonMethods);
                 ServiceInfo info = new ServiceInfo(service, host, gateway, pythonMethods);
-                generatePython(info, pypackage);
+                generatePython(info, pypackage, project.getBasedir().toString(),pythondir);
             } catch (Exception e) {
                 LoggerFactory.getLogger(GeneratorMojo.class).error("Error Generating Python Clients", e);
             }
@@ -211,12 +211,12 @@ public class GeneratorMojo extends AbstractMojo{
     }
     
     String initTemplate = "__version__ = '${project.version}'";
-    protected void generatePython(ServiceInfo info, String pypath) throws Exception {
+    protected void generatePython(ServiceInfo info, String pypath, String basedir, String pydir) throws Exception {
         printServiceInfo(info);
         String serviceName = info.getServiceName().toLowerCase();
         StringBuilder output = new StringBuilder();
-        output.append(project.getBasedir()).append("/");
-        output.append(pythondir);
+        output.append(basedir).append("/");
+        output.append(pydir);
         //special case auth, louie, and test
         if (INFO_SERVICE.equals(serviceName) || AUTH_SERVICE.equals(serviceName) || TEST_SERVICE.equals(serviceName)) {
             output.append("louie/");

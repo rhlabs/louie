@@ -7,7 +7,7 @@
     <version>${version}</version>
     <packaging>pom</packaging>
 
-    <name>${rootArtifactId} Parent</name>
+    <name>${rootArtifactId}</name>
 
     <properties>
         <louie.version>1.9-SNAPSHOT</louie.version>
@@ -19,7 +19,6 @@
         <repository>
             <id>louie-repo</id>
             <name>LoUIE git repository</name>
-            <url>http://supercoolurl.com</url>
         </repository>
         -->
     </repositories>

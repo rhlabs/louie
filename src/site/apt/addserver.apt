@@ -1,0 +1,28 @@
+ ------
+Add a server to NetBeans
+ ------
+
+Add a GlassFish Server to your NetBeans IDE:
+
+[./images/addserver/nb_add_server.png]
+
+ <<From the Services window, right click Servers and select Add Server>>
+
+[./images/addserver/nb_gf_new.png]
+ 
+ <<Select GlassFish Server>>
+
+[./images/addserver/nb_gf_detected.png]
+
+ <<If your GlassFish instance is detected, click Next. Otherwise, browse to your install location>>
+
+[./images/addserver/nb_gf_config.png]
+
+ <<The default GlassFish domain is domain1, so you can leave the defaults here.>>
+ <<Specify a User Name and Password if necessary.>>
+
+[./images/addserver/nb_gf_done.png]
+
+ <<All done!>>
+
+ Next, you can {{{./run.html}run}} your application!

@@ -8,6 +8,10 @@
     <packaging>pom</packaging>
     <name>LoUIE</name>
     
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
+    
     <scm>
         <connection>scm:git:/src/mis/git/louie.git</connection>
     </scm>

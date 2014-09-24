@@ -66,7 +66,6 @@ public class PythonMethodInfo extends MethodInfo {
         Class<?> c = cl.loadClass(classname);
         Method staticMethod = c.getDeclaredMethod("getDescriptor");
         Descriptors.Descriptor desc = (Descriptors.Descriptor) staticMethod.invoke(null, (Object[]) null);
-        String pkg = desc.getFile().getPackage();
         String file = desc.getFile().getName();
         file = file.replaceAll("\\.proto", "_pb2");
         file = file.replaceAll("\\/", ".");
