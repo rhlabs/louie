@@ -6,14 +6,14 @@ Undeploying Your Application
 
 * In NetBeans:
 
-[./images/undeploy/app_clean_build.png]
+[../images/undeploy/app_clean_build.png]
 
  <<Clean and Build your Server project to undeploy>>
 
-[./images/undeploy/app_undeployed.png]
+[../images/undeploy/app_undeployed.png]
 
  <<Look for output similar to this in your server.log file>>
 
-[./images/undeploy/app_alt_undeploy.png]
+[../images/undeploy/app_alt_undeploy.png]
 
  <<If the application did not undeploy via the Clean and Build action, you can undeploy it using the Services tab>>

@@ -21,27 +21,27 @@ Define value for property 'service_titlecase':  : : Sample
 * OR From NetBeans:
 
 
-[./images/create/nb_new.png]
+[../images/create/nb_new.png]
 
  <<In NetBeans, create a New Project>>
 
-[./images/create/nb_from_arch.png] 
+[../images/create/nb_from_arch.png] 
 
  <<Create a new Maven project from a Maven Archetype>>
 
-[./images/create/nb_arch_filter.png] 
+[../images/create/nb_arch_filter.png] 
 
  <<Filter the archetypes using the keyword "louie" and select the latest version>>
 
-[./images/create/nb_arch_args.png] 
+[../images/create/nb_arch_args.png] 
 
  <<Populate the arguments: Project Name, Group Id, service_lowercase and service_titlecase>>
 
-[./images/create/nb_generated.png]
+[../images/create/nb_generated.png]
 
  <<You should now have three new generated projects>>
 
-[./images/create/nb_clean_build.png]
+[../images/create/nb_clean_build.png]
 
  <<The Services project will appear to have errors, so clean and build the main project>>
 
