@@ -9,22 +9,32 @@
       <item name="FAQ" href="faq.html"/>
     </menu> -->
 
-    <menu name="Manual" inherit="top">
+    <menu name="Manual" inherit="top" img="icon-home">
       <item name="Introduction" href="intro.html"/>
-      <item name="Setup" href="java.html">
-        <item name="Other" href="optional.html"/>
+      <item name="Setup" href="setup.html" collapse="true">
+        <item name="Java Development Environment" href="java.html"/>
+        <item name="Install Protocol Buffers" href="pbinstall.html"/>
+        <item name="Optional Considerations" href="optional.html"/>
         <item name="Server Configuration" href="server.html"/>
       </item>
-      <item name="Getting Started" href="start.html">
+      <item name="Getting Started" href="start.html" collapse="true">
         <item name="Creating a new project" href="create.html"/>
         <item name="Adding a server to NetBeans" href="addserver.html"/>
         <item name="Running a project" href="run.html"/>
         <item name="Undeploying" href="undeploy.html"/>
       </item>
+      <item name="Developing with LoUIE" href="develop.html" collapse="true">
+        <item name="Protocol Buffers" href="pb.html"/>
+        <item name="Writing a Service" href="service.html"/>
+        <item name="Adding a Datasource" href="datasource.html"/>
+        <item name="Messaging" href="messaging.html"/>
+        <item name="Logging Configuration" href="logging.html"/>
+        <item name="Caching" href="caching.html"/>
+      </item>
+        
       <!-- <item name="Python" href="python.html"/> -->
       
-      <item name="Protocol Buffers" href="pb.html"/>
-      <item name="Service" href="service.html"/>
+      
     </menu>
   </body>
   <skin>

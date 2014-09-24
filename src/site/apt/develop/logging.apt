@@ -1,0 +1,28 @@
+ ------
+ Logging
+ ------
+
+Logging
+
+* {{{http://www.slf4j.org/}SLF4J}} 
+
+ LoUIE is configured by default to log of all requests as well as all database 
+queries performed. This allows us to analyze usage and patterns. All logging is 
+done using {{{http://www.slf4j.org/}SLF4J}}, which provides a facade to the actual logging code so that 
+the logging implementation can be swapped out. 
+
+* {{{http://code.google.com/p/log4jdbc/}Log4jdbc}} 
+
+ {{{http://code.google.com/p/log4jdbc/}Log4jdbc}} is a Java JDBC driver that 
+can log JDBC calls and optionally timing information for other JDBC drivers 
+using SLF4J. When using the including Jdbc utilties, we inject this driver 
+automatically into the connection so that all queries can be captured and logged.
+
+* {{{http://logging.apache.org/log4j/2.x/}Log4J2}}
+
+ The LoUIE archetype will template out a server configuration to use 
+{{{http://logging.apache.org/log4j/2.x/}Log4J2}}. This is our preferred 
+logging framework, but you can change the dependency bindings to a different 
+slf4j adapter. You will need to account for the Log4Jdbc configurations. 
+Log4j2 provides a Routing Appender which we are using in the default log4j2.xml
+to split logging into different files based upon your logger key.

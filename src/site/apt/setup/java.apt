@@ -1,10 +1,12 @@
  ------
- Java Setup
+ Java Development Environment
  ------
 
-Setting up Java
+Java Development Environment
 
-  If you are new to Java development you will need to install a Java Development Kit (JDK) and an IDE like {{{https://netbeans.org/}Netbeans}} or {{{https://www.eclipse.org/}Eclipse}}. 
+* Setting up Java
+
+  If you are new to Java development you will need to install a Java Development Kit (JDK) and an IDE like {{{http://netbeans.org/}Netbeans}} or {{{http://www.eclipse.org/}Eclipse}}. 
 
   JDK 7 or later is required for using LoUIE. You can download the latest 7.x JDK with NetBeans IDE Java SE bundle {{{http://www.oracle.com/technetwork/java/javase/downloads/jdk-7-netbeans-download-432126.html}here}}.
   This is the environment that has been used for all the primary development and testing for LoUIE.
@@ -21,11 +23,9 @@ jdk1.7 -> jdk1.7.0_55/
 jdk1.7.0_55/
 +-------+
 
+* Netbeans Configuration
 
-
-Netbeans Configuration
-
-  {{{https://netbeans.org/}Netbeans}} for the most part will simply just work out of the box.  If you need to
+  {{{http://netbeans.org/}Netbeans}} for the most part will simply just work out of the box.  If you need to
   modify startup options you can change them here: NETBEANS_INSTALL/etc/netbeans.conf 
   or pass args to the netbeans command.
 
@@ -33,7 +33,7 @@ Netbeans Configuration
   to ensure that the netbeans installation dir is also writable by you.
 
 
-Maven
+* Maven
 
   LoUIE uses {{{http://maven.apache.org/}Maven}} for build management.  
   Netbeans comes bundled with Maven, so inside of the IDE you will be able to use all 

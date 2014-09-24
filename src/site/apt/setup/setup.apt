@@ -1,0 +1,24 @@
+ ------
+ Environment Setup
+ ------
+
+Environment Setup
+
+
+* New to Java?
+   
+ The biggest hurdle when beginning LoUIE development is getting your environment
+configured for Java EE developement. You will need to ensure that you have a proper
+Java Development Kit (JDK) installed as well as the various servers and tools that 
+are required for building and running a LoUIE service effectively.
+
+* Environment
+
+ The documentation included here assumes that you are working on a linux based 
+operating system. If you are on another platform, or do not have access to install
+servers in certain directories, feel free to setup your work environment as you like.
+These practices are mainly suggestions and you can setup your development environment
+however you, or your organization, prefers.
+
+ LoUIE is primarily just a Java EE Web application with compilation hooks. Therefore
+you should be able to run LoUIE in a variety of application servers.   

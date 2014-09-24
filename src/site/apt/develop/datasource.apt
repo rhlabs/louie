@@ -1,0 +1,87 @@
+ ------
+ Datasources
+ ------
+
+Setting up a Datasource
+
+ Note: the below instructions are specific to glassfish. For other application servers
+please read their provided documentation.
+
+* Database Pool Configuration
+
+ A very useful feature to utilize in an application server like glassfish is database 
+connection pooling. The base JDBC functionality in LoUIE is designed with database 
+pooling in mind. It is made very easy to lookup and use a server configured pool.
+
+ To setup a mysql pool, first install the connector library, ie mysql-connector-java-5.1.28-bin.jar 
+in {PATH_TO_GF_INSTALL}/glassfish4/glassfish/domains/domain1/lib/ and restart the server. 
+You can find the latest mysql connector {{{http://dev.mysql.com/downloads/connector/j/5.1.html}here}}
+
+ Once you have installed the jdbc connector, you can add a pool and a datasource 
+through the admin interface, but for simplicity here is an example of adding a 
+mysql database connection pool "TestPool" that is configured to connect to a local
+database named "test". Also you will need to create the corresponding datasource "jdbc/TestDS". 
+The following will setup a pool that connects to a database called test on your local machine.
+
+ Note: for documentation on how to install a mysql server and setup a database, please 
+see the mysql documentation {{{http://dev.mysql.com/doc/}here}}
+
++-----+
+asadmin create-jdbc-connection-pool \
+ --datasourceclassname=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource \
+ --restype=javax.sql.ConnectionPoolDataSource \
+ --isconnectvalidatereq=true \
+ --validationclassname=org.glassfish.api.jdbc.validation.MySQLConnectionValidation \
+ --validationmethod=custom-validation --steadypoolsize=2 --maxpoolsize=32 \
+ --maxwait=60000 --poolresize=2 --idletimeout=300 --property \
+ ServerName=localhost:DatabaseName=test:AutoReconnect=true TestPool
+
+# if you need add a username and password to the pool, change the --property to
+# --property ServerName=localhost:DatabaseName=test:AutoReconnect=true:User=USER:Password=PASSWORD
+
+asadmin create-jdbc-resource --connectionpoolid TestPool --enabled=true jdbc/TestDS
+
+# verify that the pool is working properly
+asadmin ping-connection-pool TestPool
++-----+
+
+* JDBC Factory
+
+ To integrate your datasource into a LoUIE source you will need to setup a JdbcFactory.
+You can incapsulate this logic into your own class if you like, or just create it directly
+in your DAO layer.  Below is an example of a factory class and it's use in code.
+
++------------+
+import com.rhythm.louie.jdbc.DatasourceFactory;
+import com.rhythm.louie.jdbc.JdbcFactory;
+
+public class TestJdbc {
+    static final String DB_KEY = "Test";
+    static final String DATASOURCE = "jdbc/TestDS";
+
+    private TestJdbc() {}
+
+    /**
+     * Returns a factory that creates connections using JNDI
+     * @return JdbcFactory  
+     */
+    public static JdbcFactory getFactory() {
+        return new DatasourceFactory(DATASOURCE, DB_KEY);
+    }
+}
++------------+
+
+ To use the JdbcFactory in a DAO, cache a reference to it and use it through the duration of the service.
+
++------------+
+@DAO
+public class TestDAO implements TestService{
+    private final JdbcFactory jdbcFactory;
+    
+    public TestDAO() {
+        jdbcFactory = TestJdbc.getFactory();
+    }
+
+    ...
+}
++------------+

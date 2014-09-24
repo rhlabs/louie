@@ -2,9 +2,11 @@
  Protocol Buffers
  ------
 
- {{{https://developers.google.com/protocol-buffers}Protocol Buffers}} (PBs) form the basis communication with LoUIE. In order to effectively utilize the capability in LoUIE, you will need to organize your data in PB Messages. Protocol Buffers are used heavily within Google and their documentation is stellar. If you are not familiar with PBs, it is well worth your time becoming comfortable with them and what you can and cannot do.
+Protocol Buffers
 
-Example
+ {{{http://developers.google.com/protocol-buffers}Protocol Buffers}} (PBs) form the basis communication with LoUIE. In order to effectively utilize the capability in LoUIE, you will need to organize your data in PB Messages. Protocol Buffers are used heavily within Google and their documentation is stellar. If you are not familiar with PBs, it is well worth your time becoming comfortable with them and what you can and cannot do.
+
+* Example
 
  In order explain how PBs are used throughout LoUIE, here is an example proto file found hypothetically in: service/src/main/resources/sample/sample.proto
 

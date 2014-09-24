@@ -45,5 +45,5 @@ Define value for property 'service_titlecase':  : : Sample
 
  <<The Services project will appear to have errors, so clean and build the main project>>
 
- Congratulations! Your first project is now built and compiled. 
+ Congratulations! Your first project is now created and compiled. 
  Next you can {{{./addserver.html}add}} a GlassFish server to your NetBeans and then {{{./run.html}run}} the project!

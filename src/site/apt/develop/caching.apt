@@ -1,0 +1,11 @@
+ ------
+ Caching
+ ------
+
+Caching
+
+* {{{http://code.google.com/p/guava-libraries/}Guava}} 
+ 
+ For in memory caching and in client side libraries we are using Guava for caching. 
+Guava provides a ton of features, a caching framework is just one small portion. 
+With Guava you can create LRU based caching structures that abstract the actual lookups. 

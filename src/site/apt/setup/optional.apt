@@ -1,10 +1,12 @@
  -------
- Optional Configurations
+ Optional Considerations
  -------
 
-Git
+Optional Considerations
 
- {{{http://git-scm.com/}Git}} is a version control system. If you are using git with
+* Git
+
+ {{{git-scm.com/}Git}} is a version control system. If you are using git with
   your project you will want to include a .gitignore file like below in your project root.
 
   Example .gitignore
@@ -16,9 +18,9 @@ Git
 *~
 +--------+
 
-Nexus server
+* Nexus server
 
-  {{{http://www.sonatype.org/nexus/}Sonatype Nexus}} is a repository management system.
+  {{{www.sonatype.org/nexus/}Sonatype Nexus}} is a repository management system.
   It is very useful to integrate a Nexus server into your workflow as it allows you to 
   store your own binaries for other developers to use.  If your work environment is 
   configured for Nexus, you will need to setup a settings.xml like {{{./settings.xml}this}} 
@@ -27,7 +29,7 @@ Nexus server
   running your server. 
 
 
-Working with a Fileserver
+* Working with a Fileserver
 
   If your work environment runs home directories off of a file server it is highly 
   recommended that you move some internal directories to a local file system. This 

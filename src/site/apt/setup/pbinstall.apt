@@ -1,0 +1,27 @@
+ ------
+ Installing Protocol Buffers
+ ------
+
+Installing Protocol Buffers
+
+ LoUIE uses Google's Protocol Buffers as the underlying serialization for it's RPC
+layer. When compiling LoUIE based projects you will need to use Protocol Buffers 
+for the arguments and return types of all your service methods. The java dependencies 
+will be fetched via Maven, but you will still need to install the PB compiler.
+
+ Note: Currently LoUIE is dependent on your compiler being v2.5. We will work on making this more flexible 
+in the future.
+
+* Install with a Package Manager
+
+ If you are running on a Linux OS, you should be able to install protoc through your
+package manager.
+
++-------------+
+Example from Ubuntu Here
++-------------+
+
+* Compile and Install from Source
+
+ Alternatively, you can find instructions for downloading, building, and installing the compiler from 
+source {{{http://developers.google.com/protocol-buffers/}here}}. 

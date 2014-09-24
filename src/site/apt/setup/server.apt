@@ -12,7 +12,7 @@ Server Configuration
 
 * Installation
 
- To install Glassfish, download the full platform zip {{{https://glassfish.java.net/download.html}here}}
+ To install Glassfish, download the full platform zip {{{http://glassfish.java.net/download.html}here}}
 
  To install, just unzip it in your desired location.
 
@@ -87,23 +87,4 @@ asadmin set configs.config.server-config.network-config.transports.transport.tcp
 # Suppress "Powered By" response headers
 asadmin set server.network-config.protocols.protocol.http-listener-1.http.xpowered-by=false
 +-----+
-
-
-* Database Pool Configuration
-
- A very useful feature to utilize in an application server like glassfish is database connection pooling. The base JDBC functionality in LoUIE is designed with database pooling in mind. It is made very easy to lookup and use a server configured pool.
-
- To setup a mysql pool, first install the connector library, ie mysql-connector-java-5.1.28-bin.jar in  {PATH_TO_GF_INSTALL}/glassfish4/glassfish/domains/domain1/lib/ and restart the server. You can find the latest mysql connector {{{http://dev.mysql.com/downloads/connector/j/5.1.html}here}}
-
- Once you have installed the jdbc connector, you can add a pool and a datasource through the admin interface, but for simplicity here is an example of adding a mysql database connection pool "TestPool" and it's corresponding datasource "jdbc/TestDS". The following will setup a pool that connects to a database called test on your local machine.
-
-+-----+
-asadmin create-jdbc-connection-pool --datasourceclassname=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource --restype=javax.sql.ConnectionPoolDataSource --isconnectvalidatereq=true --validationclassname=org.glassfish.api.jdbc.validation.MySQLConnectionValidation --validationmethod=custom-validation --steadypoolsize=2 --maxpoolsize=32 --maxwait=60000 --poolresize=2 --idletimeout=300 --property ServerName=localhost:DatabaseName=test:AutoReconnect=true TestPool
-
-# if you need add a username and password to the pool, change the --property to
---property ServerName=localhost:DatabaseName=test:AutoReconnect=true:User=USER:Password=PASSWORD
-
-asadmin create-jdbc-resource --connectionpoolid TestPool --enabled=true jdbc/TestDS
-+-----+
-
 
