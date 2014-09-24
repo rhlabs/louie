@@ -81,17 +81,6 @@ public interface TestService {
     @Streaming
     public List<ErrorPB> streamLoopTest(Integer numResults, Integer resultSize, Integer sleep, List<String> hosts) throws Exception;
  
-    /**
-     * Generates a message using the configured JMS adapter,
-     * and the same delegate should receive that message
-     * 
-     * @param message
-     * @return
-     * @throws Exception 
-     */
-    public String messageTest(String message) throws Exception;
-    
-    
     @Internal
     public Map<String,String> mapTest() throws Exception;
 

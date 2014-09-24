@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
+import org.slf4j.LoggerFactory;
+
 import com.rhythm.louie.server.TaskScheduler;
 import com.rhythm.louie.DAO;
 import com.rhythm.louie.stream.StreamingConsumer;
@@ -56,7 +58,7 @@ public class TestDAO implements TestService {
         if (hosts.isEmpty()) {
             return "Done";
         }
-        List<String> args = new ArrayList<String>(hosts);
+        List<String> args = new ArrayList<>(hosts);
         String host = args.remove(0);
         TestClient client = TestClientFactory.getClient(
                 LouieConnectionFactory.getConnection(host));
@@ -65,12 +67,12 @@ public class TestDAO implements TestService {
 
     @Override
     public List<ErrorPB> streamTest(final Integer numResults, final  Integer resultSize, final Integer sleep) throws Exception {
-        List<String> values = new ArrayList<String>(numResults);
+        List<String> values = new ArrayList<>(numResults);
         for (int i = 0; i<numResults;i++) {
             values.add("");
         }
         
-        CalcList<String,ErrorPB> list = new CalcList<String,ErrorPB>(new Function<String, ErrorPB>() {
+        CalcList<String,ErrorPB> list = new CalcList<>(new Function<String, ErrorPB>() {
             @Override
             public ErrorPB apply(String input) {
                 if (sleep>0) {
@@ -97,10 +99,10 @@ public class TestDAO implements TestService {
         if (hosts.isEmpty()) {
             return streamTest(numResults,resultSize,sleep);
         }
-        final List<String> args = new ArrayList<String>(hosts);
+        final List<String> args = new ArrayList<>(hosts);
         final String host = args.remove(0);
         
-        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<ErrorPB>(100);
+        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<>(100);
         
         TaskScheduler.getInstance().execute(new Runnable() {
             @Override
@@ -110,7 +112,7 @@ public class TestDAO implements TestService {
                             LouieConnectionFactory.getConnection(host));
                     client.streamLoopTest(numResults, resultSize, sleep, args, consumer);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LoggerFactory.getLogger(TestDAO.class).error("Error calling streamLoopTest on Remote Client",ex);
                 }
             }
         });
@@ -158,11 +160,6 @@ public class TestDAO implements TestService {
 //        }
 //    }
 
-    @Override
-    public String messageTest(String message) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
     @Override
     public Map<String, String> mapTest() throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
