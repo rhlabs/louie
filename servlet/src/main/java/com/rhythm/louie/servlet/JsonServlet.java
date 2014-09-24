@@ -3,17 +3,19 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.servlets;
+package com.rhythm.louie.servlet;
 
 import com.rhythm.louie.server.Server;
 import com.rhythm.louie.request.JsonProcess;
 import com.rhythm.louie.request.JsonProcessor;
 import com.rhythm.louie.request.JsonRouter;
+import com.rhythm.louie.server.Server;
 
 import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author cjohnson
  */
+@WebServlet(name = "JsonServlet", urlPatterns = {"/json"})
 public class JsonServlet extends HttpServlet {
     private JsonProcess processor;
     

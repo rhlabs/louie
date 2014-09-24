@@ -92,7 +92,7 @@ public class Classes {
      * @param ann
      * @return 
      */
-    public static <A extends Annotation> Class<?> findAnnotatedClass(Class cl, Class<A> ann) {
+    public static <A extends Annotation> Class<?> findAnnotatedClass(Class<?> cl, Class<A> ann) {
         if (cl.getAnnotation(ann)!=null) {
             return cl;
         }

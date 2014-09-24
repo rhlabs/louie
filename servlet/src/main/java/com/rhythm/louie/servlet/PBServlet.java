@@ -4,12 +4,13 @@
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.servlets;
+package com.rhythm.louie.servlet;
 
 import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +21,7 @@ import com.rhythm.louie.request.HttpProcessor;
  *
  * @author cjohnson
  */
+@WebServlet(name = "PBServlet", urlPatterns = {"/pb"})
 public class PBServlet extends HttpServlet {
     HttpProcessor processor = new HttpProcessor();
     

@@ -10,7 +10,7 @@
     <artifactId>louie-archetype</artifactId>
     <packaging>maven-archetype</packaging>
     
-    <name>Louie Archetype</name>
+    <name>LoUIE Archetype</name>
  
     <build>
         <extensions>

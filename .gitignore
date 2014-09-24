@@ -1,7 +1,8 @@
+/target/
 /engine/target/
 /processor/target/
+/servlet/target/
 /plugin/target/
+/archetype/target/
 /activemq-adapter/target/
-/target/
 *~
-/louie-archetype/target/

@@ -1,17 +1,16 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
 /*
- * ServletListener.java
+ * ServiceRegister.java
+ * 
+ * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-package ${package}.servlets; 
+package com.rhythm.louie.servlet;
+
 
 import com.rhythm.louie.ServiceManager;
 import com.rhythm.louie.service.ServiceFactory;
 
-import ${package}.${service_lowercase}.${service_titlecase}ServiceFactory;
-
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,14 +23,16 @@ import org.slf4j.LoggerFactory;
  * Web application lifecycle listener.
  * @author cjohnson
  */
-public class StateListener implements ServletContextListener {
+public abstract class ServiceRegister implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
             
             // Init services
-            ServiceManager.addService(${service_titlecase}ServiceFactory.getInstance());
+            for (ServiceFactory factory : loadFactories()) {
+                ServiceManager.addService(factory);
+            }
 
             try {
                 Class<?> c = Class.forName("com.rhythm.swagr.SwagrServiceFactory");
@@ -40,12 +41,12 @@ public class StateListener implements ServletContextListener {
                 ServiceFactory swagrFactory = (ServiceFactory) factoryMethod.invoke(c);
                 ServiceManager.addService(swagrFactory);
             } catch (Exception ex){
-                LoggerFactory.getLogger(StateListener.class.getName()).error("SWAGr Service was not loaded");
+                //LoggerFactory.getLogger(ServiceRegister.class.getName()).error("SWAGr Service was not loaded");
             }
             
             ServiceManager.initialize(sce.getServletContext());
         } catch (Exception ex) {
-            Logger.getLogger(StateListener.class.getName()).log(Level.SEVERE, 
+            Logger.getLogger(ServiceRegister.class.getName()).log(Level.SEVERE, 
                     "ERROR Initializing Services", ex);
         }
     }
@@ -55,4 +56,5 @@ public class StateListener implements ServletContextListener {
         ServiceManager.shutdown();
     }
     
+    abstract public Collection<ServiceFactory> loadFactories();
 }

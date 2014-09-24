@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.servlets;
+package com.rhythm.louie.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import com.rhythm.louie.cache.CacheManager;
  *
  * @author cjohnson
  */
+@WebServlet(name = "CacheInfoServlet", urlPatterns = {"/cache"})
 public class CacheInfoServlet extends HttpServlet {
     
     private final Logger logger = LoggerFactory.getLogger(CacheManager.class);

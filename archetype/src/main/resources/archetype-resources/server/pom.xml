@@ -32,6 +32,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.rhythm.louie</groupId>
+            <artifactId>louie-servlet</artifactId>
+            <version>${louie.version}</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>${rootArtifactId}-service</artifactId>
             <version>${project.version}</version>

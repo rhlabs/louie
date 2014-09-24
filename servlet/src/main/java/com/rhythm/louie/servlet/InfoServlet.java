@@ -4,19 +4,22 @@
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.servlets;
+package com.rhythm.louie.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.rhythm.louie.server.ExternalProperties;
 import com.rhythm.louie.ServiceManager;
+import com.rhythm.louie.server.ExternalProperties;
+import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.server.ServiceProperties;
 
 import com.rhythm.louie.service.command.ArgType;
@@ -28,6 +31,7 @@ import com.rhythm.louie.service.Service;
  *
  * @author cjohnson
  */
+@WebServlet(name = "InfoServlet", urlPatterns = {"/info"})
 public class InfoServlet extends HttpServlet {
    
     /** 
