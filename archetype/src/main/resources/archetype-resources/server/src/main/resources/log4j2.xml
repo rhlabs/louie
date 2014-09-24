@@ -10,6 +10,11 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%m%n %throwable{15}"/>
+            <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
+        </Console>
+        <Console name="ConsoleError" target="SYSTEM_ERR">
+            <PatternLayout pattern="%m%n %throwable{15}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
         
         <Routing name="JdbcRouter">
@@ -110,6 +115,7 @@
         
         <Root level="info">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="ConsoleError"/>
         </Root>
     </Loggers>
     
