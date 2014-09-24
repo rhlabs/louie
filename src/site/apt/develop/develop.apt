@@ -5,5 +5,9 @@
 Developing with LoUIE
 
 
-* Lets get a crackin
+ To develop with LoUIE you will need to setup your data objects with 
+{{{./pb.html}Protocol Buffers}} and write a {{{./service.html}service interface}}.
    
+ If this is a database driven service, you will want to configure a {{{./datasource.html} datasource}}.
+
+ Other additional concepts can be found in the index on the left.
