@@ -27,11 +27,8 @@ import com.rhythm.louie.request.data.Result;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,24 +40,15 @@ import org.slf4j.LoggerFactory;
 public class ProtoProcessor implements ProtoProcess{
     private final Logger LOGGER = LoggerFactory.getLogger(ProtoProcessor.class);
 
-    public static void main(String args[]) {
-        try {
-            String localRoute = InetAddress.getLocalHost().getHostAddress();
-            System.out.println(localRoute);
-        } catch (UnknownHostException ex) {
-            java.util.logging.Logger.getLogger(ProtoProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
     @Override
     public List<Result> processRequest(InputStream input, OutputStream output, RequestProperties props) throws UnauthorizedSessionException, IOException, Exception {
         long start = System.nanoTime();
 
-        List<Result> results = new ArrayList<Result>();
+        List<Result> results = new ArrayList<>();
         
         RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(input);
         if (header.getCount()>1) {
-            throw new Exception("Batching Requests is not yet supported!");
+            throw new Exception("Batching Requests is not supported!");
         }
         
         IdentityPB identity = null;

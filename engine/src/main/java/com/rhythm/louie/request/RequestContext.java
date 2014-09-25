@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.rhythm.louie.generator.TypeUtils;
+
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
 import com.rhythm.pb.RequestProtos.RequestPB;
@@ -37,7 +39,7 @@ public class RequestContext {
     private String remoteAddress;
     private int localPort = -1;
     
-    private PBParamType type;
+    private final PBParamType type;
     
     private IdentityPB identity;
     private SessionKey sessionKey = null;
@@ -51,10 +53,17 @@ public class RequestContext {
         this.header = header;
         this.request = request;
         this.dataType = dataType;
-        this.params = new ArrayList<Param>();
+        this.params = new ArrayList<>();
         
-        type = PBParamType.typeForNames(request.getTypeList());
+        List<String> convertedTypes = new ArrayList<>(request.getTypeCount());
+        for (String param : request.getTypeList()) {
+            if (param.startsWith("rh.pb")) {
+                param = TypeUtils.legacyConvert(param);
+            }
+            convertedTypes.add(param);
+        }
         
+        type = PBParamType.typeForNames(convertedTypes);
         destinations = null;
     }
     
@@ -257,7 +266,7 @@ public class RequestContext {
      */
     synchronized public void addDestinationRoutes(List<RoutePathPB> routes) {
         if (destinations == null) {
-            destinations = new ArrayList<RoutePathPB>();
+            destinations = new ArrayList<>();
         }
         destinations.addAll(routes);
     }

@@ -21,10 +21,11 @@ import javax.lang.model.util.Types;
 public class TypeUtils {
     private static final String DATATYPE_PREFIX = "com.rhythm.pb.DataTypeProtos.";
     
+    static final Map<String,String> legacyMap;
     static final Map<String,String> pbMap;
     static final Map<String,String> typeMap;
     static {
-        typeMap = new HashMap<String,String>();
+        typeMap = new HashMap<>();
         typeMap.put(DATATYPE_PREFIX+"StringPB","String");
         typeMap.put(DATATYPE_PREFIX+"StringListPB",listOf("String"));
         
@@ -49,7 +50,7 @@ public class TypeUtils {
         typeMap.put(DATATYPE_PREFIX+"DateListPB",listOf("org.joda.time.LocalDate"));
         
         // Build the reverse
-        pbMap = new HashMap<String,String>();
+        pbMap = new HashMap<>();
         for (Map.Entry<String, String> entry : typeMap.entrySet()) {
             pbMap.put(entry.getValue(),entry.getKey());
         }
@@ -59,6 +60,13 @@ public class TypeUtils {
         
         pbMap.put("Long", DATATYPE_PREFIX+"LongPB");
         pbMap.put(listOf("Long"),DATATYPE_PREFIX+"LongListPB");
+    
+        // A bit inefficient here, but that way we do not have to list all the types again
+        legacyMap = new HashMap<>();
+        for (String type : typeMap.keySet()) {
+            type = type.replaceFirst(DATATYPE_PREFIX, "");
+            legacyMap.put("rh.pb."+type,"louie."+type);
+        }
     }
     
     private static String listOf(String type) {
@@ -112,7 +120,7 @@ public class TypeUtils {
     
     static final Map<String,String> pbtypeMap;
     static {
-        pbtypeMap = new HashMap<String,String>();
+        pbtypeMap = new HashMap<>();
         pbtypeMap.put(DATATYPE_PREFIX+"StringPB","STRING");
         pbtypeMap.put(DATATYPE_PREFIX+"StringListPB","STRING_LIST");
         
@@ -198,4 +206,10 @@ public class TypeUtils {
         }
         return (instanceOf(types,sup,className));
     }
+    
+    public static String legacyConvert(String type) {
+        String converted  = legacyMap.get(type);
+        return converted==null?type:converted;
+    }
+    
 }
