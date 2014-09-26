@@ -5,13 +5,11 @@
  */
 package com.rhythm.louie.clientgen;
 
+import com.rhythm.louie.Classes;
 import com.rhythm.louie.Disabled;
 import com.rhythm.louie.Internal;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
-
-import com.rhythm.louie.Classes;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -43,59 +43,55 @@ import org.slf4j.LoggerFactory;
 /**
  * Executes the LoUIE client generator
  * @author eyasukoc
- * @goal generate
- * @requiresDependencyResolution test
  */
+@Mojo(name="generate", requiresDependencyResolution = ResolutionScope.TEST)
 public class GeneratorMojo extends AbstractMojo{
     /**
       * The current project representation.
-      * @parameter
-      * default-value="${project}"
-      * @readonly
-      * @required
       */
+    @Parameter(defaultValue="${project}", readonly=true, required=true)
     private MavenProject project;
+    
     /**
      * Hostname
-     * @parameter
-     * property="hostname"
      */
+    @Parameter
     private String hostname = "";
+    
     /**
      * Application server gateway
-     * @parameter
-     * property="gateway"
      */
+    @Parameter
     private String gateway = "";
+    
     /**
      * python client package name
-     * @parameter
-     * property="pythonpackage"
      */
+    @Parameter
     private String pythonpackage = "";
+    
     /**
      * output directory for generated python
-     * @parameter
-     * property="pythondir"
-     * default-value="target/generated-sources/python"
      */
+    @Parameter(defaultValue="target/generated-sources/python")
     private String pythondir = "";
+    
     /**
      * A list of package prefixes to look for
-     * @parameter
      */
+    @Parameter
     private List<String> prefixes;
     
     /**
      * A list of complete PACKAGES to blacklist (not just some prefix)
-     * @parameter
      */
+    @Parameter
     private List<String> blacklist;
     
     /**
      * A list of fully qualified CLASSES to whitelist
-     * @parameter
      */
+    @Parameter
     private List<String> whitelist;
     
     @SuppressWarnings("unchecked")
@@ -142,7 +138,7 @@ public class GeneratorMojo extends AbstractMojo{
         if (whitelist == null) whitelist = new ArrayList<String>();
         whitelist.add("com.rhythm.louie.auth.AuthServiceHandler");
         whitelist.add("com.rhythm.louie.testservice.TestServiceHandler");
-        whitelist.add("com.rhythm.louie.server.InfoServiceHandler");
+        whitelist.add("com.rhythm.louie.info.InfoServiceHandler");
         
         ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
         Thread.currentThread().setContextClassLoader(cl);
@@ -249,6 +245,7 @@ public class GeneratorMojo extends AbstractMojo{
         vc.put("info", info);
         vc.put("baseName", info.getBaseName());
         vc.put("serviceName", info.getServiceName());
+        vc.put("package", info.getPackageName());
 
         Template vt = ve.getTemplate(template);
         File f = new File(output);

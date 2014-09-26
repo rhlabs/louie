@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT, YOUR CHANGES WILL BE WIPED OUT AT A LATER STAGE!
 #
 # =============================================================================
-# Module: louie.${serviceName}
+# Module: ${package}.${serviceName}
 # =============================================================================
 
 """Client for communicating with the LoUIE ${serviceName} service
