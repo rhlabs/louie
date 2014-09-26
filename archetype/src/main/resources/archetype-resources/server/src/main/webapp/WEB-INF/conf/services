@@ -9,8 +9,8 @@
 
 #  All services specified in your ServletListener will be started. 
 #  Else, each must be specifically enabled.
-#  If not specified, default is: true
-#default.enable = true
+#  If not specified, default is: false
+default.enable = true
 
 #  'main' is tied to the 'centralized' config and represents the specific central server (see server prop file)
 #  If not specified, default is: ""
