@@ -37,7 +37,7 @@ public class ServiceProperties {
     private static final Map<String,ServiceProperties> SERVICES = new ConcurrentHashMap<>();
 
     private static final ServiceProperties DEFAULT 
-            = new ServiceProperties(DEFAULT_NAME,false,"",false,false,true);
+            = new ServiceProperties(DEFAULT_NAME,true,"",false,false,true);
     
     private final String name;
     private boolean enable;
