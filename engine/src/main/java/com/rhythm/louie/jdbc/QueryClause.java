@@ -56,10 +56,11 @@ public class QueryClause {
     }
 
     /**
+     * Creates a custom clause that must contain one and only one ?
      * 
      * @param clause
      * @param value
-     * @return
+     * @return the created QueryClause
      * @throws Exception 
      */
     public static QueryClause createClause(String clause, Object value) throws Exception {
@@ -190,6 +191,19 @@ public class QueryClause {
      */
     public static QueryClause createFieldClause(String field, Object value, int sqlType) {
         return new QueryClause(field + "=?", value, sqlType);
+    }
+    
+    /**
+     * Creates a clause in the form of: field=? 
+     * 
+     * @param field
+     * @param value
+     * @return 
+     * 
+     * @see java.sql.Types
+     */
+    public static QueryClause createFieldClause(String field, Object value) {
+        return new QueryClause(field + "=?", value, Types.OTHER);
     }
     
     /**

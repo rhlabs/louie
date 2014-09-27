@@ -38,7 +38,7 @@ public class QueryBuilder implements AutoCloseable {
     private String suffix;
     boolean whereAdded;
     boolean hasBatch = false;
-    final List<QueryClause> clauses = new ArrayList<QueryClause>();
+    final List<QueryClause> clauses = new ArrayList<>();
     private final JdbcFactory factory;
     private JdbcService jdbc = null;
 
@@ -233,9 +233,24 @@ public class QueryBuilder implements AutoCloseable {
     public void addClause(String clause, Object value, int sqlType) throws Exception {
         addClause(QueryClause.createClause(clause, value, sqlType));
     }
+    
+    /**
+     * Adds a custom clause 
+     * Uses the JDBC Standard mapping to determine the SQL Type
+     * 
+     * @param clause full text of a clause with a single ? for a value
+     * @param value the data to be injected into the prepared statement
+     * @throws java.lang.Exception if you do not specify one and only one ?
+     * 
+     * @see java.sql.Types
+     */
+    public void addClause(String clause, Object value) throws Exception {
+        addClause(QueryClause.createClause(clause, value));
+    }
 
     /**
      * Adds a clause in the form of: field=? 
+     * 
      * @param fieldName the name of the field
      * @param value the data to be injected into the prepared statement
      * @param sqlType the java.sql.Type of the field
@@ -245,6 +260,18 @@ public class QueryBuilder implements AutoCloseable {
      */
     public void addFieldClause(String fieldName, Object value, int sqlType) throws Exception {
         addClause(QueryClause.createFieldClause(fieldName, value, sqlType));
+    }
+    
+    /**
+     * Adds a clause in the form of: field=? 
+     * Uses the JDBC Standard mapping to determine the SQL Type
+     * 
+     * @param fieldName the name of the field
+     * @param value the data to be injected into the prepared statement
+     * @throws java.lang.Exception
+     */
+    public void addFieldClause(String fieldName, Object value) throws Exception {
+        addClause(QueryClause.createFieldClause(fieldName, value));
     }
     
     /**
@@ -336,7 +363,7 @@ public class QueryBuilder implements AutoCloseable {
      * @throws Exception any SQL exceptions will get bubbled up
      */
     public <K,V> Map<K,V> execute(ResultMapper<K,V> processor) throws Exception {
-        Map<K,V> results = new HashMap<K,V>();
+        Map<K,V> results = new HashMap<>();
         execute(processor, results);
         return results;
     }
@@ -378,7 +405,7 @@ public class QueryBuilder implements AutoCloseable {
      * @throws Exception any SQL exceptions will get bubbled up
      */
     public <T> List<T> execute(ResultProcessor<T> processor) throws Exception {
-        List<T> results = new ArrayList<T>();
+        List<T> results = new ArrayList<>();
         execute(processor, results);
         return results;
     }
