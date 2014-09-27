@@ -14,15 +14,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <!--
-        <repository>
-            <id>louie-repo</id>
-            <name>LoUIE git repository</name>
-        </repository>
-        -->
-    </repositories>
-
     <modules>
         <module>service</module>
         <module>server</module>
@@ -55,6 +46,35 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.rhythm.louie</groupId>
+                <artifactId>louie-maven-plugin</artifactId>
+                <version>${louie.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Build-Version>${build.version}</Build-Version>
+                            <Build-Time>${build.time}</Build-Time>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin> 
         </plugins>
     </build>
 
