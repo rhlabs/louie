@@ -12,7 +12,7 @@
         </activatedProfiles>
     </action>
     <action>
-        <actionName>CUSTOM-site pl</actionName>
+        <actionName>CUSTOM-site parent only</actionName>
         <displayName>site pl</displayName>
         <goals>
             <goal>clean</goal>
