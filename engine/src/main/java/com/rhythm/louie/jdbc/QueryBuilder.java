@@ -32,7 +32,7 @@ import com.rhythm.louie.jdbc.query.ResultMapper;
  * has been completed, you must clean up to avoid connection leaks by calling closeAll()
  */
 
-public class QueryBuilder {
+public class QueryBuilder implements AutoCloseable {
 
     private final String prefix;
     private String suffix;
@@ -442,6 +442,11 @@ public class QueryBuilder {
     public void closeAll() {
         if (jdbc != null) jdbc.closeAll();
         jdbc = null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        closeAll();
     }
     
 }

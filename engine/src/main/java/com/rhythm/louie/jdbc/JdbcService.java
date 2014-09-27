@@ -15,7 +15,7 @@ import java.sql.SQLException;
  *
  * @author cjohnson
  */
-public interface JdbcService {
+public interface JdbcService extends AutoCloseable {
 
     Connection getConnection();
 

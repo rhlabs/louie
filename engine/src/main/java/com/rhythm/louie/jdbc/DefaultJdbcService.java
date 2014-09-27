@@ -158,4 +158,9 @@ public class DefaultJdbcService implements JdbcService {
             conn = null;
         }
     }
+
+    @Override
+    public void close() throws Exception {
+        closeAll();
+    }
 }
