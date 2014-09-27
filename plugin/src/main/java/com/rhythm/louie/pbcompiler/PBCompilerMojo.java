@@ -14,7 +14,9 @@ import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
+
 import static java.nio.file.FileVisitResult.CONTINUE;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +24,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import com.google.common.base.Joiner;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -61,14 +66,14 @@ public class PBCompilerMojo extends AbstractMojo{
     /**
      * The Google Protocol Buffer compiler
      */
-    @Parameter(defaultValue="/usr/bin/protoc")
+    @Parameter(defaultValue="protoc")
     private String compiler;
     
     /**
      * The Google Protocol Buffer lib (include) folder
      */
-    @Parameter(defaultValue="/usr/include")
-    private String compilerlibs;
+    @Parameter(name = "compiler-include")
+    private String[] compilerInclude;
     
     /**
      * The source directory within which we look for .proto files (relative to basedir)
@@ -112,11 +117,8 @@ public class PBCompilerMojo extends AbstractMojo{
     @Parameter
     private boolean pygen;
     
-    
-    // A list of compilers in possible linux locations
-    private final String[] protocompiler = {"/usr/bin/protoc","/usr/sbin/protoc"};
     // A list of compiler libs in possible linux locations
-    private final String[] protolibs = {"/usr/include"};
+    private final String[] includeDirs = {"/usr/include","/usr/local/include"};
     
     private final String mavenSharedDir = "maven-shared-archive-resources";
     
@@ -142,26 +144,23 @@ public class PBCompilerMojo extends AbstractMojo{
         }  
 
         List<String> args = new ArrayList<>();
-
-        //Check existence of specified compiler and libraries ( GUESS A BUNCH )
-        File compilerF = new File(compiler);
-        int i = 0;
-        while (!compilerF.exists() && i < protocompiler.length) {
-            compilerF = new File(protocompiler[i]);
-            i++;
-        }
-        i = 0;
-        File libdir = new File(compilerlibs+"/google");
-        String libmarker = compilerlibs;
-        while (!libdir.exists() && i < protolibs.length) {
-            libdir = new File(protolibs[i]+"/google");
-            libmarker = protolibs[i];
-            i++;
-        }
-
-        args.add(compilerF.toString());                                         //configurable protoc
+        args.add(compiler);                                         
         args.add("--proto_path="+basedirectory+"/"+protosrc);
-        args.add("--proto_path="+libmarker);                                    //configurable libs
+        
+        if (compilerInclude!=null && compilerInclude.length>0) {
+            for (String dir : compilerInclude) {
+                args.add("--proto_path="+dir);   
+            }
+        } else {
+            // Try to find the google include in some known include dirs
+            for (String dir : includeDirs) {
+                File libdir = new File(dir+"/google");
+                if (libdir.exists()) {
+                    args.add("--proto_path="+dir);   
+                }
+            }
+        }
+
         String archivePath = builddirectory+"/"+mavenSharedDir;
         File sharedArchive = new File(archivePath);
         if (sharedArchive.exists()) {
@@ -178,38 +177,11 @@ public class PBCompilerMojo extends AbstractMojo{
         while (files.hasNext()) {
             args.add(files.next().toString());
         }
-
-        // exec
-        BufferedReader input = null;
+        
         try {
-            getLog().info(args.toString());
-            String line;
-            Process p = Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
-            
-            //ERROR HANDLING
-            if (p.getErrorStream() != null) {
-                try {
-                    input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                    while ((line = input.readLine()) != null) {
-                        getLog().error(line);
-                    }
-                } finally {
-                    if (input != null) input.close();
-                }
-            }
-            //OUTPUT HANDLING
-            input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = input.readLine()) != null) {
-                getLog().info(line);
-            }
+            execProtoCompile(args);
         } catch (IOException ex) {
             throw new MojoExecutionException(ex.toString());
-        } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException ex) {
-                throw new MojoExecutionException(ex.toString());
-            }
         }
         
         if (pygen) {
@@ -231,7 +203,24 @@ public class PBCompilerMojo extends AbstractMojo{
         }
         
     }
- 
+    
+    private void execProtoCompile(List<String> args) throws IOException {
+        getLog().info(Joiner.on(" ").join(args));
+        Process p = Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
+        
+        try (BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            String line;
+
+            while ((line = error.readLine()) != null) {
+                getLog().error(line);
+            }
+            while ((line = input.readLine()) != null) {
+                getLog().info(line);
+            }
+        }
+    }
+
     private void makeDir(String path) {
         File f = new File(path);
         if (!f.exists()) {
