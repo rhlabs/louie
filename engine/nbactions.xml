@@ -14,4 +14,15 @@
                 <skipTests>false</skipTests>
             </properties>
         </action>
+        <action>
+            <actionName>CUSTOM-clean build +python</actionName>
+            <displayName>clean build +python</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
+            <activatedProfiles>
+                <activatedProfile>python</activatedProfile>
+            </activatedProfiles>
+        </action>
     </actions>

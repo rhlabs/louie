@@ -106,7 +106,7 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>create-distribution</id>
+                                <id>create-py-distribution</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>

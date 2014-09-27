@@ -210,19 +210,24 @@ public class GeneratorMojo extends AbstractMojo{
     protected void generatePython(ServiceInfo info, String pypath, String basedir, String pydir) throws Exception {
         printServiceInfo(info);
         String serviceName = info.getServiceName().toLowerCase();
+        
+        String pypackage = pypath.replaceAll("\\/","\\."); //lame that i'm converting back
+        if (pypackage.length() == 1) pypackage = "";
+        
         StringBuilder output = new StringBuilder();
         output.append(basedir).append("/");
         output.append(pydir);
         //special case auth, louie, and test
         if (INFO_SERVICE.equals(serviceName) || AUTH_SERVICE.equals(serviceName) || TEST_SERVICE.equals(serviceName)) {
             output.append("louie/");
+            pypackage = "louie.";
         } else {
             output.append(pypath);
         }
         output.append(serviceName).append("/");
         Path file = Paths.get(output.toString(), "__init__.py");
         output.append(PYTHON_CLIENT_MODULE);
-        processTemplate(info, PYTHON_TEMPLATE, output.toString());
+        processTemplate(info, PYTHON_TEMPLATE, output.toString(), pypackage);
         
         //generate some __init__ files
         try {
@@ -233,7 +238,7 @@ public class GeneratorMojo extends AbstractMojo{
         }
     }
     
-    protected void processTemplate(ServiceInfo info, String template, String output) throws Exception {
+    protected void processTemplate(ServiceInfo info, String template, String output, String pkg) throws Exception {
         Properties props = new Properties();
         URL url = GeneratorMojo.class.getClassLoader().getResource("config/velocity.properties");
         props.load(url.openStream());
@@ -245,7 +250,7 @@ public class GeneratorMojo extends AbstractMojo{
         vc.put("info", info);
         vc.put("baseName", info.getBaseName());
         vc.put("serviceName", info.getServiceName());
-        vc.put("package", info.getPackageName());
+        vc.put("package", pkg);
 
         Template vt = ve.getTemplate(template);
         File f = new File(output);

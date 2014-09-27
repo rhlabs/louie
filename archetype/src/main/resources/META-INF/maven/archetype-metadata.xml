@@ -10,6 +10,15 @@
         </requiredProperty>
     </requiredProperties>
     
+    <fileSets>
+        <fileSet>
+            <directory></directory>
+            <includes>
+                <include>nbactions.xml</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+    
     <modules>
         <module id="${rootArtifactId}-service" dir="service" name="${rootArtifactId}-service">
             <fileSets>
@@ -53,6 +62,12 @@
         </module>
         <module id="${rootArtifactId}-server" dir="server" name="${rootArtifactId}-server">
             <fileSets>
+                <fileSet encoding="UTF-8">
+                    <directory></directory>
+                    <includes>
+                        <include>nbactions.xml</include>
+                    </includes>
+                </fileSet>
                 <fileSet filtered="true" encoding="UTF-8">
                     <directory>assembly</directory>
                     <includes>

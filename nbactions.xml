@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>CUSTOM-clean build +python</actionName>
+        <displayName>clean build +python</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>install</goal>
+        </goals>
+        <activatedProfiles>
+            <activatedProfile>python</activatedProfile>
+        </activatedProfiles>
+    </action>
+    <action>
+        <actionName>CUSTOM-site pl</actionName>
+        <displayName>site pl</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>site</goal>
+            <goal>-pl</goal>
+            <goal>.</goal>
+        </goals>
+    </action>
+</actions>
