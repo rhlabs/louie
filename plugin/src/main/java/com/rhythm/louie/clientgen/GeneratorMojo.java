@@ -10,8 +10,10 @@ import com.rhythm.louie.Disabled;
 import com.rhythm.louie.Internal;
 import com.rhythm.louie.process.ServiceCall;
 import com.rhythm.louie.process.ServiceHandler;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
@@ -27,6 +29,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -98,14 +104,12 @@ public class GeneratorMojo extends AbstractMojo{
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Executing LoUIE Service Client Generator");
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         try {
             String outputDir = project.getBuild().getOutputDirectory();
             List<Artifact> artifacts = project.getCompileArtifacts();
             urls.add(new File(outputDir).toURI().toURL());
-//            System.out.println(outputDir);
             for (Artifact a : artifacts) {
-//                System.out.println(a.getFile().toURI().toString());
                 urls.add(a.getFile().toURI().toURL());
             }
 
@@ -113,7 +117,8 @@ public class GeneratorMojo extends AbstractMojo{
             ex.printStackTrace();
         }
         
-        if (blacklist == null) blacklist = new ArrayList<String>();
+        // TODO exclude all of com.rhythm.louie once we rename other rh based services
+        if (blacklist == null) blacklist = new ArrayList<>();
         blacklist.add("com.rhythm.louie");
         blacklist.add("com.rhythm.louie.servlet");
         blacklist.add("com.rhythm.louie.auth");
@@ -130,15 +135,17 @@ public class GeneratorMojo extends AbstractMojo{
         blacklist.add("com.rhythm.louie.servlets");
         blacklist.add("com.rhythm.louie.stream");
         blacklist.add("com.rhythm.louie.testservice");
+        blacklist.add("com.rhythm.louie.testservice.jms");
         blacklist.add("com.rhythm.louie.topology");
         blacklist.add("com.rhythm.louie.pb");
         blacklist.add("com.rhythm.louie.pb.command");
         blacklist.add("com.rhythm.louie.pb.data");
         
-        if (whitelist == null) whitelist = new ArrayList<String>();
+        if (whitelist == null) whitelist = new ArrayList<>();
         whitelist.add("com.rhythm.louie.auth.AuthServiceHandler");
         whitelist.add("com.rhythm.louie.testservice.TestServiceHandler");
         whitelist.add("com.rhythm.louie.info.InfoServiceHandler");
+        whitelist.add("com.rhythm.louie.testservice.jms.JmsTestServiceHandler");
         
         ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
         Thread.currentThread().setContextClassLoader(cl);
@@ -156,9 +163,7 @@ public class GeneratorMojo extends AbstractMojo{
     private static final String PYTHON_TEMPLATE = "templates/python/ServiceClient.vm";
     private static final String PYTHON_CLIENT_MODULE = "client.py";
     
-    protected static final String AUTH_SERVICE = "auth";
-    protected static final String INFO_SERVICE = "info";
-    protected static final String TEST_SERVICE = "test";
+    protected static final Set<String> LOUIE_SERVICES = ImmutableSet.of("auth","info","test","jmstest");
     
     public void exec(String host, String gateway, List<String> prefix, List<String> whitelist, List<String> blacklist, String pypackage) {
         
@@ -176,7 +181,7 @@ public class GeneratorMojo extends AbstractMojo{
             return;
         }
         for (Class<?> service : services) {
-            List<MethodInfo> pythonMethods = new ArrayList<MethodInfo>();
+            List<MethodInfo> pythonMethods = new ArrayList<>();
             try {
                 for (Method method : service.getMethods()) {
                     if (!Modifier.isStatic(method.getModifiers())
@@ -217,8 +222,8 @@ public class GeneratorMojo extends AbstractMojo{
         StringBuilder output = new StringBuilder();
         output.append(basedir).append("/");
         output.append(pydir);
-        //special case auth, louie, and test
-        if (INFO_SERVICE.equals(serviceName) || AUTH_SERVICE.equals(serviceName) || TEST_SERVICE.equals(serviceName)) {
+        //special case louie internal services
+        if (LOUIE_SERVICES.contains(serviceName)) {
             output.append("louie/");
             pypackage = "louie.";
         } else {
@@ -241,7 +246,9 @@ public class GeneratorMojo extends AbstractMojo{
     protected void processTemplate(ServiceInfo info, String template, String output, String pkg) throws Exception {
         Properties props = new Properties();
         URL url = GeneratorMojo.class.getClassLoader().getResource("config/velocity.properties");
-        props.load(url.openStream());
+        try (InputStream is = url.openStream()) {
+            props.load(is);
+        }
 
         VelocityEngine ve = new VelocityEngine(props);
         ve.init();
@@ -255,9 +262,9 @@ public class GeneratorMojo extends AbstractMojo{
         Template vt = ve.getTemplate(template);
         File f = new File(output);
         f.getParentFile().mkdirs();
-        Writer writer = new PrintWriter(f);
-        vt.merge(vc, writer);
-        writer.close();
+        try (Writer writer = new PrintWriter(f)) {
+            vt.merge(vc, writer);
+        }
     }
     
 }
