@@ -35,7 +35,7 @@ public class ManifestMojo extends AbstractMojo {
     /**
      * The format of the timestamp to store
      */
-    @Parameter(property="manifest.dateformat", defaultValue = "HH:mm:ss MM/dd/yyyy", required = true)
+    @Parameter(property="manifest.dateformat", defaultValue = "MMM dd, yyyy HH:mm:ss z", required = true)
     private String dateformat;
     
     /**
@@ -60,10 +60,9 @@ public class ManifestMojo extends AbstractMojo {
             getLog().error(e.toString());
         }
         
-        if (versionText == null || versionText.isEmpty()) {
-            versionText = "Unknown";
+        if (versionText != null && !versionText.isEmpty()) {
+            project.getProperties().put("build.version", versionText);
         }
-        project.getProperties().put("build.version", versionText);
     }
     
     private String retrieveVersion() throws IOException {

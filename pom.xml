@@ -13,7 +13,7 @@
     </prerequisites>
     
     <scm>
-        <connection>scm:git:/src/mis/git/louie.git</connection>
+        <connection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie</connection>
     </scm>
     
     <distributionManagement>

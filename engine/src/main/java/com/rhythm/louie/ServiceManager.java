@@ -18,7 +18,7 @@ import com.rhythm.louie.jms.MessageUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
 import com.rhythm.louie.info.InfoServiceFactory;
-import com.rhythm.louie.server.ExternalProperties;
+import com.rhythm.louie.server.BuildProperties;
 import com.rhythm.louie.server.LocalConstants;
 import com.rhythm.louie.server.Server;
 import com.rhythm.louie.server.ServiceProperties;
@@ -87,13 +87,12 @@ public class ServiceManager {
         Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
         
         StringBuilder versionInfo = new StringBuilder();
-        Map<String,String> gitVersions = ExternalProperties.getInstance().getGitVersionMap();
-        Map<String,String> compileDates = ExternalProperties.getInstance().getCompileDateMap();
-        for (String impl : gitVersions.keySet()) {
-            if("LoUIE Processor".equals(impl)) continue; //hardcoded processor skip
-            versionInfo.append("  ").append(impl).append(": ")
-                    .append(gitVersions.get(impl))
-                    .append(" (").append(compileDates.get(impl)).append(")\n");
+        
+        for (BuildProperties build : BuildProperties.getServiceBuildProperties()) {
+            if("LoUIE Processor".equals(build.getName())) continue; //hardcoded processor skip
+            versionInfo.append("  ").append(build.getName()).append(": ")
+                    .append(build.getVersion()).append(" ")
+                    .append(build.getBuildString()).append("\n");
         }
         LOGGER.info("\n********************************************************\n"
                 + "LoUIE ServiceManager Initialization - \n{}"

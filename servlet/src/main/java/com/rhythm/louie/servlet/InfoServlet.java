@@ -16,10 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.rhythm.louie.server.ExternalProperties;
 import com.rhythm.louie.ServiceManager;
-import com.rhythm.louie.server.ExternalProperties;
-import com.rhythm.louie.server.ServiceProperties;
+import com.rhythm.louie.server.BuildProperties;
 import com.rhythm.louie.server.ServiceProperties;
 
 import com.rhythm.louie.service.command.ArgType;
@@ -55,8 +53,7 @@ public class InfoServlet extends HttpServlet {
     
     private void showServiceCalls(String serviceName, HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
+        try (PrintWriter out = response.getWriter()) {
             out.println("<html>");
             out.println("<head>");
             out.println("<title>LoUIE Services</title>");  
@@ -84,8 +81,6 @@ public class InfoServlet extends HttpServlet {
             
             out.println("</body>");
             out.println("</html>");
-        } finally { 
-            out.close();
         }
     }
     
@@ -131,9 +126,9 @@ public class InfoServlet extends HttpServlet {
             out.println("<h3>" + serviceName+ "&nbsp;&nbsp;&nbsp;&nbsp;</h3>");
             out.println(getPropertyString(serviceName)+"<br>");
         }
-        Map<String, List<String>> groupedMethods = new TreeMap<String, List<String>>();
+        Map<String, List<String>> groupedMethods = new TreeMap<>();
         
-        List<PBCommand<?,?>> pbcommands = new ArrayList<PBCommand<?,?>>(service.getCommands());
+        List<PBCommand<?,?>> pbcommands = new ArrayList<>(service.getCommands());
         Collections.sort(pbcommands, new Comparator<PBCommand<?,?>>() {
 
             @Override
@@ -217,7 +212,7 @@ public class InfoServlet extends HttpServlet {
                 current.add(methodHTML.toString());
                 groupedMethods.put(grouping, current);
             } else {
-                List<String> groupList = new ArrayList<String>();
+                List<String> groupList = new ArrayList<>();
                 groupList.add(methodHTML.toString());
                 groupedMethods.put(grouping, groupList);
             }
@@ -247,8 +242,7 @@ public class InfoServlet extends HttpServlet {
     
     private void showAllServiceCalls(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
+        try (PrintWriter out = response.getWriter()) {
             out.println("<html>");
             out.println("<head>");
             out.println("<title>LoUIE Services</title>");  
@@ -268,16 +262,12 @@ public class InfoServlet extends HttpServlet {
             }
             out.println("</body>");
             out.println("</html>");
-        } finally { 
-            out.close();
         }
     } 
     
     private void listAllServices(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
-            ExternalProperties extProps = ExternalProperties.getInstance();
+        try (PrintWriter out = response.getWriter()) {
             out.println("<html>");
             out.println("<head>");
             out.println("<title>LoUIE Services</title>");
@@ -285,15 +275,14 @@ public class InfoServlet extends HttpServlet {
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>LoUIE Services</h1>");
-            out.println("<h3> Loaded Jars: </h3>");
-            Map<String,String> gitVersions = extProps.getGitVersionMap();
-            Map<String,String> compileDates = extProps.getCompileDateMap();
-            for (String impl : gitVersions.keySet()) {
-                if("LoUIE Processor".equals(impl)) continue; //hardcoded processor skip
-                out.println("<b>&nbsp&nbsp " + impl + "</b>: ");
-                out.println(gitVersions.get(impl));
-                out.println(" (" + compileDates.get(impl) + ")<br>");
-            }
+            
+            for (BuildProperties build : BuildProperties.getServiceBuildProperties()) {
+            if("LoUIE Processor".equals(build.getName())) continue; //hardcoded processor skip
+                out.println("<b>&nbsp&nbsp " + build.getName() + "</b>: "
+                        + build.getVersion()
+                        + " <i>" +build.getBuildString()+"</i><br>");
+        }
+            
             out.println("<br><br><a href=\"?service=all\">Show All Services</a><br>");
             
             out.println("<ul>");
@@ -309,8 +298,6 @@ public class InfoServlet extends HttpServlet {
             out.println("</ul>");
             out.println("</body>");
             out.println("</html>");
-        } finally { 
-            out.close();
         }
     } 
     
