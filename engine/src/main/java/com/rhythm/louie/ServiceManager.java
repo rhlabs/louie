@@ -221,6 +221,9 @@ public class ServiceManager {
         } catch (IOException ex) {
             LoggerFactory.getLogger(ServiceManager.class).warn(ex.getMessage());
             return props;
+        } catch (NullPointerException npe) {
+            System.out.println("NPE encountered for file: " 
+                    + dir + propFile + "." + LocalConstants.HOST);
         } finally {
             if (in!=null)  {
                 try {

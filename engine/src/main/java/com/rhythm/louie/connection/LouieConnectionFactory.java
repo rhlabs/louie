@@ -29,7 +29,7 @@ public class LouieConnectionFactory {
     private static final String BETAHOST = "louiebeta";
     private static final String LOCALHOST = "localhost";
     
-    private static final Map<Server, LouieConnection> connections = new ConcurrentHashMap<Server, LouieConnection>();
+//    private static final Map<Server, LouieConnection> connections = new ConcurrentHashMap<Server, LouieConnection>();
     
     private LouieConnectionFactory() {}
     
@@ -182,13 +182,19 @@ public class LouieConnectionFactory {
     }
     
     public static LouieConnection getLocalConnection() {
-        return new DefaultLouieConnection(Identity.getIdentity(),LOCALHOST);
+        LouieConnection lc = new DefaultLouieConnection(Identity.getIdentity(),LOCALHOST);
+        lc.setGateway(Server.LOCAL.getGateway());
+        return lc;
     }
     public static LouieConnection getLocalConnection(IdentityPB id) {
-        return new DefaultLouieConnection(id,LOCALHOST);
+        LouieConnection lc = new DefaultLouieConnection(id,LOCALHOST);
+        lc.setGateway(Server.LOCAL.getGateway());
+        return lc;
     }
     public static LouieConnection getLocalConnection(IdentityPB id, String key) {
-        return new DefaultLouieConnection(id,LOCALHOST,key);
+        LouieConnection lc = new DefaultLouieConnection(id,LOCALHOST,key);
+        lc.setGateway(Server.LOCAL.getGateway());
+        return lc;
     }
     
     
@@ -221,28 +227,24 @@ public class LouieConnectionFactory {
     }
     
     private static LouieConnection getMutualSSLConnection(IdentityPB id, Server server) {
-        LouieConnection conn = connections.get(server);
-        if (conn == null) {
-            // check for ssl 
-            if (server.isSSLMutual()) { 
-                SSLConfig sslConfig;
-                try {
-                    sslConfig = new LouieSSLClientConfig(server);
-                } catch (Exception ex) {
-                    LoggerFactory.getLogger(LouieConnectionFactory.class)
-                        .error("Error creating SSL config", ex);
-                    return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
-                }
-                return new DefaultLouieConnection(id,sslConfig);
+        LouieConnection conn;
+        if (server.isSSLMutual()) { 
+            SSLConfig sslConfig;
+            try {
+                sslConfig = new LouieSSLClientConfig(server);
+            } catch (Exception ex) {
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                    .error("Error creating SSL config", ex);
+                return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
             }
-            //else attempt a regular http connection, what the heck!
-            conn = new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
-            connections.put(server, conn);
+            return new DefaultLouieConnection(id,sslConfig);
         }
+        //else attempt a regular http connection, what the heck!
+        conn = new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
         return conn;
     }
     
     public final void removeConnection(Server server){
-        connections.remove(server);
+//        connections.remove(server);
     }
 }

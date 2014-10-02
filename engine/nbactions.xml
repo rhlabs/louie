@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
-        <action>
-            <actionName>test.single</actionName>
-            <packagings>
-                <packaging>*</packaging>
-            </packagings>
-            <goals>
-                <goal>test-compile</goal>
-                <goal>surefire:test</goal>
-            </goals>
-            <properties>
-                <test>${packageClassName}</test>
-                <skipTests>false</skipTests>
-            </properties>
-        </action>
-        <action>
-            <actionName>CUSTOM-clean build +python</actionName>
-            <displayName>clean build +python</displayName>
-            <goals>
-                <goal>clean</goal>
-                <goal>install</goal>
-            </goals>
-            <activatedProfiles>
-                <activatedProfile>python</activatedProfile>
-            </activatedProfiles>
-        </action>
+    <action>
+        <actionName>test.single</actionName>
+        <packagings>
+            <packaging>*</packaging>
+        </packagings>
+        <goals>
+            <goal>test-compile</goal>
+            <goal>surefire:test</goal>
+        </goals>
+        <properties>
+            <test>${packageClassName}</test>
+            <skipTests>false</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-compile java PBs</actionName>
+        <displayName>compile java PBs</displayName>
+        <goals>
+            <goal>remote-resources:process</goal>
+            <goal>rh:pbcompile</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-clean build +python</actionName>
+        <displayName>clean build +python</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>install</goal>
+        </goals>
+        <activatedProfiles>
+            <activatedProfile>python</activatedProfile>
+        </activatedProfiles>
+    </action>
     </actions>

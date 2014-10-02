@@ -29,6 +29,7 @@ public class MessageManager {
     
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 61616;
+    private static final String SYSTEM_PROP_KEY = "jmsadapter";
     
     private static JmsAdapter jmsAdapter = null;
     
@@ -58,8 +59,11 @@ public class MessageManager {
         
         String adapterClass = defaultProps.getMessageAdapter();
         if (adapterClass == null) {
-            throw new MessageAdapterException("A message server adapter class "
+            adapterClass = System.getProperty(SYSTEM_PROP_KEY);
+            if (adapterClass == null) {
+                throw new MessageAdapterException("A message server adapter class "
                     + "must be specified in the service configs!");
+            }
         }
         try {
             jmsAdapter = (JmsAdapter) Class.forName(adapterClass).newInstance();

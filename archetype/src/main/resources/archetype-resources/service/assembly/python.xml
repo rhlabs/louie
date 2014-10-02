@@ -14,10 +14,12 @@
   </formats>
   <fileSets>
     <fileSet>
+      <filtered>true</filtered>
       <outputDirectory>/</outputDirectory>
       <directory>src/main/python</directory>
     </fileSet>
     <fileSet> 
+      <filtered>true</filtered>
       <outputDirectory>/</outputDirectory>
       <directory>target/generated-sources/python</directory>
       <includes>
