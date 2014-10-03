@@ -6,12 +6,14 @@
 
 package com.rhythm.louie.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
 
 import net.sf.log4jdbc.ConnectionSpy;
 
@@ -104,28 +106,55 @@ public class DefaultJdbcService implements JdbcService {
         return serialID;
     }
 
+    // Executes a prepared statement
     @Override
-    public ResultSet executeStatement() throws SQLException {
-        return executePreparedStatement();
+    public boolean execute() throws SQLException {
+        return getPreparedStatement().execute();
     }
     
     // Executes a prepared statement
     @Override
+    public int executeUpdate() throws SQLException {
+        return getPreparedStatement().executeUpdate();
+    }
+    
+    @Override
+    public ResultSet executeQuery() throws SQLException {
+        return getPreparedStatement().executeQuery();
+    }
+    
+    @Override
+    public ResultSet getResultSet() throws SQLException {
+        return getPreparedStatement().getResultSet();
+    }
+    
+    @Override
+    public int getUpdateCount() throws SQLException {
+        return getPreparedStatement().getUpdateCount();
+    }
+    
+    @Deprecated
+    @Override
+    public ResultSet executeStatement() throws SQLException {
+        return executeQuery();
+    }
+    
+    @Deprecated
+    @Override
     public ResultSet executePreparedStatement() throws SQLException {
-        resultSet =  getPreparedStatement().executeQuery();
-        return resultSet;
+        return executeQuery();
     }
 
-    // Executes a prepared statement
+    @Deprecated
     @Override
     public void executePreparedStatementProcedure() throws SQLException {
-        getPreparedStatement().execute();
+        execute();
     }
-
-    // Executes a prepared statement
+    
+    @Deprecated
     @Override
     public int executePreparedStatementUpdate() throws SQLException {
-        return getPreparedStatement().executeUpdate();
+        return executeUpdate();
     }
 
     //CLOSE
@@ -147,8 +176,18 @@ public class DefaultJdbcService implements JdbcService {
     }
 
     // Used to close all connections
+    @Deprecated
     @Override
     public void closeAll() {
+        try {
+            close();
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(DefaultJdbcService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
         closeStatements();
 
         if (conn != null) {
@@ -157,10 +196,5 @@ public class DefaultJdbcService implements JdbcService {
             } catch(Exception e) {}
             conn = null;
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        closeAll();
     }
 }

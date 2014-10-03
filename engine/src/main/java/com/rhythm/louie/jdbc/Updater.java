@@ -27,7 +27,7 @@ public abstract class Updater {
         this.factory = factory;
         this.table = table;
         this.where = where;
-        fields = new ArrayList<Field>();
+        fields = new ArrayList<>();
     }
     
     abstract public void setWhere(PreparedStatement ps, int index) throws Exception;
@@ -37,10 +37,7 @@ public abstract class Updater {
     }
     
     public int execute() throws Exception {
-        JdbcService jdbc = null;
-        try {
-            String query = getQuery();
-            jdbc = getService(query);
+        try (JdbcService jdbc = getService(getQuery())) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             int i=1;
             for (Field f : fields) {
@@ -53,9 +50,7 @@ public abstract class Updater {
                 }
             }
             setWhere(ps,i);
-            return jdbc.executePreparedStatementUpdate();
-        } finally {
-            if (jdbc!=null) jdbc.closeAll();
+            return jdbc.executeUpdate();
         }
     }
 

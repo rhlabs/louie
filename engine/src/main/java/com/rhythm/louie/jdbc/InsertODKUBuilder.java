@@ -26,8 +26,8 @@ public class InsertODKUBuilder {
     public InsertODKUBuilder(JdbcFactory factory, String table) {
         this.factory = factory;
         this.table = table;
-        fields = new ArrayList<Field>();
-        odkus = new ArrayList<Field>();
+        fields = new ArrayList<>();
+        odkus = new ArrayList<>();
     }
     
     protected JdbcService getService(String query) throws Exception {
@@ -35,10 +35,7 @@ public class InsertODKUBuilder {
     }
     
     public int execute() throws Exception {
-        JdbcService jdbc = null;
-        try {
-            String query = getQuery();
-            jdbc = getService(query);
+        try (JdbcService jdbc = getService(getQuery())) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             int i=1;
             for (Field f : fields) {
@@ -61,19 +58,14 @@ public class InsertODKUBuilder {
                 }
             }
             executed = true;
-            jdbc.executePreparedStatementUpdate();
-        } finally {
-            if (jdbc!=null) jdbc.closeAll();
+            jdbc.executeUpdate();
         }
-        try {
-            jdbc = factory.newService("SELECT ROW_COUNT()");
-            ResultSet rs = jdbc.executeStatement();
+        try (JdbcService jdbc = factory.newService("SELECT ROW_COUNT()")) {
+            ResultSet rs = jdbc.executeQuery();
             if (rs.next()) {
                 numUpdated = rs.getInt(1);
                 return numUpdated;
             }
-        } finally {
-            if (jdbc != null) jdbc.closeAll();
         }
         return -1;
     }
@@ -100,18 +92,14 @@ public class InsertODKUBuilder {
             if (autoIncrementField == null) {
                 throw new Exception("This field could be meaningless because you didn't specify the AutoIncrement Field prior to executing.");
             }
-            JdbcService jdbc = null;
-            try {
-                jdbc = factory.newService("SELECT LAST_INSERT_ID()");
+            try (JdbcService jdbc = factory.newService("SELECT LAST_INSERT_ID()")) {
                 jdbc.getPreparedStatement();
-                ResultSet rs = jdbc.executePreparedStatement();
+                ResultSet rs = jdbc.executeQuery();
                 if (rs.next()) {
                     return rs.getInt(1);
                 } else {
                     return -1;
                 }
-            } finally {
-                if (jdbc != null) jdbc.closeAll();
             }
         }
         throw new Exception ("Cannot call getAutoIncrementID on InsertODKU prior to calling execute");

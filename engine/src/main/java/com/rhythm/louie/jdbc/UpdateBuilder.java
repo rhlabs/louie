@@ -22,12 +22,12 @@ public class UpdateBuilder {
     private final JdbcFactory factory;
     private final String table;
     private final List<Field> fields;
-    private final List<QueryClause> whereClauses = new ArrayList<QueryClause>();
+    private final List<QueryClause> whereClauses = new ArrayList<>();
     
     public UpdateBuilder(JdbcFactory factory, String table) {
         this.factory = factory;
         this.table = table;
-        fields = new ArrayList<Field>();
+        fields = new ArrayList<>();
     }
     
     /**
@@ -89,10 +89,7 @@ public class UpdateBuilder {
      * @throws Exception 
      */
     public int execute() throws Exception {
-        JdbcService jdbc = null;
-        try {
-            String query = getQuery();
-            jdbc = getService(query);
+        try (JdbcService jdbc = getService(getQuery())) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             int i=1;
             for (Field f : fields) {
@@ -127,9 +124,7 @@ public class UpdateBuilder {
                     }
                 }
             }
-            return jdbc.executePreparedStatementUpdate();
-        } finally {
-            if (jdbc!=null) jdbc.closeAll();
+            return jdbc.executeUpdate();
         }
     }
 

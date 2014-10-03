@@ -5,6 +5,9 @@
  */
 package com.rhythm.louie.jdbc;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import com.rhythm.louie.jdbc.query.ResultProcessor;
 
 import java.sql.PreparedStatement;
@@ -32,7 +35,7 @@ import com.rhythm.louie.jdbc.query.ResultMapper;
  * has been completed, you must clean up to avoid connection leaks by calling closeAll()
  */
 
-public class QueryBuilder implements AutoCloseable {
+public class QueryBuilder implements Closeable {
 
     private final String prefix;
     private String suffix;
@@ -347,7 +350,7 @@ public class QueryBuilder implements AutoCloseable {
                 }
             }
         }
-        return jdbc.executePreparedStatement();
+        return jdbc.executeQuery();
     }
     
     /**
@@ -429,7 +432,7 @@ public class QueryBuilder implements AutoCloseable {
                 processor.processResults(executeBatch(query,batch), results);
                 batch++;
             } finally {
-                closeAll();
+                close();
             }
         }
     }
@@ -459,21 +462,23 @@ public class QueryBuilder implements AutoCloseable {
                 }
             }
         }
-        return jdbc.executePreparedStatement();
+        return jdbc.executeQuery();
     }
 
 
     /**
      * Cleans up the internal JDBC Connection, must be called after execute()
      */ 
+    @Deprecated
     public void closeAll() {
         if (jdbc != null) jdbc.closeAll();
         jdbc = null;
     }
 
     @Override
-    public void close() throws Exception {
-        closeAll();
+    public void close() throws IOException {
+        if (jdbc != null) jdbc.close();
+        jdbc = null;
     }
     
 }

@@ -45,10 +45,10 @@ public class Batcher {
             if (fullargs.size() <= JdbcConstants.JDBC_IN_LIMIT) {
                 return doQueryBatch(fullargs);
             } else {
-                List<R> results = new ArrayList<R>(fullargs.size());
+                List<R> results = new ArrayList<>(fullargs.size());
 
                 int count = 0;
-                ArrayList<A> tmpList = new ArrayList<A>(JdbcConstants.JDBC_IN_LIMIT);
+                ArrayList<A> tmpList = new ArrayList<>(JdbcConstants.JDBC_IN_LIMIT);
                 for (A i : fullargs) {
                     tmpList.add(i);
                     count++;
@@ -72,25 +72,21 @@ public class Batcher {
                 return Collections.emptyList();
             }
 
-            JdbcService jdbc = null;
-            try {
-                jdbc = getService(getQuery(batchargs.size()));
+            try (JdbcService jdbc = getService(getQuery(batchargs.size()))) {
                 PreparedStatement ps = jdbc.getPreparedStatement();
                 int i = setPreArgs(ps);
                 for (A arg : batchargs) {
                     setArg(ps,i++,arg);
                 }
 
-                //ResultSet rst = jdbc.executePreparedStatement();
+                //ResultSet rst = jdbc.executeQuery();
                 if (update) {
-                    jdbc.executePreparedStatementUpdate();
+                    jdbc.executeUpdate();
                     return Collections.emptyList();
                 }
                 
                 ResultSet rst = executeQuery(jdbc);
                 return processResults(rst);
-            } finally {
-                if (jdbc != null) { jdbc.closeAll(); }
             }
         }
 
@@ -99,7 +95,7 @@ public class Batcher {
         }
         
         protected ResultSet executeQuery(JdbcService jdbc) throws Exception {
-            return jdbc.executePreparedStatement();
+            return jdbc.executeQuery();
         }
         
         protected JdbcService getService(String query) throws Exception {
@@ -142,12 +138,12 @@ public class Batcher {
         }
         
         public Map<A,List<R>> doQuery(Collection<A> fullargs) throws Exception {
-            Map<A,List<R>> results = new HashMap<A,List<R>>(fullargs.size());
+            Map<A,List<R>> results = new HashMap<>(fullargs.size());
             if (fullargs.size() <= JdbcConstants.JDBC_IN_LIMIT) {
                 doQueryBatch(fullargs,results);
             } else {
                 int count = 0;
-                ArrayList<A> tmpList = new ArrayList<A>(JdbcConstants.JDBC_IN_LIMIT);
+                ArrayList<A> tmpList = new ArrayList<>(JdbcConstants.JDBC_IN_LIMIT);
                 for (A i : fullargs) {
                     tmpList.add(i);
                     count++;
@@ -171,19 +167,15 @@ public class Batcher {
                 return;
             }
 
-            JdbcService jdbc = null;
-            try {
-                jdbc = getService(getQuery(batchargs.size()));
+            try (JdbcService jdbc = getService(getQuery(batchargs.size()))) {
                 PreparedStatement ps = jdbc.getPreparedStatement();
                 int i = setPreArgs(ps);
                 for (A arg : batchargs) {
                     setArg(ps,i++,arg);
                 }
 
-                ResultSet rst = jdbc.executePreparedStatement();
+                ResultSet rst = jdbc.executeQuery();
                 processResults(rst,results);
-            } finally {
-                if (jdbc != null) { jdbc.closeAll(); }
             }
         }
 
