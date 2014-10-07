@@ -1,0 +1,18 @@
+package sql;
+
+option java_package = "com.rhythm.louie.sql";
+option java_outer_classname = "SqlProtos";
+option java_generate_equals_and_hash = true;
+
+message SqlStatementPB {
+    optional string         sql = 1;
+}
+
+message SqlResultPB {
+    repeated SqlColumnPB    columns  = 1;
+}
+
+message SqlColumnPB {
+    optional bytes          value   = 1;
+    optional uint32         type    = 2;
+}
