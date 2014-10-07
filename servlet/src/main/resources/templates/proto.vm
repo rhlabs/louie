@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+#parse("templates/header.vm")
+
+  </head>
+   
+  <body>
+#parse("templates/navbar.vm")
+
+    <div id="wrapper">
+    
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    Proto File
+                </li>
+            </ul>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-lg-12 title-content">
+                      <h1>$filename</h1>
+                    </div>
+                </div>
+
+#if (!$error.isEmpty())
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="title-content">
+                            <h3>$error</h3>
+                        </div>
+                    </div>
+                </div>
+#else 
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div>
+                            <hr>
+                            <pre>
+#foreach($line in $file)
+$line
+#end
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+#end
+
+#parse("templates/footer.vm")
+
+  </body>
+</html>

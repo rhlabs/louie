@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Louie(${contextPath}) - Cache</title>
+
+#parse("templates/header.vm")
+
+  </head>
+   
+  <body>
+#parse("templates/navbar.vm")
+
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    Cache
+                </li>
+#foreach($manager in $managers)
+                <li>
+                    <a href='?manager=${manager.name}'>${manager.name}</a>
+                </li>
+#end
+            </ul>
+        </div>
+        <div id = "alert_holder" class="floating-alert"></div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-9 title-content">
+                      <h1>Cache for $serverName${contextPath}</h1>
+                      <button type="button" class="btn btn-primary btn-xs" id="ALL" data-toggle="confirmation">Clear ALL Caches</button>
+                    </div>
+                </div>
+
+#if ($showCaches)
+                <div class="row">
+                    <div class="col-lg-9 info-content page-header">
+                      <h3>${manager.name} &nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-primary btn-xs" id="${manager.name}" data-toggle="confirmation">Clear ALL ${manager.name} Caches</button></h3>
+                    </div>
+                </div>
+
+                <div class="row show-grid info-content">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-3"><h4>Cache Name (Type)</h4></div>
+                    <div class="col-lg-1"><h4># Keys</h4></div>
+                    <div class="col-lg-4"></div>
+                </div>
+
+#foreach($cache in $manager.getCaches())
+#set($clz = $cache.getClass().getSimpleName())
+                <div class="row show-grid info-content">
+                    <div class="col-lg-1">
+                        <button type="button" class="btn btn-primary btn-xs" id="${manager.name}[${cache.cacheName}]" data-toggle="confirmation">Clear</a>
+                    </div>
+                    <div class="col-lg-3">${cache.cacheName} ($clz)</div>
+                    <div class="col-lg-1">${cache.size}</div>
+                    <div class="col-lg-4"></div>
+                </div>
+#end   
+#else
+                <div class="row">
+                    <div class="col-lg-9 title-content">
+                      <p>Select a cache manager on the left.</p>
+                    </div>
+                </div>
+#end
+            </div>
+        </div>
+    </div>
+
+<script>
+    function clearCache() {
+        cacheName = jQuery(this).attr("id")
+        $.ajax({
+            url: "${contextPath}/cache?clear="+cacheName,success:function(result) {
+                fadeAlert("Successfully Cleared: "+result);}});
+    };
+
+    function fadeAlert(message) {
+        $('#alert_holder').html('<div class="alert alert-success" id="alert_message">'+message+'</span></div>')
+
+        window.setTimeout(function() {
+            $("#alert_message").fadeTo(500, 0).slideUp(500, function(){
+                $(this).remove(); 
+            });
+        }, 3000);            
+    }
+</script>
+
+#parse("templates/footer.vm")
+    
+    <script src="${contextPath}/louie/bootstrap-confirmation.min.js"></script>
+
+    <script>
+        $('[data-toggle="confirmation"]').confirmation({
+            placement: 'right',
+            onConfirm: clearCache,
+            btnCancelLabel  : 'Cancel',
+            btnOkLabel      : 'Clear Cache'
+        });  
+
+    </script>
+
+  </body>
+</html>

@@ -13,6 +13,7 @@ import java.util.Set;
 import com.rhythm.louie.Internal;
 import com.rhythm.louie.Service;
 import com.rhythm.louie.Streaming;
+import com.rhythm.louie.Updating;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
 
@@ -86,6 +87,27 @@ public interface StatusService {
 
     @Internal
     public Set<String> setTest() throws Exception;
+    
+    /**
+     * Does nothing just testing display
+     * 
+     * @param blah
+     * @return
+     * @throws Exception
+     * @deprecated
+     */
+    @Deprecated
+    String deprecatedTest(String blah) throws Exception;
+    
+    /**
+     * Does nothing just testing display
+     * 
+     * @param blah
+     * @return
+     * @throws Exception 
+     */
+    @Updating
+    String updatingTest(String blah) throws Exception;
     
 }
 

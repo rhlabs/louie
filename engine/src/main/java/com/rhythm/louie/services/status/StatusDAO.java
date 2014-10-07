@@ -169,5 +169,16 @@ public class StatusDAO implements StatusService {
     public Set<String> setTest() throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Deprecated
+    @Override
+    public String deprecatedTest(String blah) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String updatingTest(String blah) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }

@@ -10,7 +10,6 @@ package com.rhythm.louie;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.logging.Level;
 
 import javax.servlet.ServletContext;
 
@@ -36,7 +35,7 @@ public class ServiceManager {
     private static boolean init = false;
     
     private static final Map<String, ServiceFactory> serviceFactories = new HashMap<>();
-    private static final List<String> failedServiceProviders = new ArrayList<>();
+    private static final Map<String, String> failedServiceProviders = new HashMap<>();
     
     private ServiceManager() {};
     
@@ -139,7 +138,7 @@ public class ServiceManager {
                 } catch (MessageAdapterException ex) {
                     throw ex;
                 } catch (Exception ex) {
-                    failedServiceProviders.add(factory.getClass().getSimpleName());
+                    failedServiceProviders.put(factory.getClass().getSimpleName(), ex.toString());
                     sb.append(" - ERROR: ")
                             .append(ex.toString())
                             .append("\n");
@@ -167,7 +166,7 @@ public class ServiceManager {
                     ServiceFactory servFactory = (ServiceFactory) Class.forName(serviceProvider).newInstance();
                     serviceFactories.put(servFactory.getServiceName(), servFactory);
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-                    failedServiceProviders.add(serviceProvider);
+                    failedServiceProviders.put(serviceProvider, ex.toString());
                     LoggerFactory.getLogger(ServiceManager.class)
                             .error("Failed to load ServiceProvider {} from properties: {}",serviceProvider,ex.toString());
                     
@@ -194,16 +193,17 @@ public class ServiceManager {
                     try {
                         ServiceFactory servFactory = (ServiceFactory) Class.forName(line).newInstance();
                         String serviceName = servFactory.getServiceName();
-                        if (serviceFactories.containsKey(serviceName) 
-                                && ServiceProperties.getServiceProperties(serviceName).getProviderClass() == null) {
-                            failedServiceProviders.add(line);
-                            LoggerFactory.getLogger(ServiceManager.class)
-                                    .warn("An additional ServiceProvider: {} was BLOCKED from being loaded for service {}",line,serviceName);
+                        if (serviceFactories.containsKey(serviceName)) {
+                            if (ServiceProperties.getServiceProperties(serviceName).getProviderClass() == null) {
+                                failedServiceProviders.put(line, "Multiple providers found for the same service");
+                                LoggerFactory.getLogger(ServiceManager.class)
+                                        .warn("An additional ServiceProvider: {} was BLOCKED from being loaded for service {}", line, serviceName);
+                            }
                         } else {
                             serviceFactories.put(serviceName, servFactory);
                         }
-                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-                        failedServiceProviders.add(line);
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+                        failedServiceProviders.put(line, ex.toString());
                         LoggerFactory.getLogger(ServiceManager.class)
                                 .error("Failed to load a class from ServiceProvider prop file: {}",ex.toString());
                     }
@@ -212,6 +212,11 @@ public class ServiceManager {
                 LoggerFactory.getLogger(ServiceManager.class).error("Failed to parse a ServiceProvider prop file: {} ",ex.toString());
             }
         }    
+        
+        // Remove any services that are marked as failed in case of ambiguous loading
+        for (String failed : failedServiceProviders.keySet()) {
+            serviceFactories.remove(failed);
+        }
     }
     
     private static void configureRoutes(ServletContext context) {
@@ -337,8 +342,8 @@ public class ServiceManager {
         return Collections.unmodifiableCollection(servicesByName.keySet());
     }
 
-    public static Collection<String> getFailedServiceProviders() {
-        return Collections.unmodifiableCollection(failedServiceProviders);
+    public static Map<String, String> getFailedServiceProviders() {
+        return Collections.unmodifiableMap(failedServiceProviders);
     }
     
 }

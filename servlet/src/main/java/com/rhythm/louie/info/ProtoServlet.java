@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.servlet;
+package com.rhythm.louie.info;
 
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
@@ -16,9 +16,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -35,24 +35,63 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author cjohnson
  */
-@WebServlet(name = "ProtoServlet", urlPatterns = {"/proto"})
+@WebServlet(urlPatterns = {"/proto"})
 public class ProtoServlet extends HttpServlet {
-    private final Logger LOGGER = LoggerFactory.getLogger(ProtoServlet.class);
-
     private final Map<String,File> packageMap = Collections.synchronizedMap(new HashMap<String,File>());
     private final Map<String,File> pathMap = Collections.synchronizedMap(new HashMap<String,File>());
     private final Map<String,File> pbMap = new ConcurrentHashMap<>();
     
-    @Override
-    public void init() throws ServletException {
-            super.init();
+    
+     /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String pb = request.getParameter("pb");
+
+        File file = null;
+        if (pb != null && !pb.isEmpty()) {
+            String pbpkg = getPackage(pb);
+            file = pbMap.get(pb);
+            if (file == null) {
+                String pbfile = packageToFile(pbpkg);
+                URL base = getClass().getClassLoader().getResource(pbfile);
+                File fullDir = new File(base.getPath());
+                processPbDir(fullDir, pbfile);
+                file = pbMap.get(pb);
+            }
+        }
+
+        String filename = "";
+        List<String> fileContents = Collections.emptyList();
+        String error = "";
+        
+        if (file==null) {
+            error = "Error! Must specify a package,file, or pb";
+        } else if (!file.exists()) {
+            error = "Error! File does not exist";
+        } else {
+            fileContents = Files.readAllLines(file.toPath(), Charset.defaultCharset());
+            filename = file.getName();
+        }
+        
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("file", fileContents);
+        properties.put("filename", filename);
+        properties.put("error", error);
+
+        InfoUtils.writeTemplateResponse(request, response, "proto.vm", properties);
     }
     
     private void processPbDir(File dir, String prepkg) {
@@ -98,37 +137,6 @@ public class ProtoServlet extends HttpServlet {
         return pbs;
     }
 
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        response.setContentType("text");
-        try (PrintWriter writer = response.getWriter()) {
-            String pb = request.getParameter("pb");
-            
-            if (pb!=null && !pb.isEmpty()) {
-                String pbpkg = getPackage(pb);
-                File target = pbMap.get(pb);
-                if (target == null) {
-                    String pbfile = packageToFile(pbpkg);
-                    URL base = getClass().getClassLoader().getResource(pbfile);
-                    File fullDir = new File(base.getPath());
-                    processPbDir(fullDir,pbfile);
-                    target = pbMap.get(pb);
-                }
-                writeTextFile(target,writer);
-            } else {
-                writer.write("Error! Must specify a package,file, or pb.\n");
-            }
-        }
-    }
-    
     private String packageToFile(String pkg){
         return pkg.replaceAll("\\.", "\\/");
     }
@@ -140,45 +148,6 @@ public class ProtoServlet extends HttpServlet {
             return match.replaceAll("$1");
         }
         return pb;
-    }
-    
-    private void processProto(HttpServletRequest request, PrintWriter writer) {
-        try {
-            String proto = request.getParameter("proto");
-            if (proto == null || proto.isEmpty()) {
-                writer.write("Error! Must specify a proto.\n");
-            } else {
-                Class<?> protoClass = Class.forName(proto,true,this.getClass().getClassLoader());
-                
-                Descriptor desc = getDescriptor(protoClass);
-                writeProto(desc,writer);
-            }
-
-//            writeProto(ToolInfoBPB.getDescriptor(), writer);
-//            writer.write("\n");
-//            writeProto(ToolVersionPB.getDescriptor(), writer);
-        } catch (Exception e) {
-            writer.write(e.toString()+"\n");
-        } finally {
-            writer.close();
-        }
-    }
-    
-    private static Descriptor getDescriptor(Class<?> cl) throws Exception {
-        if (cl==null) {
-            return null;
-        }
-        
-        Method descMeth = cl.getMethod("getDescriptor");
-        if (!Modifier.isStatic(descMeth.getModifiers())
-                || !Modifier.isPublic(descMeth.getModifiers())) {
-            throw new Exception("Not a PB!");
-        }
-        Object o = descMeth.invoke(cl);
-        if (!(o instanceof Descriptor)) {
-            throw new Exception("Not a PB Descriptor!");
-        }
-        return (Descriptor) o;
     }
     
     static public void writeProto(Descriptor desc, PrintWriter writer) {
@@ -196,8 +165,8 @@ public class ProtoServlet extends HttpServlet {
         writer.write("}\n");
     }
 
-    static final Map<Label,String> labelMap = new EnumMap<Label, String>(Label.class);
-    static final Map<Type,String> typeMap = new EnumMap<Type, String>(Type.class);
+    private static final Map<Label,String> labelMap = new EnumMap<>(Label.class);
+    private static final Map<Type,String> typeMap = new EnumMap<>(Type.class);
     
     static {
         for (Label l : Label.values()) {
@@ -226,91 +195,6 @@ public class ProtoServlet extends HttpServlet {
         return typeMap.get(t);
     }
     
-    private void writeTextFile(File f, PrintWriter writer) {
-        if (f==null) {
-            writer.write("No such file.");
-            return;
-        }
-        
-        FileReader reader = null;
-        try {
-            reader = new FileReader(f);
-            
-            char[] buf = new char[1024];
-            int count = 0;
-            while((count = reader.read(buf)) >= 0) {
-                writer.write(buf, 0, count);
-            }
-            
-        } catch (Exception ex) {
-            LOGGER.error("Error writing Text file", ex);
-        } finally {
-            if (reader != null) try {
-                reader.close();
-            } catch (IOException ex) {
-                LOGGER.error("Error closing reader", ex);
-            }
-        }
-    }
-    
-//    public void writeText() {
-//        // Set content type
-//        response.setContentType("text");
-//
-//        // Set content size
-//        //File file = new File(filename);
-//        //response.setContentLength((int) file.length());
-//
-//        // Open the file and output streams
-//
-//        InputStream in = null;
-//        OutputStream out = response.getOutputStream();
-//        try {
-//            ClassLoader CLDR = this.getClass().getClassLoader();
-//            in = CLDR.getResourceAsStream(filename);
-//             
-//            // Copy the contents of the file to the output stream
-//            byte[] buf = new byte[1024];
-//            int count = 0;
-//            while ((count = in.read(buf)) >= 0) {
-//                out.write(buf, 0, count);
-//            }
-//        } catch(Exception e) {
-//            e.printStackTrace();
-//            PrintWriter writer = response.getWriter();
-//            try {
-//                writer.write("Error Retrieving File!\n");
-//                writer.write(e.toString());
-//            } finally {
-//                writer.close();
-//            }
-//        } finally {
-//            if (in != null) {
-//                in.close();
-//            }
-//            out.close();
-//        }
-//    }
-    
-//    public void readTextFromJar(String s,PrintWriter out) {
-//        String thisLine;
-//        try {
-//            //InputStream is = getClass().getResourceAsStream(s);
-//            
-//            ClassLoader CLDR = this.getClass().getClassLoader();
-//            InputStream is = CLDR.getResourceAsStream(s);
-//    
-//            
-//            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-//            while ((thisLine = br.readLine()) != null) {
-//                out.println(thisLine);
-//            }
-//            br.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /** 
      * Handles the HTTP <code>GET</code> method.
@@ -344,6 +228,6 @@ public class ProtoServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Display Proto Files";
     }// </editor-fold>
 }

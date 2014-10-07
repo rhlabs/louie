@@ -56,7 +56,7 @@ public class BuildProperties implements Comparable<BuildProperties> {
         if (serviceSorted==null) {
             serviceSorted = new ArrayList<>();
             for (BuildProperties build : props.values()) {
-                if (!build.buildTime.isEmpty()) {
+                if (build.isServiceBuild()) {
                     serviceSorted.add(build);
                 }
             }
@@ -127,6 +127,11 @@ public class BuildProperties implements Comparable<BuildProperties> {
         return "("+buildVersion+
                 (!buildTime.isEmpty() && !buildVersion.isEmpty()?" ":"")
                 +buildTime+")";
+    }
+    
+    public boolean isServiceBuild() {
+        // Need a better way to determine this at some point
+        return !buildTime.isEmpty();
     }
     
     @Override
