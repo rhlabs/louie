@@ -42,14 +42,18 @@ public class ${className} implements ServiceFactory {
     }
 
     public static ${info.serviceClassName} getServiceClient() throws Exception {
-        return getService().getDelegate();
+        return loadService().getDelegate();
     }
 
     private static ${baseName}ServiceHandler service;
 
     @Override
+    public ${baseName}ServiceHandler getService() throws Exception {
+        return loadService();
+    }
+
     @SuppressWarnings("unchecked")
-    public static synchronized ${baseName}ServiceHandler getService() throws Exception {
+    private static synchronized ${baseName}ServiceHandler loadService() throws Exception {
         if (service!=null) {
             return service;
         }
@@ -87,7 +91,7 @@ public class ${className} implements ServiceFactory {
         return service;
     }
 
-    private boolean useRemoteDAO(ServiceProperties props) throws Exception {
+    private static boolean useRemoteDAO(ServiceProperties props) throws Exception {
         if (props.isCentralized()) {
             Server PRIMARY = Server.getServer(props.getMain());
             if (PRIMARY == null) {
@@ -101,7 +105,7 @@ public class ${className} implements ServiceFactory {
         return false;
     }
 
-    private ${info.serviceClassName} loadLayer(String property, String defaultName,
+    private static ${info.serviceClassName} loadLayer(String property, String defaultName,
             Class<? extends Annotation> annotation, boolean delegate) throws Exception {
         Class<?> layer = null;
         if (property==null) {
