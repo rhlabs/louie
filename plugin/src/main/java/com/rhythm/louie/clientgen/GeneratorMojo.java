@@ -121,7 +121,6 @@ public class GeneratorMojo extends AbstractMojo{
         if (blacklist == null) blacklist = new ArrayList<>();
         blacklist.add("com.rhythm.louie");
         blacklist.add("com.rhythm.louie.servlet");
-        blacklist.add("com.rhythm.louie.auth");
         blacklist.add("com.rhythm.louie.client.connection");
         blacklist.add("com.rhythm.louie.connection");
         blacklist.add("com.rhythm.louie.email");
@@ -134,18 +133,10 @@ public class GeneratorMojo extends AbstractMojo{
         blacklist.add("com.rhythm.louie.server");
         blacklist.add("com.rhythm.louie.servlets");
         blacklist.add("com.rhythm.louie.stream");
-        blacklist.add("com.rhythm.louie.testservice");
-        blacklist.add("com.rhythm.louie.testservice.jms");
         blacklist.add("com.rhythm.louie.topology");
         blacklist.add("com.rhythm.louie.pb");
         blacklist.add("com.rhythm.louie.pb.command");
         blacklist.add("com.rhythm.louie.pb.data");
-        
-        if (whitelist == null) whitelist = new ArrayList<>();
-        whitelist.add("com.rhythm.louie.auth.AuthServiceHandler");
-        whitelist.add("com.rhythm.louie.testservice.TestServiceHandler");
-        whitelist.add("com.rhythm.louie.info.InfoServiceHandler");
-        whitelist.add("com.rhythm.louie.testservice.jms.JmsTestServiceHandler");
         
         ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
         Thread.currentThread().setContextClassLoader(cl);

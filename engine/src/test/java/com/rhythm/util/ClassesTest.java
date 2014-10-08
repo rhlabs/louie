@@ -12,10 +12,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.rhythm.louie.auth.AuthService;
+import com.rhythm.louie.services.auth.AuthService;
 import com.rhythm.louie.Service;
-import com.rhythm.louie.info.InfoService;
-import com.rhythm.louie.testservice.TestService;
+import com.rhythm.louie.services.info.InfoService;
+import com.rhythm.louie.services.status.StatusService;
 
 import static org.junit.Assert.*;
 
@@ -51,7 +51,7 @@ public class ClassesTest {
         assertEquals(cl.size(), 3);
         assertTrue(cl.contains(InfoService.class));
         assertTrue(cl.contains(AuthService.class));
-        assertTrue(cl.contains(TestService.class));
+        assertTrue(cl.contains(StatusService.class));
         
         for (Class<?> c : cl) {
             System.out.println(c.getName());

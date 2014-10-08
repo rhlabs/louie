@@ -29,7 +29,7 @@ public class MessageManager {
     
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 61616;
-    private static final String SYSTEM_PROP_KEY = "jmsadapter";
+    private static final String SYSTEM_PROP_KEY = "com.rhythm.louie.jmsadapter";
     
     private static JmsAdapter jmsAdapter = null;
     

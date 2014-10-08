@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.testservice.jms;
+package com.rhythm.louie.services.devtest;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,18 +18,18 @@ import static org.junit.Assert.*;
  *
  * @author cjohnson
  */
-public class JmsTestServiceTest {
+public class DevTestServiceTest {
     
     
-    private static JmsTestServiceClient client;
-    public JmsTestServiceTest() {}
+    private static DevTestServiceClient client;
+    public DevTestServiceTest() {}
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         LouieConnection conn = LouieConnectionFactory.getLocalConnection(
                         Identity.createJUnitIdentity());
         
-        client = JmsTestClientFactory.getClient(conn);
+        client = DevTestClientFactory.getClient(conn);
     }
     
     

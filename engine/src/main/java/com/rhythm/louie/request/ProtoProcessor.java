@@ -8,9 +8,9 @@ package com.rhythm.louie.request;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 
-import com.rhythm.louie.auth.AuthUtils;
-import com.rhythm.louie.auth.SessionStat;
-import com.rhythm.louie.auth.UnauthorizedSessionException;
+import com.rhythm.louie.services.auth.AuthUtils;
+import com.rhythm.louie.services.auth.SessionStat;
+import com.rhythm.louie.services.auth.UnauthorizedSessionException;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.IdentityPB;

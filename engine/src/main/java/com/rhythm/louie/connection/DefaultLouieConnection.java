@@ -40,8 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.Constants;
-import com.rhythm.louie.server.LocalConstants;
-import com.rhythm.louie.auth.AuthService;
+import com.rhythm.louie.services.auth.AuthService;
 import com.rhythm.louie.stream.Consumer;
 
 import com.rhythm.louie.request.data.Data;

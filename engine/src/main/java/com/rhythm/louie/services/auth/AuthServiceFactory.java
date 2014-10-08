@@ -3,44 +3,41 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.auth;
+package com.rhythm.louie.services.auth;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.pb.RequestProtos.IdentityPB;
-
-import com.rhythm.louie.service.Service;
-import com.rhythm.louie.request.data.Param;
-import com.rhythm.louie.request.RequestContext;
-import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.ServiceProvider;
 import com.rhythm.louie.connection.DefaultLouieConnection;
-
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.Param;
+import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.ServiceFactory;
+
+import com.rhythm.pb.RequestProtos.IdentityPB;
 
 /**
  *
  * @author cjohnson
  */
+@ServiceProvider
 public class AuthServiceFactory implements ServiceFactory {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthServiceFactory.class);
     
     private static AuthServiceHandler service;
     
-    private AuthServiceFactory() {}
+    public AuthServiceFactory() {}
     
     public static AuthServiceFactory getInstance() {
-        return Holder.INSTANCE;
+        return new AuthServiceFactory();
     }
 
     @Override
     public String getServiceName() {
         return AuthService.SERVICE_NAME;
     }
-
-    private static class Holder {
-        private static final AuthServiceFactory INSTANCE = new AuthServiceFactory();
-    }     
     
     @Override
     public Service getService() {

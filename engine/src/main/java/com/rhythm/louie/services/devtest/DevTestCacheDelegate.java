@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.testservice.jms;
+package com.rhythm.louie.services.devtest;
 
 import com.rhythm.louie.Delegate;
 import com.rhythm.louie.cache.CacheManager;
@@ -25,12 +25,12 @@ import com.rhythm.louie.CacheDelegate;
  * @author eyasukoc
  */
 @CacheDelegate
-public class JmsTestCacheDelegate implements CacheLayer, JmsTestService, Delegate<JmsTestService> {
+public class DevTestCacheDelegate implements CacheLayer, DevTestService, Delegate<DevTestService> {
     private final String SERVICE_NAME = "test";
-    private JmsTestService delegate;
+    private DevTestService delegate;
     private final MessageHandler msgHandler;
     
-    public JmsTestCacheDelegate() {
+    public DevTestCacheDelegate() {
         msgHandler= new TestServiceMessageHandler();
     }
     
@@ -51,12 +51,12 @@ public class JmsTestCacheDelegate implements CacheLayer, JmsTestService, Delegat
     public void shutdown() throws Exception {}
 
     @Override
-    public void setDelegate(JmsTestService delegate) {
+    public void setDelegate(DevTestService delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public JmsTestService getDelegate() {
+    public DevTestService getDelegate() {
         return delegate;
     }
 

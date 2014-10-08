@@ -15,6 +15,7 @@ import com.rhythm.louie.Classes;
 import com.rhythm.louie.Delegate;
 import com.rhythm.louie.server.Server;
 import com.rhythm.louie.server.ServiceProperties;
+import com.rhythm.louie.ServiceProvider;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.CacheDelegate;
@@ -23,18 +24,16 @@ import com.rhythm.louie.Router;
 
 import com.rhythm.louie.service.ServiceFactory;
 
+@ServiceProvider
 public class ${className} implements ServiceFactory {
 
     private static final String serviceName = "${info.serviceName}";
 
-    private ${className}() {}
+    public ${className}() {}
 
+    @Deprecated
     public static ${className} getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    private static class Holder {
-        private static final ${className} INSTANCE = new ${className}();
+        return new ${className}();
     }
 
     @Override

@@ -11,9 +11,9 @@ import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;                                                                                                                                                                                                          
 
 import com.rhythm.louie.server.Server;
-import com.rhythm.louie.auth.AuthUtils;
-import com.rhythm.louie.auth.SessionStat;
-import com.rhythm.louie.auth.UnauthorizedSessionException;
+import com.rhythm.louie.services.auth.AuthUtils;
+import com.rhythm.louie.services.auth.SessionStat;
+import com.rhythm.louie.services.auth.UnauthorizedSessionException;
 import com.rhythm.louie.connection.LouieConnection;       
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.exception.LouieRouteException;

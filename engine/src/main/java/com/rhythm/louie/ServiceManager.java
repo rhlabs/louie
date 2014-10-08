@@ -9,7 +9,6 @@ package com.rhythm.louie;
 
 import java.util.*;
 
-import com.rhythm.louie.auth.AuthServiceFactory;
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.email.EmailService;
@@ -17,20 +16,16 @@ import com.rhythm.louie.jms.MessageAdapterException;
 import com.rhythm.louie.jms.MessageUpdate;
 import com.rhythm.louie.jms.MessageHandler;
 import com.rhythm.louie.jms.MessageManager;
-import com.rhythm.louie.info.InfoServiceFactory;
 import com.rhythm.louie.server.BuildProperties;
 import com.rhythm.louie.server.LocalConstants;
 import com.rhythm.louie.server.Server;
 import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.server.TaskScheduler;
 import com.rhythm.louie.topology.Route;
-import com.rhythm.louie.testservice.TestServiceFactory;
 
 import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.ServiceFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -50,11 +45,33 @@ public class ServiceManager {
     
     private static final Set<String> reservedServices;
     private static final List<ServiceFactory> serviceFactories;
+    private static final String CORE_SERV_PKG_PREFIX = "com.rhythm.louie.services"; 
     static {
-        serviceFactories = new ArrayList<ServiceFactory>();
-        serviceFactories.add(InfoServiceFactory.getInstance());
-        serviceFactories.add(AuthServiceFactory.getInstance());
-        serviceFactories.add(TestServiceFactory.getInstance());
+        /*
+        Always load/reserve the core louie services found in the specified package prefix.
+        */
+        serviceFactories = new ArrayList<>();
+        List<Class<?>> classes = null;
+        try {
+            classes = Classes.getRecursiveTypesAnnotatedWith(CORE_SERV_PKG_PREFIX, ServiceProvider.class);
+        } catch (IOException ex) {
+            LoggerFactory.getLogger(ServiceManager.class).error(ex.toString());
+        }
+        if (classes != null) {
+            for(Class<?> c : classes) {
+                boolean isImpl = false;
+                for (Class intr : c.getInterfaces()) {
+                    if (intr.equals(ServiceFactory.class)) isImpl = true;
+                }
+                if (isImpl) {
+                    try {
+                        serviceFactories.add((ServiceFactory) Class.forName(c.getName()).newInstance());
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                        LoggerFactory.getLogger(ServiceManager.class).error(ex.toString());
+                    }
+                }
+            }
+        }
         
         reservedServices = new HashSet<String>();
         for (ServiceFactory factory : serviceFactories) {

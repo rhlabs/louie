@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.auth;
+package com.rhythm.louie.services.auth;
 
 import com.google.common.cache.CacheBuilderSpec;
 

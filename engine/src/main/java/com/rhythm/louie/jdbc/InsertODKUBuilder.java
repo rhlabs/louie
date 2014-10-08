@@ -105,7 +105,7 @@ public class InsertODKUBuilder {
         throw new Exception ("Cannot call getAutoIncrementID on InsertODKU prior to calling execute");
     }
 
-    public String getQuery() throws Exception {
+    public final String getQuery() throws Exception {
         StringBuilder query = new StringBuilder();
         query.append("INSERT INTO ").append(table).append(" ("); 
         

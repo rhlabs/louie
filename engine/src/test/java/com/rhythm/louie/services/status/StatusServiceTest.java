@@ -1,10 +1,10 @@
 /*
- * TestServiceTest.java
+ * StatusServiceTest.java
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.testservice;
+package com.rhythm.louie.services.status;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.connection.Response;
-import com.rhythm.louie.info.InfoClientTest;
+import com.rhythm.louie.services.info.InfoClientTest;
 import com.rhythm.louie.stream.Consumer;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
@@ -36,17 +36,17 @@ import com.rhythm.louie.stream.StreamingConsumer;
  *
  * @author cjohnson
  */
-public class TestServiceTest {
+public class StatusServiceTest {
     
-    private static TestServiceClient client;
-    public TestServiceTest() {}
+    private static StatusServiceClient client;
+    public StatusServiceTest() {}
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         LouieConnection conn = LouieConnectionFactory.getLocalConnection(
                         Identity.createJUnitIdentity());
         
-        client = TestClientFactory.getClient(conn);
+        client = StatusClientFactory.getClient(conn);
     }
     
     /**
@@ -64,7 +64,7 @@ public class TestServiceTest {
                 @Override
                 public void run() {
                     try {
-                        client = TestClientFactory.getClient(
+                        client = StatusClientFactory.getClient(
                         LouieConnectionFactory.getLocalConnection(
                         Identity.createJUnitIdentity()));
                         
@@ -209,7 +209,7 @@ public class TestServiceTest {
                 try {
                     client.streamTest(20, 100, 100, consumer);
                 } catch (Exception ex) {
-                    Logger.getLogger(TestServiceTest.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(StatusServiceTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

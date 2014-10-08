@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.testservice;
+package com.rhythm.louie.services.status;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
@@ -34,9 +34,9 @@ import com.rhythm.louie.stream.StreamingConsumer;
  * @author cjohnson
  */
 @DAO
-public class TestDAO implements TestService {
+public class StatusDAO implements StatusService {
     private static final int THREAD_POOL_SIZE = 20;
-    public TestDAO() {
+    public StatusDAO() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                     .setNameFormat("qhostTEST-threadscheduler-%d").build();
     }
@@ -60,7 +60,7 @@ public class TestDAO implements TestService {
         }
         List<String> args = new ArrayList<>(hosts);
         String host = args.remove(0);
-        TestClient client = TestClientFactory.getClient(
+        StatusClient client = StatusClientFactory.getClient(
                 LouieConnectionFactory.getConnection(host));
         return client.loopTest(args);
     }
@@ -108,11 +108,11 @@ public class TestDAO implements TestService {
             @Override
             public void run() {
                 try {
-                    TestServiceClient client = TestClientFactory.getClient(
+                    StatusServiceClient client = StatusClientFactory.getClient(
                             LouieConnectionFactory.getConnection(host));
                     client.streamLoopTest(numResults, resultSize, sleep, args, consumer);
                 } catch (Exception ex) {
-                    LoggerFactory.getLogger(TestDAO.class).error("Error calling streamLoopTest on Remote Client",ex);
+                    LoggerFactory.getLogger(StatusDAO.class).error("Error calling streamLoopTest on Remote Client",ex);
                 }
             }
         });

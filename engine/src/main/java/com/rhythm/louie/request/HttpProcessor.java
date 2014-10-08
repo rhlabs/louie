@@ -6,7 +6,7 @@
 package com.rhythm.louie.request;
 
 import com.rhythm.louie.server.Server;
-import com.rhythm.louie.auth.UnauthorizedSessionException;
+import com.rhythm.louie.services.auth.UnauthorizedSessionException;
 import com.rhythm.louie.exception.LouieRouteException;
 
 import com.rhythm.louie.request.data.Result;

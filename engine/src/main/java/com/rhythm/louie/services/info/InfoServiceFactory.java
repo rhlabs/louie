@@ -3,8 +3,9 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.info;
+package com.rhythm.louie.services.info;
 
+import com.rhythm.louie.ServiceProvider;
 import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.ServiceFactory;
 
@@ -12,23 +13,21 @@ import com.rhythm.louie.service.ServiceFactory;
  *
  * @author cjohnson
  */
+@ServiceProvider
 public class InfoServiceFactory implements ServiceFactory {
-    
     
     private static InfoServiceHandler service;
     
+    public InfoServiceFactory() {}
+    
     public static InfoServiceFactory getInstance() {
-        return Holder.INSTANCE;
+        return new InfoServiceFactory();
     }
 
     @Override
     public String getServiceName() {
         return InfoService.SERVICE_NAME;
     }
-
-    private static class Holder {
-        private static final InfoServiceFactory INSTANCE = new InfoServiceFactory();
-    }         
     
     @Override
     public Service getService() {

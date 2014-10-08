@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2012 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.auth;
+package com.rhythm.louie.services.auth;
 
 import java.util.List;
 
@@ -20,8 +20,8 @@ import com.rhythm.pb.RequestProtos.SessionKey;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.info.InfoClient;
-import com.rhythm.louie.info.InfoClientFactory;
+import com.rhythm.louie.services.info.InfoClient;
+import com.rhythm.louie.services.info.InfoClientFactory;
 
 import static org.junit.Assert.*;
 

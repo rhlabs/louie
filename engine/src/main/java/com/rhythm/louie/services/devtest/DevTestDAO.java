@@ -3,7 +3,7 @@
  * 
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
-package com.rhythm.louie.testservice.jms;
+package com.rhythm.louie.services.devtest;
 
 import com.rhythm.louie.DAO;
 
@@ -12,7 +12,7 @@ import com.rhythm.louie.DAO;
  * @author cjohnson
  */
 @DAO
-public class JmsTestDAO implements JmsTestService {
+public class DevTestDAO implements DevTestService {
 
     @Override
     public String messageTest(String message) throws Exception {

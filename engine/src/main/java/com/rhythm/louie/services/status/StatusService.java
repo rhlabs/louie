@@ -4,7 +4,7 @@
  * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie.testservice;
+package com.rhythm.louie.services.status;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ import com.rhythm.pb.RequestProtos.ErrorPB;
  */
 
 @Service
-public interface TestService {
+public interface StatusService {
     /**
      * Echoes the value back after sleeping
      * 
