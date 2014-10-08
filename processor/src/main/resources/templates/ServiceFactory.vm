@@ -41,7 +41,7 @@ public class ${className} implements ServiceFactory {
         return serviceName;
     }
 
-    public ${info.serviceClassName} getServiceClient() throws Exception {
+    public static ${info.serviceClassName} getServiceClient() throws Exception {
         return getService().getDelegate();
     }
 
@@ -49,7 +49,7 @@ public class ${className} implements ServiceFactory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized ${baseName}ServiceHandler getService() throws Exception {
+    public static synchronized ${baseName}ServiceHandler getService() throws Exception {
         if (service!=null) {
             return service;
         }
