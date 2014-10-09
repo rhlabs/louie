@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
  * Callable implementation for use in streaming asynchronous multiplexed calls.
  * @author eyasukoc
  */
-public class AsyncIOCallable implements Callable {
+public class AsyncIOCallable implements Callable<List<AsyncIOBundle>> {
 
     private final AsyncIO io;
     private final List<AsyncIOBundle> bundles;
