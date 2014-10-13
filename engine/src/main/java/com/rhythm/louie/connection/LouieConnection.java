@@ -36,6 +36,8 @@ public interface LouieConnection {
     
     void setGateway(String gateway);
     
+    String getGateway();
+    
     void setPort(int port);
     
     URLConnection getJsonForwardingConnection() throws Exception;

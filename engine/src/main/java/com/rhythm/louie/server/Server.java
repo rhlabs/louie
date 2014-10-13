@@ -20,16 +20,23 @@ import com.rhythm.louie.info.InfoProtos.ServerPB;
  * @author cjohnson
  */
 public class Server {
+    private static String DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
+    public static void setDefaultGateway(String gateway) {
+        if (gateway==null) {
+            DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
+        } else {
+            DEFAULT_GATEWAY = gateway;
+        }
+    }
+    
     public static final Server UNKNOWN = new Server("Unknown");
     static {
         UNKNOWN.host = "localhost";
         UNKNOWN.location = "UNKNOWN";
         UNKNOWN.timezone = TimeZone.getDefault().getDisplayName();
-    }
-    
-    private static String DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
-    public static void setDefaultGateway(String gateway) {
-        DEFAULT_GATEWAY = gateway;
+        
+        // set gateway again here just to be sure it gets set correctly on initialize
+        UNKNOWN.gateway = Constants.DEFAULT_GATEWAY;
     }
     
     public static Server LOCAL = UNKNOWN;
@@ -82,36 +89,49 @@ public class Server {
                     server.host=value.trim();
                 } else {
                     String attribute = keyParts[1];
-                    if (attribute.equals("display")) {
-                        server.display=value;
-                    } else if (attribute.equals("timezone")) {
-                        server.timezone=value;
-                    } else if (attribute.equals("location")) {
-                        server.location=value;
-                    } else if (attribute.equals("gateway")) {
-                        server.gateway=value;
-                    } else if (attribute.equals("mutual_ssl")) {
-                        server.mutualSSL=value.equals("true");
-                    } else if (attribute.equals("ssl_port")) {
-                        server.sslPort=Integer.parseInt(value);
-                    } else if (attribute.equals("ssl_gateway")) {
-                        server.sslGateway=value;
-                    } else if (attribute.equals("ssl_pass")) {
-                        server.sslPass=value;
-                    } else if (attribute.equals("ssl_ca_pass")) {
-                        server.sslCAPass=value;
-                    } else if (attribute.equals("ip")){
-                        server.ip=value;
-                    } else if (attribute.equals("router")) {
-                        server.router=Boolean.parseBoolean(value);
-                        if (server.router) {
-                            ROUTER = server;
-                        }
-                     }else if (attribute.equals("central_auth")) {
-                        CENTRAL_AUTH = server;
-                    } else {
-                        LoggerFactory.getLogger(Server.class)
-                                .warn("Warning! Unknown Server Property: {}", key);
+                    switch (attribute) {
+                        case "display":
+                            server.display=value;
+                            break;
+                        case "timezone":
+                            server.timezone=value;
+                            break;
+                        case "location":
+                            server.location=value;
+                            break;
+                        case "gateway":
+                            server.gateway=value;
+                            break;
+                        case "mutual_ssl":
+                            server.mutualSSL=value.equals("true");
+                            break;
+                        case "ssl_port":
+                            server.sslPort=Integer.parseInt(value);
+                            break;
+                        case "ssl_gateway":
+                            server.sslGateway=value;
+                            break;
+                        case "ssl_pass":
+                            server.sslPass=value;
+                            break;
+                        case "ssl_ca_pass":
+                            server.sslCAPass=value;
+                            break;
+                        case "ip":
+                            server.ip=value;
+                            break;
+                        case "router":
+                            server.router=Boolean.parseBoolean(value);
+                            if (server.router) {
+                                ROUTER = server;
+                            }   break;
+                        case "central_auth":
+                            CENTRAL_AUTH = server;
+                            break;
+                        default:
+                            LoggerFactory.getLogger(Server.class)
+                                    .warn("Warning! Unknown Server Property: {}", key);
+                            break;
                     }
                 }
             }
@@ -128,7 +148,7 @@ public class Server {
                 Server.LOCAL = server;
             }
             
-            List<String> disabled = new ArrayList<String>();
+            List<String> disabled = new ArrayList<>();
             
             for (Server server : SERVERS.values()) {
                 try {
@@ -150,7 +170,8 @@ public class Server {
                 } else {
                     if (LOCAL != null) {
                         if (LOCAL.getLocation().equals(location)) {
-                            if (LOCAL.getHostName().equals(server.getHostName())) {     //lame way to ensure only THIS server is keyed for THIS location (routing machinery)
+                            // lame way to ensure only THIS server is keyed for THIS location (routing machinery)
+                            if (LOCAL.getHostName().equals(server.getHostName())) {    
                                 SERVERS_BY_LOCATION.put(server.getLocation(),server);                            
                             } else {
                                 LoggerFactory.getLogger(Server.class)
@@ -160,9 +181,6 @@ public class Server {
                             SERVERS_BY_LOCATION.put(server.getLocation(),server);
                         }
                     }
-//                    if (previous!=null) {
-//                        LOGGER.warn("WARNING! Multiple Servers have the same location: "+server.getLocation());
-//                    }
                 }
             }
             
@@ -170,8 +188,8 @@ public class Server {
                 SERVERS.remove(disableName);
             }
             
-            ALL_SERVERS = Collections.unmodifiableList(new ArrayList<Server>(SERVERS.values()));
-            List<ServerPB> serverPBs = new ArrayList<ServerPB>(ALL_SERVERS.size());
+            ALL_SERVERS = Collections.unmodifiableList(new ArrayList<>(SERVERS.values()));
+            List<ServerPB> serverPBs = new ArrayList<>(ALL_SERVERS.size());
             for (Server server : Server.allServers()) {
                 server.pb = ServerPB.newBuilder()
                         .setName(server.getName())
@@ -183,7 +201,7 @@ public class Server {
                 serverPBs.add(server.pb);
             }
             ALL_SERVER_PBS = Collections.unmodifiableList(serverPBs);
-            SERVER_LOCATIONS = Collections.unmodifiableList(new ArrayList<String>(SERVERS_BY_LOCATION.keySet()));
+            SERVER_LOCATIONS = Collections.unmodifiableList(new ArrayList<>(SERVERS_BY_LOCATION.keySet()));
             
             //Print
             StringBuilder sb = new StringBuilder();
@@ -378,10 +396,10 @@ public class Server {
                 return false;
             }
             final ServerKey other = (ServerKey) obj;
-            if ((this.address == null) ? (other.address != null) : !this.address.equals(other.address)) {
+            if (!Objects.equals(this.address, other.address)) {
                 return false;
             }
-            if ((this.gateway == null) ? (other.gateway != null) : !this.gateway.equals(other.gateway)) {
+            if (!Objects.equals(this.gateway, other.gateway)) {
                 return false;
             }
             return true;

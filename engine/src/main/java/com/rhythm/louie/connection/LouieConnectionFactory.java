@@ -13,8 +13,6 @@ import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
 
 import java.net.URLConnection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,6 +124,16 @@ public class LouieConnectionFactory {
             } catch (Exception ex) {
                 LoggerFactory.getLogger(LouieConnectionFactory.class)
                         .error("Error setting Gateway", ex);
+            }
+        }
+        
+        @Override
+        public String getGateway() {
+            try {
+                return getDelegate().getGateway();
+            } catch (Exception ex) {
+                Logger.getLogger(LouieConnectionFactory.class.getName()).log(Level.SEVERE, null, ex);
+                return "unknown";
             }
         }
 

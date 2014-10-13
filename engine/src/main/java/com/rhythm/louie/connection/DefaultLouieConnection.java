@@ -27,6 +27,7 @@ import com.rhythm.louie.request.RequestContext;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -129,7 +130,16 @@ public class DefaultLouieConnection implements LouieConnection {
     
     @Override
     public void setGateway(String gateway) {
-        this.gateway = gateway;
+        if (gateway==null) {
+            this.gateway = Constants.DEFAULT_GATEWAY;
+        } else {
+            this.gateway = gateway;
+        }
+    }
+    
+    @Override
+    public String getGateway() {
+        return gateway;
     }
     
     @Override
@@ -138,23 +148,23 @@ public class DefaultLouieConnection implements LouieConnection {
     }
     
     private URL getAuthURL() {
-        return getUrl("http://"+this.host+":"+AUTH_PORT+"/"+this.gateway+"/pb");
+        return getUrl("http://"+host+":"+AUTH_PORT+"/"+gateway+"/pb");
     }
     
     private URL getPBURL() {
-        return getUrl("http://"+this.host+":"+PORT+"/"+this.gateway+"/pb");
+        return getUrl("http://"+host+":"+PORT+"/"+gateway+"/pb");
     }
     
     private URL getSecurePBURL() {
-        return getUrl("https://"+this.host+":"+SSL_PORT+"/"+this.gateway+"/pb");
+        return getUrl("https://"+host+":"+SSL_PORT+"/"+gateway+"/pb");
     }
     
     private URL getJsonURL() {
-        return getUrl("http://"+this.host+":"+PORT+"/"+this.gateway+"/json");
+        return getUrl("http://"+host+":"+PORT+"/"+gateway+"/json");
     }
     
     private URL getSecureJsonURL() {
-        return getUrl("https://"+this.host+":"+SSL_PORT+"/"+this.gateway+"/json");
+        return getUrl("https://"+host+":"+SSL_PORT+"/"+gateway+"/json");
     }
     
     private URL getUrl(String urlStr) {
@@ -187,12 +197,9 @@ public class DefaultLouieConnection implements LouieConnection {
 
         // Set Content Type
         connection.setRequestProperty("Content-Type", "application/x-protobuf");
-        //connection.setRequestProperty(, who)
         
         connection.setReadTimeout(30*1000);
         connection.setConnectTimeout(15*1000);
-        
-        
         
         return connection;
     }
@@ -210,18 +217,16 @@ public class DefaultLouieConnection implements LouieConnection {
 
         // Set Content Type
         connection.setRequestProperty("Content-Type", "application/x-protobuf");
-        //connection.setRequestProperty(, who)
         
         connection.setReadTimeout(30*1000);
         connection.setConnectTimeout(15*1000);
-        
-        
         
         return connection;
     }
     
     private URLConnection getSecureConnection(URL url) throws Exception {
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        
         //set configs for basic http stuff (see getConnection)
         connection.setDoInput(true);
         connection.setDoOutput(true);
@@ -313,52 +318,51 @@ public class DefaultLouieConnection implements LouieConnection {
         // Build and Write Request Header
         RequestHeaderPB.Builder headerBuilder = RequestHeaderPB.newBuilder();
         headerBuilder.setCount(1);
-        //headerBuilder.setAgent("Unknown");
         if (key == null) {
             headerBuilder.setIdentity(getIdentity());
         } else if (!command.equals("createSession")){ //lame extra check
             headerBuilder.setKey(key);
         }
 
-        headerBuilder.build().writeDelimitedTo(connection.getOutputStream()); 
-
-        // Build and Write Request
-        RequestPB.Builder reqBuilder = RequestPB.newBuilder();
-        reqBuilder.setId(txId.incrementAndGet())
-                  .setService(service)
-                  .setMethod(command);
-        
-        // Only send routing info if this is not a auth call
         RequestContext currentRequest = RequestContextManager.getRequest();
-        if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
-            if (currentRequest.getRequest().hasRouteUser()) {
-                reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
-            } else if (currentRequest.getIdentity() != null) {
+        try (OutputStream output = connection.getOutputStream()) {
+            headerBuilder.build().writeDelimitedTo(output); 
+
+            // Build and Write Request
+            RequestPB.Builder reqBuilder = RequestPB.newBuilder();
+            reqBuilder.setId(txId.incrementAndGet())
+                      .setService(service)
+                      .setMethod(command);
+
+            // Only send routing info if this is not a auth call
+            if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
+                if (currentRequest.getRequest().hasRouteUser()) {
+                    reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
+                } else if (currentRequest.getIdentity() != null) {
                     // The identity should be set, so this check should not be needed.
-                // TODO determine how the identity could be null...
-                // (identity could be null if key in request is null, but that should not be happening either
+                    // TODO determine how the identity could be null...
+                    // (identity could be null if key in request is null, but that should not be happening either
 
-                // Set the Routed User, as the current User is may be "LoUIE"
-                reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
+                    // Set the Routed User, as the current User is may be "LoUIE"
+                    reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
+                }
+                // Append any routes you been on and the current Route
+                reqBuilder.addAllRoute(currentRequest.getRequest().getRouteList());
+                reqBuilder.addRoute(currentRequest.getRoute());
             }
-            // Append any routes you been on and the current Route
-            reqBuilder.addAllRoute(currentRequest.getRequest().getRouteList());
-            reqBuilder.addRoute(currentRequest.getRoute());
-        }
-            
-        for (Message message : req.getParam().getArguments()) {
-            reqBuilder.addType(message.getDescriptorForType().getFullName());
-        }
-        reqBuilder.build().writeDelimitedTo(connection.getOutputStream());
 
-        // Write Data
-        for (Message message : req.getParam().getArguments()) {
-            message.writeDelimitedTo(connection.getOutputStream());
-        }
-        
-        connection.getOutputStream().close();
+            for (Message message : req.getParam().getArguments()) {
+                reqBuilder.addType(message.getDescriptorForType().getFullName());
+            }
+            reqBuilder.build().writeDelimitedTo(output);
 
-        // Cast to a HttpURLConnection
+            // Write Data
+            for (Message message : req.getParam().getArguments()) {
+                message.writeDelimitedTo(output);
+            }
+        }
+
+        // Cast to a HttpURLConnection in order to get response codes
         if (connection instanceof HttpURLConnection) {
             HttpURLConnection httpConnection = (HttpURLConnection) connection;
             int respCode = 0;
@@ -372,38 +376,37 @@ public class DefaultLouieConnection implements LouieConnection {
                 
             if (respCode == 404 || respCode == 503){
                 httpConnection.disconnect();
-                throw new BouncedException("Server returned: " + Integer.toString(respCode));
+                throw new BouncedException("Server "+connection.getURL()+" returned: " + Integer.toString(respCode));
             }
             if (respCode>=400) {
                 throw new HttpException(httpConnection.getResponseCode(),httpConnection.getResponseMessage());
             }
         }
 
-        BufferedInputStream input = new BufferedInputStream(connection.getInputStream());
+        ResponsePB response;
+        try (BufferedInputStream input = new BufferedInputStream(connection.getInputStream())) {
+            // Read in the Response Header
+            ResponseHeaderPB responseHeader = ResponseHeaderPB.parseDelimitedFrom(input);
+            if (responseHeader.getCount()!=1) {
+                throw new LouieRequestException("Received more than one response! This is unsupported behavior.");
+            }
+            if (responseHeader.hasKey()) {
+                key = responseHeader.getKey();
+            }
 
-        // Read in the Response Header
-        ResponseHeaderPB responseHeader = ResponseHeaderPB.parseDelimitedFrom(input);
-        if (responseHeader.getCount()!=1) {
-            throw new LouieRequestException("Received more than one response! This is unsupported behavior.");
-        }
-        if (responseHeader.hasKey()) {
-            key = responseHeader.getKey();
-        }
+            // Read in each Response
+            response = ResponsePB.parseDelimitedFrom(input);
+            if (response.hasError()) {
+                throw new LouieRequestException(response.getError().getDescription());
+            }
 
-        // Read in each Response
-        ResponsePB response = ResponsePB.parseDelimitedFrom(input);
-        if (response.hasError()) {
-            throw new LouieRequestException(response.getError().getDescription());
+            try {
+                processResponse(req, response, input);
+            } catch (Exception ex) {
+                throw new LouieResponseException(ex);
+            }
         }
         
-        try {
-            processResponse(req, response, input);
-        } catch (Exception ex) {
-            throw new LouieResponseException(ex);
-        }
-        
-        input.close();
-
         if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
             currentRequest.addDestinationRoutes(response.getRouteList());
         }
@@ -454,8 +457,8 @@ public class DefaultLouieConnection implements LouieConnection {
             if (requestOnSSL) {                                                                                                  
                 try {                                                                                                            
                     connection = getSecureConnection(getSecureJsonURL());                                                        
-                } catch (Exception e) {                                                                                          
-                    e.printStackTrace();                                                                                         
+                } catch (Exception e) {                
+                    LoggerFactory.getLogger(DefaultLouieConnection.class).error("Error Connecting via HTTPS",e);
                     throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords and incoming/outgoing ports.");
                 }                                                                                                                                 
             } else {                                                                                                                              
@@ -478,8 +481,8 @@ public class DefaultLouieConnection implements LouieConnection {
             if (requestOnSSL) {                                      
                 try {                                                
                     connection = getSecureConnection(getSecurePBURL());
-                } catch (Exception e) {                              
-                    e.printStackTrace();                             
+                } catch (Exception e) {               
+                    LoggerFactory.getLogger(DefaultLouieConnection.class).error("Error Connecting via HTTPS",e);
                     throw new HttpsException("Error Connecting "
                             + "via HTTPS. Please verify certificates and passwords and incoming/outgoing ports.");
                 }                                                                                                                                 
