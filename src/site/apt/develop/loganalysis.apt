@@ -1,0 +1,122 @@
+ ------
+ Log Analysis
+ ------
+
+Log Analysis 
+
+* Request logs
+
+ By default all requests are logged through log4j2 to a file called request.log.
+The format is as follows:
+
++---+
+[%d{yyyy-MM-dd HH:mm:ss}|%p|%X{ip}|%X{session}|%X{language}|%X{module}|%X{exectime}/%X{time}ms|%X{bytes}b|%X{rows}] %m%n     
++---+
+
+ An example output:
+
++---+
+[2014-09-29 12:10:54|INFO|127.0.0.1|cjohnson-2a11da20|Java/1.7.0_55|JUnit|48/48ms|157b|1] hsm:getFileInfo(rh.pb.hsm.FileFilterListBPB) - (filters { path: ["local/a/somefile.jpg"]} )
++---+
+
+ The log output is formatted for some custom variables that can help in diagnosing 
+the source of potential problems as well as overall usage.
+
+*----------+------------------------------+
+|| Key     || Description |
+*----------+------------------------------+
+| session  | The username and abbreviated session id.  The session id is created as a random unique 128 number.\ |
+|          | If the call is a routed call, ie server-to-server call, the username will appear as LOUIE(username). |
+*----------+------------------------------+
+| language | The language and version the client is using. |
+*----------+------------------------------+
+| module   | The name of the running program with an optional "/" followed by the user specified\ |
+|          | script or package to help diagnose where client calls is coming from. |
+*----------+------------------------------+
+| exectime | The time the server spent actually executing the call. |
+*----------+------------------------------+
+| time     | The time of the overall request. Includes client processing time which is arbitrary. |
+*----------+------------------------------+
+| bytes    | The size in bytes of the return. |
+*----------+------------------------------+
+| rows     | The number of individual protocol buffer "rows" returned. |
+*----------+------------------------------+
+| %m       | The log message, which is defined as service:method(argument types) - (actual arguments).\ |
+|          | Note: as the argument data can be potentially very large, certain measures are taken to\ |
+|          | reduce it's size, injecting "..." in lengthy arrays and such. |
+*----------+------------------------------+
+Custom Request log fields
+
+
+* JDBC logs
+
+ If DAOs are using Jdbc connections using Louie JdbcServices framework they will automatically by monitored by log4jdbc.
+Log4Jdbc will the log its information through slf4j.  By default, log4j2 is configured to log these through a routing logger defined as follows:
+
++----+
+<Routing name="JdbcRouter">
+  <Routes pattern="${ctx:DB_KEY}">
+    <Route>
+      <RollingFile name="${ctx:DB_KEY}" 
+          fileName="${sys:com.sun.aas.instanceRoot}/logs/pi/JDBC/${ctx:DB_KEY}.log"
+          filePattern="${sys:com.sun.aas.instanceRoot}/logs/pi/JDBC/${ctx:DB_KEY}.log.%d{yyyy-MM-dd}.gz">
+        <PatternLayout>
+          <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p] %m%n</Pattern>
+        </PatternLayout>
+        <Policies>
+          <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        </Policies>
+        <DefaultRolloverStrategy max="7"/>
+      </RollingFile>
+    </Route>
+  </Routes>
+</Routing>
++----+
+
+ The log4j2 configuration enables each datasource to define what log file to write to,
+specifed by the DB_KEY. The DB_KEY is set when creating JdbcServices via factories, ie DatasourceFactory.
+Note: the "<DefaultRolloverStrategy max="7"/>" property in use with RollingFileAppenders is still currently not functioning as desired 
+and is an outstanding issue for log4j as well as log4j2.
+
+ The log output from log4jdbc is configured to include the timing, therefore a sample log output
+looks like the following:
+
++----+
+[2014-10-08 17:08:08|INFO] SELECT id,path FROM transfers
+ {executed in 2 msec}
++----+
+
+ Note: Jdbc errors are also logged to this file, so check here is you need further info
+as to why a query is failing.
+
+* Auth log
+
+ This log contains all of the identity information submitted by the users. By default it is 
+defined as:
+
++----+
+[%d{yyyy-MM-dd HH:mm:ss}|%X{user}|%X{session}|%X{language}|%X{program}|%X{location}|%X{machine}|%X{processId}|%X{path}] %m%n
++----+
+
+ An example output:
+
++----+
+[2014-10-13 14:30:02|cjohnson|33b9b15e3133499b870f55162fe4eb1c|python/2.6|houdini|MAIN|lis7|32280|/usr/local/bin/houdini]
++----+
+
+ The custom tags are essentially the same as covered in the Request Logs table, with a few additions.
+
+*----------+------------------------------+
+|| Key     || Description |
+*----------+------------------------------+
+| session  | The full session id          |
+*----------+------------------------------+
+| program  | The encapsulating process name running the request. |
+*----------+------------------------------+
+| machine  | The name of the host machine making the call |
+*----------+------------------------------+
+| path     | The full path to the client's running process. |
+*----------+------------------------------+
+| processId  | The id of the client process |
+*----------+------------------------------+
+Auth Log Custom Columns

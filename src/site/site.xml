@@ -29,12 +29,11 @@
         <item name="Adding a Datasource" href="develop/datasource.html"/>
         <item name="Messaging" href="develop/messaging.html"/>
         <item name="Logging Configuration" href="develop/logging.html"/>
+        <item name="Log Analysis" href="develop/loganalysis.html"/>
         <item name="Caching" href="develop/caching.html"/>
       </item>
         
       <!-- <item name="Python" href="python.html"/> -->
-      
-      
     </menu>
   </body>
   <skin>
