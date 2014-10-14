@@ -25,7 +25,7 @@ public class StateListener extends ServiceRegister {
     public Collection<ServiceFactory> loadFactories() {
         Collection<ServiceFactory> factories = new ArrayList<>();
         
-        factories.add(${service_titlecase}ServiceFactory.getInstance());
+        factories.add(new ${service_titlecase}ServiceFactory());
         
         return factories;
     }
