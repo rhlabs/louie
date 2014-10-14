@@ -50,13 +50,13 @@ public class RequestHandler {
         if (request.getSessionKey()!=null && !request.getSessionKey().isEmpty()) {
             session+="-"+request.getSessionKey().substring(0,Math.min(8,request.getSessionKey().length()));
         }
-        MDC.put(LogVars.LOG_SESSION, session);
-        MDC.put(LogVars.LOG_IP, request.getRemoteAddress());
+        MDC.put(LogVars.SESSION, session);
+        MDC.put(LogVars.IP, request.getRemoteAddress());
         MDC.put(LogVars.MODULE, request.getModule());
         MDC.put(LogVars.LANGUAGE,request.getLanguage());
-        MDC.put(LogVars.LOG_TIME,Long.toString(result.getDuration()));
-        MDC.put(LogVars.LOG_EXECTIME,Long.toString(result.getExecTime()));
-        MDC.put(LogVars.LOG_ROWS, Integer.toString(result.getMessages().size()));
+        MDC.put(LogVars.TIME,Long.toString(result.getDuration()));
+        MDC.put(LogVars.EXECTIME,Long.toString(result.getExecTime()));
+        MDC.put(LogVars.ROWS, Integer.toString(result.getMessages().size()));
         
         // Note this should be efficient if the message has been serialized,
         // since the size is cached, else this is unnecessarily expensive
@@ -67,7 +67,7 @@ public class RequestHandler {
             }
             result.setSize(totalSize);
         }
-        MDC.put(LogVars.LOG_BYTES, Long.toString(result.getSize()));
+        MDC.put(LogVars.BYTES, Long.toString(result.getSize()));
         
         StringBuilder logtext = new StringBuilder();
         logtext.append(request.getRequest().getService()).append(":")
@@ -239,7 +239,7 @@ public class RequestHandler {
             throw new Exception("No Method Specified");
         }
 
-        MDC.put(LogVars.LOG_REQID, Integer.toString(pbreq.getRequest().getId()));
+        MDC.put(LogVars.REQID, Integer.toString(pbreq.getRequest().getId()));
         
         try {
             RequestContextManager.setRequest(pbreq);

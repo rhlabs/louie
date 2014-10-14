@@ -4,10 +4,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Properties>
+        <!-- Set the server root to your target dir just in case you try to run anything outside of a deployment -->
         <Property name="com.sun.aas.instanceRoot">target</Property>
+        
+        <!-- Glassfish -->
+        <Property name="logroot">${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}</Property>
+        <!-- Tomcat -->
+        <!-- <Property name="logroot">${symbol_dollar}{sys:catalina.home}/logs/${rootArtifactId}</Property> -->
     </Properties>
     
     <Appenders>
+        <!-- Since we are routing all other logs to the console, ie the server log,
+             we are losing log levels. So route errors to system_err instead as a partial fix.
+             Also truncate stack traces to a reasonable length.
+        -->
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%m%n %throwable{15}"/>
             <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
@@ -21,8 +31,8 @@
             <Routes pattern="${symbol_dollar}{ctx:DB_KEY}">
                 <Route>
                     <RollingFile name="${symbol_dollar}{ctx:DB_KEY}" 
-                                 fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/JDBC/${symbol_dollar}{ctx:DB_KEY}.log"
-                                 filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/JDBC/${symbol_dollar}{ctx:DB_KEY}.log.%d{yyyy-MM-dd}.gz">
+                                 fileName="${symbol_dollar}{logroot}/JDBC/${symbol_dollar}{ctx:DB_KEY}.log"
+                                 filePattern="${symbol_dollar}{logroot}/JDBC/${symbol_dollar}{ctx:DB_KEY}.log.%d{yyyy-MM-dd}.gz">
                         <PatternLayout>
                             <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p] %m%n</Pattern>
                         </PatternLayout>
@@ -36,21 +46,20 @@
         </Routing>
         
         <RollingFile name="AuthAppender" 
-                     fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/auth.log"
-                     filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/auth-%i.log">
+                     fileName="${symbol_dollar}{logroot}/auth.log"
+                     filePattern="${symbol_dollar}{logroot}/auth-%i.log">
             <PatternLayout>
-                <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%X{user}|%X{session}|%X{language}|%X{program}|%X{location}|%X{machine}|%X{processId}|%X{path}] %m%n</Pattern>
+                <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%X{ip}|%X{user}|%X{session}|%X{language}|%X{program}|%X{location}|%X{machine}|%X{processId}|%X{path}] %m%n</Pattern>
             </PatternLayout>
             <Policies>
-                <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>-->
                 <SizeBasedTriggeringPolicy size="2 MB"/>
             </Policies>
             <DefaultRolloverStrategy max="4"/>
         </RollingFile>
         
         <RollingFile name="RequestAppender" 
-                     fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/request.log"
-                     filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/request.log.%d{yyyy-MM-dd}.gz">
+                     fileName="${symbol_dollar}{logroot}/request.log"
+                     filePattern="${symbol_dollar}{logroot}/request.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout>
                 <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p|%X{ip}|%X{session}|%X{language}|%X{module}|%X{exectime}/%X{time}ms|%X{bytes}b|%X{rows}] %m%n</Pattern>
             </PatternLayout>
@@ -60,9 +69,11 @@
             <DefaultRolloverStrategy max="7"/>
         </RollingFile>
   
-         <RollingFile name="JmsAppender" 
-                     fileName="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/jms.log"
-                     filePattern="${symbol_dollar}{sys:com.sun.aas.instanceRoot}/logs/${rootArtifactId}/jms.log.%d{yyyy-MM-dd}.gz">
+        <!-- Enable this if using activemq and want extra info to go to another file -->
+        <!--
+        <RollingFile name="JmsAppender" 
+                     fileName="${symbol_dollar}{logroot}/jms.log"
+                     filePattern="${symbol_dollar}{logroot}/jms.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout>
                 <Pattern>[%d{yyyy-MM-dd HH:mm:ss}|%p] %m%n</Pattern>
             </PatternLayout>
@@ -71,19 +82,23 @@
             </Policies>
             <DefaultRolloverStrategy max="3"/>
         </RollingFile>
+        -->
   
     </Appenders>
     
     
     <Loggers>
+        <!-- Core Louie Logs -->
         
-        <logger name="louie.request" level="debug" additivity="false">
+        <logger name="louie.request" level="info" additivity="false">
             <appender-ref ref="RequestAppender" />
         </logger>
         
-        <logger name="org.apache.activemq" level="info" additivity="false">
-            <appender-ref ref="JmsAppender" />
+        <logger name="louie.auth" level="info" additivity="false">
+            <appender-ref ref="AuthAppender"/>
         </logger>
+        
+        <!-- Jdbc logging configurations. Set to fatal to turn off streams -->
         
         <logger name="jdbc.sqlonly" level="fatal" additivity="false">
             <appender-ref ref="JdbcRouter" />
@@ -100,18 +115,20 @@
         <logger name="jdbc.connection" level="fatal" additivity="false">
             <appender-ref ref="JdbcRouter" />
         </logger>
-        <logger name="com.rhythm.swagr" level="warn" additivity="false">
+        
+        <!-- To turn on debugging for requests -->
+        <!-- 
+        <logger name="com.rhythm.louie.request" level="debug" additivity="false">
             <appender-ref ref="Console"/>
         </logger>
-        <logger name="com.rhythm.louie.request" level="warn" additivity="false">
-            <appender-ref ref="Console"/>
+        -->
+        
+        <!-- Enable for activemq -->
+        <!-- 
+        <logger name="org.apache.activemq" level="info" additivity="false">
+            <appender-ref ref="JmsAppender" />
         </logger>
-        <logger name="com.rhythm.louie.auth" level="info" additivity="false">
-            <appender-ref ref="AuthAppender"/>
-        </logger>
-        <logger name="org.reflections" level="warn" additivity="false">
-            <appender-ref ref="Console"/>
-        </logger>
+        -->
         
         <Root level="info">
             <AppenderRef ref="Console"/>

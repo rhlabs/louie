@@ -95,13 +95,13 @@ as to why a query is failing.
 defined as:
 
 +----+
-[%d{yyyy-MM-dd HH:mm:ss}|%X{user}|%X{session}|%X{language}|%X{program}|%X{location}|%X{machine}|%X{processId}|%X{path}] %m%n
+[%d{yyyy-MM-dd HH:mm:ss}|%X{ip}|%X{user}|%X{session}|%X{language}|%X{program}|%X{location}|%X{machine}|%X{processId}|%X{path}] %m%n
 +----+
 
  An example output:
 
 +----+
-[2014-10-13 14:30:02|cjohnson|33b9b15e3133499b870f55162fe4eb1c|python/2.6|houdini|MAIN|lis7|32280|/usr/local/bin/houdini]
+[2014-10-13 14:30:02|127.0.0.1|cjohnson|33b9b15e3133499b870f55162fe4eb1c|python/2.6|houdini|MAIN|lis7|32280|/usr/local/bin/houdini]
 +----+
 
  The custom tags are essentially the same as covered in the Request Logs table, with a few additions.

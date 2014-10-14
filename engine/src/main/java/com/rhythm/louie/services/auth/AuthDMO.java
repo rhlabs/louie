@@ -27,12 +27,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import com.rhythm.louie.request.LogVars;
+
 /**
  *
  * @author cjohnson
  */
 public class AuthDMO implements AuthService {
-    private final Logger LOGGER = LoggerFactory.getLogger(AuthDMO.class);
+    private final Logger LOGGER  = LoggerFactory.getLogger("louie.auth");
+    
     private final CacheManager cacheManager;
     
     private final GuavaCache<String,SessionStat> SESSION_STATS;
@@ -126,15 +129,16 @@ public class AuthDMO implements AuthService {
             key = nextSessionId();                                                                                                                  
         }                                                                                                                                           
                                                                                                                                                     
-        SessionKey skey = SessionKey.newBuilder().setKey(key).build();                                                                              
-        MDC.put("user", identity.getUser());
-        MDC.put("session", key);
-        MDC.put("language", identity.getLanguage());
-        MDC.put("program", identity.getProgram());
-        MDC.put("location", identity.getLocation());
-        MDC.put("machine", identity.getMachine());
-        MDC.put("processId", identity.getProcessId());
-        MDC.put("path", identity.getPath());
+        SessionKey skey = SessionKey.newBuilder().setKey(key).build();   
+        MDC.put(LogVars.IP, identity.getIp());
+        MDC.put(LogVars.USER, identity.getUser());
+        MDC.put(LogVars.SESSION, key);
+        MDC.put(LogVars.LANGUAGE, identity.getLanguage());
+        MDC.put(LogVars.PROGRAM, identity.getProgram());
+        MDC.put(LogVars.LOCATION , identity.getLocation());
+        MDC.put(LogVars.MACHINE, identity.getMachine());
+        MDC.put(LogVars.PROCESSID, identity.getProcessId());
+        MDC.put(LogVars.PATH, identity.getPath());
         
         LOGGER.info("");
         addSessionStat(skey, identity);                                                                                                             
@@ -163,7 +167,7 @@ public class AuthDMO implements AuthService {
         if (stat!=null) {
             return Collections.singletonList(stat.toPB());
         } else {
-            List<SessionBPB> found = new ArrayList<SessionBPB>();
+            List<SessionBPB> found = new ArrayList<>();
             for (Object key : SESSION_STATS.asMap().keySet()) {
                 
                 if (key.toString().startsWith(sessionKey.getKey())) {
