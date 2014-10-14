@@ -128,11 +128,11 @@ public class InfoServlet extends HttpServlet {
         }
         Map<String, List<String>> groupedMethods = new TreeMap<>();
         
-        List<PBCommand<?,?>> pbcommands = new ArrayList<>(service.getCommands());
-        Collections.sort(pbcommands, new Comparator<PBCommand<?,?>>() {
+        List<PBCommand> pbcommands = new ArrayList<>(service.getCommands());
+        Collections.sort(pbcommands, new Comparator<PBCommand>() {
 
             @Override
-            public int compare(PBCommand<?, ?> o1, PBCommand<?, ?> o2) {
+            public int compare(PBCommand o1, PBCommand o2) {
                 int cmp = Boolean.compare(o1.isDeprecated(), o2.isDeprecated());
                 if (cmp == 0) {
                     cmp = String.CASE_INSENSITIVE_ORDER.compare(o1.getGroup(), o2.getGroup());
@@ -147,7 +147,7 @@ public class InfoServlet extends HttpServlet {
             }
             
         });
-        for (PBCommand<?, ?> command : pbcommands) {
+        for (PBCommand command : pbcommands) {
             if (command.isInternal()) {
                 continue;
             }
@@ -216,7 +216,6 @@ public class InfoServlet extends HttpServlet {
                 groupList.add(methodHTML.toString());
                 groupedMethods.put(grouping, groupList);
             }
-            
         }
         
         List<String> ungroupedList = null;

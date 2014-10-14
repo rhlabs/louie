@@ -22,7 +22,7 @@ public interface Service {
 
     Result executeCommand(RequestContext req) throws Exception;
 
-    Collection<PBCommand<?, ?>> getCommands();
+    Collection<PBCommand> getCommands();
 
     String getServiceName();
     

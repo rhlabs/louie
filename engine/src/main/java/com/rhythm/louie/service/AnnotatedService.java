@@ -33,7 +33,7 @@ import com.rhythm.louie.service.command.ReflectCommand;
 public abstract class AnnotatedService implements Service {
     private final Logger LOGGER = LoggerFactory.getLogger(AnnotatedService.class);
             
-    private final Map<PBCommandType,PBCommand<?,?>> commandMap;
+    private final Map<PBCommandType,PBCommand> commandMap;
     private final String name;
     
     protected AnnotatedService(String name) {
@@ -83,7 +83,7 @@ public abstract class AnnotatedService implements Service {
     }
     
     @Override
-    public Collection<PBCommand<?,?>> getCommands() {
+    public Collection<PBCommand> getCommands() {
         return Collections.unmodifiableCollection(commandMap.values());
     }
     

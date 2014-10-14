@@ -31,7 +31,7 @@ public class InfoDAO implements InfoService {
     
     @Override
     public List<String> getAllServiceNames() throws Exception {
-        return new ArrayList<String>(ServiceManager.getServiceNames());
+        return new ArrayList<>(ServiceManager.getServiceNames());
     }
     
     @Override
@@ -42,7 +42,7 @@ public class InfoDAO implements InfoService {
     
     @Override
     public List<ServicePB> getAllServices() throws Exception {
-        List<ServicePB> services = new ArrayList<ServicePB>();
+        List<ServicePB> services = new ArrayList<>();
         for (Service service : ServiceManager.getServices()) {
             services.add(convertServiceToPB(service));
         }
@@ -53,7 +53,7 @@ public class InfoDAO implements InfoService {
         ServicePB.Builder builder = ServicePB.newBuilder()
                 .setName(service.getServiceName());
         
-        for (PBCommand<?,?> command : service.getCommands()) {
+        for (PBCommand command : service.getCommands()) {
             if (command.isInternal()) {
                 continue;
             }

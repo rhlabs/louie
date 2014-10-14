@@ -34,9 +34,8 @@ import com.rhythm.louie.request.data.Result;
  */
 public class RequestHandler {
     public static void logRequest(RequestContext request,Result result) {
-        logRequest(request,result,LoggerFactory.getLogger("louie.request"));
-    }
-    public static void logRequest(RequestContext request,Result<?,?> result,Logger log) {
+        Logger log = LoggerFactory.getLogger("louie.request");
+        
         // Bail out of here if logging is turned off.
         if (result.isError() && !log.isErrorEnabled()) {
             return;

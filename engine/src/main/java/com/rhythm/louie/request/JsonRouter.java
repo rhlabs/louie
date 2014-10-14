@@ -346,7 +346,7 @@ public class JsonRouter implements JsonProcess {
         }                                                                             
     }                                                                                 
                                                                                       
-    private void handleResult(Result<?,?> result,HttpServletResponse resp) throws Exception {
+    private void handleResult(Result result,HttpServletResponse resp) throws Exception {
         PrintWriter writer = resp.getWriter();                                               
         writer.write("[");                                                                   
         if (result != null && !result.getMessages().isEmpty()) {                             

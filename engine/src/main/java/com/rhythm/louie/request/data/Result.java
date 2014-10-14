@@ -18,12 +18,10 @@ import com.google.protobuf.Message;
 /**
  * @author cjohnson
  * Created: Mar 1, 2011 5:12:38 PM
- * @param <A>
- * @param <R>
  */
-public class Result<A,R extends Message> {
-    private final List<R> messages;
-    private final List<A> arguments;
+public class Result {
+    private final List<? extends Message> messages;
+    private final List<? extends Object> arguments;
     private boolean success = true;
     private String info;
     private long duration;
@@ -32,41 +30,41 @@ public class Result<A,R extends Message> {
     private Exception ex;
     private boolean streaming = false;
     
-    public static <A,R extends Message> Result<A,R> emptyResult() {
-        List<A> args = Collections.emptyList();
-        List<R> results = Collections.emptyList();
-        return new Result<A,R>(true, args, results);
+    public static Result emptyResult() {
+        List<?> args = Collections.emptyList();
+        List<? extends Message> results = Collections.emptyList();
+        return new Result(true, args, results);
     }
     
-    public static <A,R extends Message> Result<A,R> results(A arg, List<R> results) {
-        return new Result<A,R>(true, Collections.singletonList(arg), results);
+    public static Result results(Object arg, List<? extends Message> results) {
+        return new Result(true, Collections.singletonList(arg), results);
     }
     
-    public static <A,R extends Message> Result<A,R> results(A arg, R result) {
-        List<R> results;
+    public static Result results(Object arg, Message result) {
+        List<? extends Message> results;
         if (result==null) {
             results = Collections.emptyList();
         } else {
             results = Collections.singletonList(result);
         }
-        return new Result<A,R>(true, Collections.singletonList(arg), results);
+        return new Result(true, Collections.singletonList(arg), results);
     }
     
     // TODO should deprecate/remove this as it is not a supported workflow
-    public static <A,R extends Message> Result<A,R> multiArgResults(Map<A,List<R>> results) {
-        List<R> messages = new ArrayList<R>();
-        for (List<R> values : results.values()) {
+    public static Result multiArgResults(Map<? extends Object,List<Message>> results) {
+        List<Message> messages = new ArrayList<>();
+        for (List<? extends Message> values : results.values()) {
             messages.addAll(values);
         }
         
-        return new Result<A,R>(true, new ArrayList<A>(results.keySet()), messages);
+        return new Result(true, new ArrayList<>(results.keySet()), messages);
     }
     
-    public static <A,R extends Message> Result<A,R> errorResult(Exception e) {
-        List<A> args = Collections.emptyList();
-        List<R> results = Collections.emptyList();
+    public static Result errorResult(Exception e) {
+        List<?> args = Collections.emptyList();
+        List<? extends Message> results = Collections.emptyList();
         
-        Result<A,R> result = new Result<A,R>(false, args, results);
+        Result result = new Result(false, args, results);
         if (e != null) {
             result.setException(e);
             StringBuilder stack = new StringBuilder();
@@ -82,7 +80,7 @@ public class Result<A,R extends Message> {
         return result;
     }
     
-    private Result(boolean success, List<A> args, List<R> messages) {
+    private Result(boolean success, List<? extends Object> args, List<? extends Message> messages) {
         this.success = success;
         this.messages = messages;
         this.arguments = args;
@@ -108,11 +106,11 @@ public class Result<A,R extends Message> {
         return info;
     }
     
-    public List<R> getMessages() {
+    public List<? extends Message> getMessages() {
         return messages;
     }
 
-    public List<A> getArguments() {
+    public List<?> getArguments() {
         return arguments;
     }
 

@@ -43,9 +43,8 @@ import com.rhythm.louie.Updating;
 /**
  * @author cjohnson
  * Created: Oct 21, 2011 5:01:49 PM
- * @param <R>
  */
-public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
+public class ReflectCommand implements PBCommand {
     private final Logger LOGGER = LoggerFactory.getLogger(ReflectCommand.class);
     
     private final AnnotatedService service;
@@ -80,13 +79,13 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
         
         description = ProcessorUtils.extractDescriptionFromJavadoc(serviceCall.javadoc());
         
-        parsers = new ArrayList<DataParser<?>>(meth.getParameterTypes().length);
-        List<ArgType> args = new ArrayList<ArgType>(meth.getParameterTypes().length);
+        parsers = new ArrayList<>(meth.getParameterTypes().length);
+        List<ArgType> args = new ArrayList<>(meth.getParameterTypes().length);
         int i=0;
         for (Class<?> arg : meth.getParameterTypes()) {
             Descriptor argDesc = getDescriptor(arg);
             args.add(new ArgType(argDesc,serviceCall.args()[i++]));
-            parsers.add(new BuilderParser<Object>(getBuilder(arg)));
+            parsers.add(new BuilderParser<>(getBuilder(arg)));
         }
         
         params = PBParamType.typeForArgs(args);
@@ -166,7 +165,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
     
     @Override
     @SuppressWarnings("unchecked")
-    public Result<Param, R> execute(RequestContext request) throws Exception {
+    public Result execute(RequestContext request) throws Exception {
         try {
             if ((request.getParams().isEmpty() && params.getTypes().isEmpty()) || request.getParams().size() == 1) {
                 Param param = request.getParams().isEmpty() ? Param.EMPTY : request.getParams().get(0);
@@ -183,9 +182,9 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
 
                 Object o = method.invoke(service, args);
                 if (o != null && o instanceof List) {
-                    return Result.results(param, (List<R>) o);
+                    return Result.results(param, (List<? extends Message>) o);
                 } else if (o == null || o instanceof Message) {
-                    return Result.results(param, (R) o);
+                    return Result.results(param, (Message) o);
                 } else {
                     throw new Exception("Unknown return type!");
                 }
@@ -193,7 +192,7 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
             } else {
                 LOGGER.warn("Multi Arg Request({}) {}:{}", request.getParams().size(),
                         request.getRequest().getService(), request.getRequest().getMethod());
-                Map<Param, List<R>> results = new HashMap<Param, List<R>>();
+                Map<Param, List<Message>> results = new HashMap<>();
                 for (Param param : request.getParams()) {
                     Object[] args = new Object[params.count()];
                     for (int i = 0; i < params.getTypes().size(); i++) {
@@ -202,13 +201,13 @@ public class ReflectCommand<R extends Message> implements PBCommand<Param,R> {
 
                     Object o = method.invoke(service, args);
                     if (o != null && o instanceof List) {
-                        results.put(param, (List<R>) o);
+                        results.put(param, (List<Message>) o);
                     } else if (o == null || o instanceof Message) {
-                        List<R> argResults;
+                        List<Message> argResults;
                         if (o == null) {
                             argResults = Collections.emptyList();
                         } else {
-                            argResults = Collections.singletonList((R)o);
+                            argResults = Collections.singletonList((Message)o);
                         }
                         results.put(param, argResults);
                     } else {

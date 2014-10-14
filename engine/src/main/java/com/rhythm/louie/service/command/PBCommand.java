@@ -8,8 +8,6 @@ package com.rhythm.louie.service.command;
 
 import java.util.List;
 
-import com.google.protobuf.Message;
-
 import com.rhythm.louie.request.RequestContext;
 import com.rhythm.louie.request.data.Result;
 
@@ -17,11 +15,11 @@ import com.rhythm.louie.request.data.Result;
  * @author cjohnson
  * Created: Mar 17, 2011 1:53:01 PM
  */
-public interface PBCommand<A,R extends Message> {
+public interface PBCommand {
     public List<PBParamType> getArguments();
     public String getReturnType();
     public String getCommandName();
-    public Result<A,R> execute(RequestContext request) throws Exception;
+    public Result execute(RequestContext request) throws Exception;
     public String getDescription();
     public boolean isDeprecated();
     public boolean returnList();
