@@ -5,15 +5,12 @@
  */
 package com.rhythm.louie.server;
 
-import com.rhythm.louie.ServiceManager;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.ServiceManager;
 import com.rhythm.louie.service.ServiceUtils;
 
 /**
@@ -22,34 +19,28 @@ import com.rhythm.louie.service.ServiceUtils;
  */
 public class ServiceProperties {
     
-    private static final String DEFAULT_NAME = "default";
-    private static final String PROP_ENABLE = "enable";
-    private static final String PROP_MAIN = "main";
-    private static final String PROP_CENTRAL = "centralized";
-    private static final String PROP_READ_ONLY = "readonly";
-    private static final String PROP_CACHING = "caching";
-    
-    private static final String PROP_DAO = "dao";
-    private static final String PROP_CACHE = "cache";
-    private static final String PROP_ROUTER = "router";
-    private static final String PROP_JMS = "jmsadapter";
-    
     private static final Map<String,ServiceProperties> SERVICES = new ConcurrentHashMap<>();
-
-    private static final ServiceProperties DEFAULT 
-            = new ServiceProperties(DEFAULT_NAME,true,"",false,false,true);
     
     private final String name;
     private boolean enable;
-    private String main;
+    private String centralHost;
     private boolean centralized;
     private boolean readOnly;
     private boolean caching;
+    private boolean reserved = false;
     
-    private String dao = null;
-    private String cache = null;
-    private String router = null;
-    private String jmsAdapter = null;
+    private String daoClass = null;
+    private String cacheClass = null;
+    private String routerClass = null;
+    private String providerClass = null;
+    
+    /* Basic defaults */
+    private static boolean defaultEnable;
+    private static String defaultCentralHost;
+    private static boolean defaultCentralized;
+    private static boolean defaultReadOnly;
+    private static boolean defaultCaching;
+    
     
     private final Map<String,String> properties;
     
@@ -79,47 +70,27 @@ public class ServiceProperties {
         return getServiceProperties(ServiceUtils.getServiceName(cl));
     }
     
-    public static ServiceProperties getDefaultServiceProperties() {
-        return DEFAULT;
+    public static List<ServiceProperties> getAllServiceProperties() {
+        return Collections.unmodifiableList(new ArrayList<>(SERVICES.values())); //is that seriously the best way to do that???
     }
     
-    public static void initReservedProperties(String name) {
-        ServiceProperties props = getServiceProperties(name);
-        props.enable = true;
-        props.main="";
-        props.centralized=false;
-        props.readOnly=false;
-        props.caching=true;
-    }
-        
-    private ServiceProperties(String name, boolean enable, String main, 
-            boolean centralized, boolean readOnly, boolean caching) {
+    protected ServiceProperties(String name) { 
         this.name = name;
-        this.enable = enable;
-        this.main = main;
-        this.centralized = centralized;
-        this.readOnly = readOnly;
-        this.caching = caching;
-        properties = new ConcurrentHashMap<>();
-    }
-    
-    private ServiceProperties(String name) { 
-        this.name = name;
-        this.enable = DEFAULT.enable;
-        this.main = DEFAULT.main;
-        this.centralized = DEFAULT.centralized;
-        this.readOnly = DEFAULT.readOnly;
-        this.caching = DEFAULT.caching;
-        this.jmsAdapter = DEFAULT.jmsAdapter;
+        this.enable = defaultEnable;
+        this.centralHost = defaultCentralHost;
+        this.centralized = defaultCentralized;
+        this.readOnly = defaultReadOnly;
+        this.caching = defaultCaching;
         properties = new ConcurrentHashMap<>();
     }
      
+
     public String getName() {
         return name;
     }
     
-    public String getMain() {
-        return main;
+    public String getCentralHost() {
+        return centralHost;
     }
     
     public boolean isEnabled() {
@@ -138,20 +109,24 @@ public class ServiceProperties {
         return caching;
     }
     
-    public String getDAO() {
-        return dao;
+    public boolean isReserved() {
+        return reserved;
     }
     
-    public String getCache() {
-        return cache;
+    public String getDAOClass() {
+        return daoClass;
     }
     
-    public String getRouter() {
-        return router;
+    public String getCacheClass() {
+        return cacheClass;
     }
     
-    public String getMessageAdapter() {
-        return jmsAdapter;
+    public String getRouterClass() {
+        return routerClass;
+    }
+    
+    public String getProviderClass() {
+        return providerClass;
     }
     
     public String getCustomProperty(String attribute,String def) {
@@ -176,84 +151,164 @@ public class ServiceProperties {
         }
     }
     
-    public static void processServiceProperties(Properties props) {
-        synchronized(SERVICES) {
-            // Load up defaults first
-            Map<String,String> nonDefaultProps = new HashMap<>();
-            for (String key : props.stringPropertyNames()) {
-                String[] keyParts = key.split("\\.",2);
-                if (keyParts.length!=2) {
-                    LoggerFactory.getLogger(ServiceProperties.class)
-                        .warn("Skipping key as it does not match service.attribute: {}", key);
-                    continue;
-                }
-                
-                String serviceName = keyParts[0];
-                String attribute = keyParts[1];
-                String value = props.getProperty(key);
-                
-                if (ServiceManager.isServiceReserved(serviceName)) {
-                    LoggerFactory.getLogger(ServiceProperties.class)
-                        .warn("Ignoring property for reserved service: {}={}", key, value);
-                } else if (serviceName.equals(DEFAULT_NAME)) {
-                    setProperty(serviceName, attribute, value);
-                } else {
-                    nonDefaultProps.put(key, value);
-                }
-            }
-            
-            for (Map.Entry<String,String> entry : nonDefaultProps.entrySet()) {
-                String[] keyParts = entry.getKey().split("\\.",2);
-                String serviceName = keyParts[0];
-                String attribute = keyParts[1];
-                
-                setProperty(serviceName, attribute, entry.getValue());
-            }
-        }
+    protected static void addService(String name, ServiceProperties service) {
+        SERVICES.put(name,service);
     }
     
-    private static void setProperty(String serviceName, String attribute, String value) {
-        ServiceProperties service;
-        if (serviceName.equals(DEFAULT_NAME)) {
-            service = DEFAULT;
-        } else {
-            service = getServiceProperties(serviceName);
-        }
-            
-        switch (attribute) {
-            case PROP_ENABLE:
-                service.enable = Boolean.parseBoolean(value);
-                break;
-            case PROP_MAIN:
-                service.main = value;
-                break;
-            case PROP_CENTRAL:
-                service.centralized = Boolean.parseBoolean(value);
-                break;
-            case PROP_READ_ONLY:
-                service.readOnly = Boolean.parseBoolean(value);
-                break;
-            case PROP_CACHING:
-                service.caching = Boolean.parseBoolean(value);
-                break;
-            case PROP_JMS:
-                service.jmsAdapter = value;
-                break;
-            case PROP_DAO:
-                if (!serviceName.equals(DEFAULT_NAME)) {
-                    service.dao = value;
-                }   break;
-            case PROP_ROUTER:
-                if (!serviceName.equals(DEFAULT_NAME)) {
-                    service.router = value;
-                }   break;
-            case PROP_CACHE:
-                if (!serviceName.equals(DEFAULT_NAME)) {
-                    service.cache = value;
-            }   break;
-            default:
-                service.properties.put(attribute, value);
-                break;
+    /////////////////////////////////////////////////////
+    // Protected Setters to be used by LouieProperties //
+    /////////////////////////////////////////////////////
+        
+    protected void addCustomProp(String attribute, String value) {
+        properties.put(attribute, value);
+    }
+    
+    protected void setEnable(boolean enable) {
+        this.enable = enable;
+    }
+
+    protected void setCentralLocation(String main) {
+        this.centralHost = main;
+    }
+
+    protected void setCentralized(boolean centralized) {
+        this.centralized = centralized;
+    }
+
+    protected void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    protected void setCaching(boolean caching) {
+        this.caching = caching;
+    }
+    
+    protected void setReserved(boolean reserved) {
+        this.reserved = reserved;
+    }
+
+    protected void setDaoClass(String daoClass) {
+        this.daoClass = daoClass;
+    }
+
+    protected void setCacheClass(String cacheClass) {
+        this.cacheClass = cacheClass;
+    }
+
+    protected void setRouterClass(String routerClass) {
+        this.routerClass = routerClass;
+    }
+    
+    protected void setProviderClass(String providerClass) {
+        this.providerClass = providerClass;
+    }
+
+    protected static void setDefaultEnable(boolean defaultEnable) {
+        ServiceProperties.defaultEnable = defaultEnable;
+    }
+
+    protected static void setDefaultCentralHost(String defaultHost) {
+        ServiceProperties.defaultCentralHost = defaultHost;
+    }
+
+    protected static void setDefaultCentralized(boolean defaultCentralized) {
+        ServiceProperties.defaultCentralized = defaultCentralized;
+    }
+
+    protected static void setDefaultReadOnly(boolean defaultReadOnly) {
+        ServiceProperties.defaultReadOnly = defaultReadOnly;
+    }
+
+    protected static void setDefaultCaching(boolean defaultCaching) {
+        ServiceProperties.defaultCaching = defaultCaching;
+    }
+    
+    protected static void processServices(List<ServiceProperties> services) {
+        for (ServiceProperties prop : services) {
+            ServiceProperties existing = SERVICES.get(prop.getName());
+            if (existing != null && existing.isReserved()) continue;
+            SERVICES.put(prop.getName(), prop); //allows for overwriting non-reserved services
         }
     }
+//    @Deprecated
+//    public static void processServiceProperties(Properties props) {
+//        synchronized(SERVICES) {
+//            // Load up defaults first
+//            Map<String,String> nonDefaultProps = new HashMap<>();
+//            for (String key : props.stringPropertyNames()) {
+//                String[] keyParts = key.split("\\.",2);
+//                if (keyParts.length!=2) {
+//                    LoggerFactory.getLogger(ServiceProperties.class)
+//                        .warn("Skipping key as it does not match service.attribute: {}", key);
+//                    continue;
+//                }
+//                
+//                String serviceName = keyParts[0];
+//                String attribute = keyParts[1];
+//                String value = props.getProperty(key);
+//                
+//                if (ServiceManager.isServiceReserved(serviceName)) {
+//                    LoggerFactory.getLogger(ServiceProperties.class)
+//                        .warn("Ignoring property for reserved service: {}={}", key, value);
+//                } else if (serviceName.equals(DEFAULT_NAME)) {
+//                    setProperty(serviceName, attribute, value);
+//                } else {
+//                    nonDefaultProps.put(key, value);
+//                }
+//            }
+//            
+//            for (Map.Entry<String,String> entry : nonDefaultProps.entrySet()) {
+//                String[] keyParts = entry.getKey().split("\\.",2);
+//                String serviceName = keyParts[0];
+//                String attribute = keyParts[1];
+//                
+//                setProperty(serviceName, attribute, entry.getValue());
+//            }
+//        }
+//    }
+    
+//    private static void setProperty(String serviceName, String attribute, String value) {
+//        ServiceProperties service;
+//        if (serviceName.equals(DEFAULT_NAME)) {
+//            service = DEFAULT;
+//        } else {
+//            service = getServiceProperties(serviceName);
+//        }
+//            
+//        switch (attribute) {
+//            case PROP_ENABLE:
+//                service.enable = Boolean.parseBoolean(value);
+//                break;
+//            case PROP_MAIN:
+//                service.main = value;
+//                break;
+//            case PROP_CENTRAL:
+//                service.centralized = Boolean.parseBoolean(value);
+//                break;
+//            case PROP_READ_ONLY:
+//                service.readOnly = Boolean.parseBoolean(value);
+//                break;
+//            case PROP_CACHING:
+//                service.caching = Boolean.parseBoolean(value);
+//                break;
+//            case PROP_JMS:
+//                service.jmsAdapter = value;
+//                break;
+//            case PROP_DAO:
+//                if (!serviceName.equals(DEFAULT_NAME)) {
+//                    service.dao = value;
+//                }   break;
+//            case PROP_ROUTER:
+//                if (!serviceName.equals(DEFAULT_NAME)) {
+//                    service.router = value;
+//                }   break;
+//            case PROP_CACHE:
+//                if (!serviceName.equals(DEFAULT_NAME)) {
+//                    service.cache = value;
+//            }   break;
+//            default:
+//                service.properties.put(attribute, value);
+//                break;
+//        }
+//    }
 }

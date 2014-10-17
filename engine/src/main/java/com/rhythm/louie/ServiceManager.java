@@ -7,32 +7,24 @@
 package com.rhythm.louie;
 
 
+import java.io.*;
+import java.net.*;
 import java.util.*;
-
-import com.rhythm.louie.cache.CacheManager;
-import com.rhythm.louie.connection.Identity;
-import com.rhythm.louie.email.EmailService;
-import com.rhythm.louie.jms.MessageAdapterException;
-import com.rhythm.louie.jms.MessageUpdate;
-import com.rhythm.louie.jms.MessageHandler;
-import com.rhythm.louie.jms.MessageManager;
-import com.rhythm.louie.server.BuildProperties;
-import com.rhythm.louie.server.LocalConstants;
-import com.rhythm.louie.server.Server;
-import com.rhythm.louie.server.ServiceProperties;
-import com.rhythm.louie.server.TaskScheduler;
-import com.rhythm.louie.topology.Route;
-
-import com.rhythm.louie.service.Service;
-import com.rhythm.louie.service.ServiceFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.logging.Level;
 
 import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.rhythm.louie.cache.CacheManager;
+import com.rhythm.louie.connection.Identity;
+import com.rhythm.louie.email.EmailService;
+import com.rhythm.louie.jms.*;
+import com.rhythm.louie.server.*;
+import com.rhythm.louie.service.Service;
+import com.rhythm.louie.service.ServiceFactory;
+import com.rhythm.louie.topology.Route;
 
 /**
  * @author cjohnson
@@ -43,54 +35,8 @@ public class ServiceManager {
         Collections.synchronizedMap(new TreeMap<String, Service>());
     private static boolean init = false;
     
-    private static final Set<String> reservedServices;
-    private static final List<ServiceFactory> serviceFactories;
-    private static final String CORE_SERV_PKG_PREFIX = "com.rhythm.louie.services"; 
-    static {
-        /*
-        Always load/reserve the core louie services found in the specified package prefix.
-        */
-        serviceFactories = new ArrayList<>();
-        List<Class<?>> classes = null;
-        try {
-            classes = Classes.getRecursiveTypesAnnotatedWith(CORE_SERV_PKG_PREFIX, ServiceProvider.class);
-        } catch (IOException ex) {
-            LoggerFactory.getLogger(ServiceManager.class).error(ex.toString());
-        }
-        if (classes != null) {
-            for(Class<?> c : classes) {
-                boolean isImpl = false;
-                for (Class intr : c.getInterfaces()) {
-                    if (intr.equals(ServiceFactory.class)) isImpl = true;
-                }
-                if (isImpl) {
-                    try {
-                        serviceFactories.add((ServiceFactory) Class.forName(c.getName()).newInstance());
-                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-                        LoggerFactory.getLogger(ServiceManager.class).error(ex.toString());
-                    }
-                }
-            }
-        }
-        
-        reservedServices = new HashSet<String>();
-        for (ServiceFactory factory : serviceFactories) {
-            reservedServices.add(factory.getServiceName());
-            ServiceProperties.initReservedProperties(factory.getServiceName());
-        }
-    }
-    
-    public static void addService(ServiceFactory factory) throws Exception {
-        if (reservedServices.contains(factory.getServiceName())) {
-            throw new Exception("Cannot addService: "+factory.getServiceName()+"!"
-                    + "  This name is restricted.");
-        }
-        serviceFactories.add(factory);
-    }
-    
-    public static boolean isServiceReserved(String serviceName) {
-        return reservedServices.contains(serviceName);
-    }
+    private static final Map<String, ServiceFactory> serviceFactories = new HashMap<>();
+    private static final List<String> failedServiceProviders = new ArrayList<>();
     
     private ServiceManager() {};
     
@@ -121,24 +67,28 @@ public class ServiceManager {
          
         Identity.registerLouieIdentity();
         
-         // Servers
-        if(context !=null) {
-            configureServers(context);
+        
+        
+        try {
+            loadProperties(context);
+        } catch (Exception ex) {
+            LOGGER.error(ex.toString());
+            return;
         }
         
         if (Server.LOCAL==Server.UNKNOWN) {
             return;
         }
         
+        // Services
+        loadServiceProviders();
+        
+        // Router
         if (Server.LOCAL.isARouter()) {
             LOGGER.info("This Server started as a router.");
             configureRoutes(context);
         }
 
-        // Services
-        if(context !=null) {
-            configureServices(context);
-        }
         try {
             EmailService.getInstance().initialize();
         } catch (Exception ex) {
@@ -157,7 +107,7 @@ public class ServiceManager {
         StringBuilder sb = new StringBuilder();
         sb.append("\nServices:\n\n");
         
-        for (ServiceFactory factory : serviceFactories) {
+        for (ServiceFactory factory : serviceFactories.values()) {
             String serviceName = factory.getServiceName().toLowerCase();
             ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
             if (props.isEnabled()) {
@@ -180,7 +130,7 @@ public class ServiceManager {
                     }
                     
                     if (props.isCentralized()) {
-                        sb.append(" || centralized @ ").append(props.getMain());
+                        sb.append(" || centralized @ ").append(props.getCentralHost());
                     }
                     if (props.isReadOnly()) {
                         sb.append(" || Read-Only");
@@ -189,6 +139,7 @@ public class ServiceManager {
                 } catch (MessageAdapterException ex) {
                     throw ex;
                 } catch (Exception ex) {
+                    failedServiceProviders.add(factory.getClass().getSimpleName());
                     sb.append(" - ERROR: ")
                             .append(ex.toString())
                             .append("\n");
@@ -198,32 +149,102 @@ public class ServiceManager {
             }
         }
         
-//        if (disabled.length()>0) {
-//            sb.append("\nDISABLED:\n\n").append(disabled);
-//        }
-        
         LOGGER.info(sb.toString());
     }
     
-    private static final String CONF_DIR = "/WEB-INF/conf/";
-    private static final String SERVICE_PROPERTIES = "services";
-    private static final String SERVER_PROPERTIES = "servers";
+    private static final String CONF_DIR = "/WEB-INF/conf/"; //old
+    private static final String PROP_DIR = "/WEB-INF/classes/"; //new
     private static final String ROUTE_PROPERTIES = "routing";
+    private static final String LOUIE_PROPERTIES = "louie.xml";
     
-    private static void configureServers(ServletContext context) {
-        Properties serverProps = loadProperties(context,CONF_DIR,SERVER_PROPERTIES);
-        Server.setDefaultGateway(context.getContextPath().replaceFirst("/", ""));
-        Server.processServerProperties(serverProps);
-    }
-    
-    private static void configureServices(ServletContext context) {
-        Properties serviceProps = loadProperties(context,CONF_DIR,SERVICE_PROPERTIES);
-        ServiceProperties.processServiceProperties(serviceProps);
+    private static void loadServiceProviders() {
+        
+        //First, load from ServiceProperties if something was set
+        for (ServiceProperties prop : ServiceProperties.getAllServiceProperties()) {
+            String serviceProvider = prop.getProviderClass();
+            if (serviceProvider != null) {
+                try {
+                    ServiceFactory servFactory = (ServiceFactory) Class.forName(serviceProvider).newInstance();
+                    serviceFactories.put(servFactory.getServiceName(), servFactory);
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                    failedServiceProviders.add(serviceProvider);
+                    LoggerFactory.getLogger(ServiceManager.class)
+                            .error("Failed to load ServiceProvider {} from properties: {}",serviceProvider,ex.toString());
+                    
+                }
+            }
+        }
+        
+        //Now, populate additional services using the generated louie-serviceprovider file in each jar
+        Enumeration<URL> serviceClasses;
+        try {
+            serviceClasses = ServiceManager.class.getClassLoader().getResources(ServiceProcessor.SERVICEPROVIDER_FILE);
+        } catch (IOException ex) {
+            LoggerFactory.getLogger(ServiceManager.class)
+                    .error("Failed to fetch ServiceProvider prop files: {}",ex.toString());
+            return;
+        }
+        
+        while (serviceClasses.hasMoreElements()) {
+            URL serviceClass = serviceClasses.nextElement();
+            
+            try (BufferedReader reader = new BufferedReader( new InputStreamReader(serviceClass.openStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    try {
+                        ServiceFactory servFactory = (ServiceFactory) Class.forName(line).newInstance();
+                        String serviceName = servFactory.getServiceName();
+                        if (serviceFactories.containsKey(serviceName) 
+                                && ServiceProperties.getServiceProperties(serviceName).getProviderClass() == null) {
+                            failedServiceProviders.add(line);
+                            LoggerFactory.getLogger(ServiceManager.class)
+                                    .warn("An additional ServiceProvider: {} was BLOCKED from being loaded for service {}",line,serviceName);
+                        } else {
+                            serviceFactories.put(serviceName, servFactory);
+                        }
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                        failedServiceProviders.add(line);
+                        LoggerFactory.getLogger(ServiceManager.class)
+                                .error("Failed to load a class from ServiceProvider prop file: {}",ex.toString());
+                    }
+                }
+            } catch (IOException ex) {
+                LoggerFactory.getLogger(ServiceManager.class).error("Failed to parse a ServiceProvider prop file: {} ",ex.toString());
+            }
+        }    
     }
     
     private static void configureRoutes(ServletContext context) {
         Properties routeProps = loadProperties(context, CONF_DIR, ROUTE_PROPERTIES);
         Route.initialize(routeProps);
+    }
+    
+    public static final String LOUIE_WEBXML_PROP = "com.rhythm.louie.properties";
+    
+    /**
+     * Attempts to locate a full file and path via a property set in web.xml
+     * If this fails, it will attempt to locate a URL as a servlet resource
+     * If that also fails, you will startup with a default set of properties for each service 
+     * but Servers will remain unconfigured (only localhost known)
+     * @param context The ServletContext for this deployment
+     * @throws Exception 
+     */
+    private static void loadProperties(ServletContext context) throws Exception{
+        URL louieXml = null;
+        String param = context.getInitParameter(LOUIE_WEBXML_PROP); 
+        if (param != null) {
+            louieXml = new File(param).toURI().toURL();
+        }
+        if (louieXml == null) {
+            try {
+                louieXml = context.getResource(PROP_DIR + LOUIE_PROPERTIES);
+            } catch (MalformedURLException ex) {
+                LoggerFactory.getLogger(ServiceManager.class)
+                        .error("Failed to get URL for Properties file: {}",ex.toString());
+            }
+        }
+        String contextGateway = context.getContextPath().replaceFirst("/", "");
+        LouieProperties.processProperties(louieXml, contextGateway);
     }
     
     private static Properties loadProperties(ServletContext context,String dir,String propFile) {
@@ -316,4 +337,8 @@ public class ServiceManager {
         return Collections.unmodifiableCollection(servicesByName.keySet());
     }
 
+    public static Collection<String> getFailedServiceProviders() {
+        return Collections.unmodifiableCollection(failedServiceProviders);
+    }
+    
 }

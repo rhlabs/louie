@@ -62,24 +62,24 @@ public class ${className} implements ServiceFactory {
         
         ${info.serviceClassName} serviceImpl;
         if (useRemoteDAO(props)) {
-            Server PRIMARY = Server.getServer(props.getMain());
+            Server PRIMARY = Server.getServer(props.getCentralHost());
             LouieConnection connection = LouieConnectionFactory.getConnectionForServer(PRIMARY);
             serviceImpl = new ${baseName}RemoteService(connection);
         } else {
-            serviceImpl = loadLayer(props.getDAO(), "${baseName}DAO", DAO.class, false);
+            serviceImpl = loadLayer(props.getDAOClass(), "${baseName}DAO", DAO.class, false);
         }
         if (serviceImpl==null) {
             throw new Exception("Must define at least a DAO layer");
         }
         
-        ${info.serviceClassName} router = loadLayer(props.getRouter(), null, Router.class, true);
+        ${info.serviceClassName} router = loadLayer(props.getRouterClass(), null, Router.class, true);
         if (router!=null) {
             ((Delegate<${info.serviceClassName}>)router).setDelegate(serviceImpl);
             serviceImpl = router;
         }
         
         if (props.isCachingOn()) {
-            ${info.serviceClassName} cache = loadLayer(props.getCache(), "${baseName}CacheDelegate", CacheDelegate.class, true);
+            ${info.serviceClassName} cache = loadLayer(props.getCacheClass(), "${baseName}CacheDelegate", CacheDelegate.class, true);
             if (cache!=null) {
                 ((Delegate<${info.serviceClassName}>)cache).setDelegate(serviceImpl);
                 serviceImpl = cache;
@@ -93,9 +93,9 @@ public class ${className} implements ServiceFactory {
 
     private static boolean useRemoteDAO(ServiceProperties props) throws Exception {
         if (props.isCentralized()) {
-            Server PRIMARY = Server.getServer(props.getMain());
+            Server PRIMARY = Server.getServer(props.getCentralHost());
             if (PRIMARY == null) {
-                throw new Exception("Cannot establish service!  Unknown MAIN server: " + props.getMain());
+                throw new Exception("Cannot establish service!  Unknown MAIN server: " + props.getCentralHost());
             }
 
             if (!Server.LOCAL.getLocation().equals(PRIMARY.getLocation())) {

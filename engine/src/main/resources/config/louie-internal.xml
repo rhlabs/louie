@@ -1,0 +1,35 @@
+<louie>
+    <server_defaults>
+        <host></host>
+        <ip></ip>
+        <display></display>
+        <timezone></timezone>
+        <location></location>
+        <router>false</router>
+        <port>8080</port>
+        <gateway>louie</gateway>
+    </server_defaults>
+    <service_defaults>
+        <enable>true</enable>
+        <main></main>
+        <centralized>false</centralized>
+        <read_only>false</read_only>
+        <caching>true</caching>
+    </service_defaults>
+    <core_services>
+        <service name="info" enable="true">
+            <reserved>true</reserved>
+            <provider_class>com.rhythm.louie.services.info.InfoServiceFactory</provider_class>
+        </service>
+        <service name="auth" enable="true">
+            <reserved>true</reserved>
+            <provider_class>com.rhythm.louie.services.auth.AuthServiceFactory</provider_class>
+        </service>
+        <service name="status" enable="true">
+            <reserved>true</reserved>
+            <provider_class>com.rhythm.louie.services.status.StatusServiceFactory</provider_class>
+        </service>
+        <service name="sql" enable="false"/>
+        <service name="devtest" enable="false"/>
+    </core_services>
+</louie>

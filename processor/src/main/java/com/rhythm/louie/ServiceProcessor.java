@@ -5,31 +5,21 @@
  */
 package com.rhythm.louie;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
 
-import com.rhythm.louie.generator.Generator;
-import com.rhythm.louie.generator.MethodInfo;
-import com.rhythm.louie.generator.ServiceInfo;
-import com.rhythm.louie.generator.TypeUtils;
+import com.rhythm.louie.generator.*;
+
+import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
  *
@@ -38,7 +28,7 @@ import com.rhythm.louie.generator.TypeUtils;
 @SupportedAnnotationTypes("com.rhythm.louie.Service")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class ServiceProcessor extends AbstractProcessor {
-    final Set<String> RESERVED = new HashSet<String>();    
+    final Set<String> RESERVED = new HashSet<>();    
     public ServiceProcessor() {
         // Load list of RESERVED words
         try {
@@ -67,10 +57,15 @@ public class ServiceProcessor extends AbstractProcessor {
                         "################################################\n");
     }
 
+    public static final String SERVICES_FILE = "META-INF/resources/louie-services";
+    public static final String SERVICEPROVIDER_FILE = "META-INF/resources/louie-serviceproviders";
+    
+    private StringBuilder services = new StringBuilder();
+    private StringBuilder serviceProviders = new StringBuilder();
+    
     @Override
     public boolean process(Set annotations,
             RoundEnvironment roundEnv) {
-        
         Types types = processingEnv.getTypeUtils();
         
         for (Element e : roundEnv.getElementsAnnotatedWith(Service.class)) {
@@ -86,6 +81,7 @@ public class ServiceProcessor extends AbstractProcessor {
             try {
                 ServiceInfo info = processService(cl, processingEnv);
                 Generator.generate(info);
+                services.append(cl.getQualifiedName().toString()).append("\n");
             } catch (Exception exc) {
                 processingEnv.getMessager().printMessage(
                             Diagnostic.Kind.NOTE,
@@ -94,7 +90,32 @@ public class ServiceProcessor extends AbstractProcessor {
                 exc.printStackTrace();
             }
         }
+        if (roundEnv.processingOver() && services.length() > 0) { 
+            writeServiceClassProps(services, processingEnv, SERVICES_FILE);
+        }
+        
+        for (Element e : roundEnv.getElementsAnnotatedWith(ServiceProvider.class)) {
+            TypeElement cl = (TypeElement) types.asElement(e.asType());
+            serviceProviders.append(cl.getQualifiedName().toString()).append("\n");
+        }
+        if (roundEnv.processingOver() && serviceProviders.length() > 0 ) {
+            writeServiceClassProps(serviceProviders, processingEnv, SERVICEPROVIDER_FILE);
+        }
+        
         return true;
+    }
+    
+    private void writeServiceClassProps(StringBuilder services, ProcessingEnvironment env, String file) {
+        try {
+            FileObject jfo = env.getFiler().createResource(CLASS_OUTPUT, "", file);
+            try (Writer writer = jfo.openWriter()) {
+                writer.append(services.toString());
+            }
+        } catch (IOException ex) {
+            env.getMessager().printMessage(Diagnostic.Kind.WARNING, "The " + file 
+                    + " file was not appended to correctly while trying to write " 
+                    + services.toString() +"\n" + ex.toString());
+        }
     }
     
     private ServiceInfo processService(TypeElement cl, ProcessingEnvironment processingEnv) throws Exception {
@@ -102,7 +123,7 @@ public class ServiceProcessor extends AbstractProcessor {
         
         Types types = processingEnv.getTypeUtils();
         
-        Map<String, List<String>> methods = new HashMap<String, List<String>>();
+        Map<String, List<String>> methods = new HashMap<>();
         
         for (Element e : cl.getEnclosedElements()) {
             if (e.getKind() != ElementKind.METHOD) {
@@ -114,7 +135,7 @@ public class ServiceProcessor extends AbstractProcessor {
             String methodName = e.getSimpleName().toString();
             List<String> methodParams = methods.get(methodName);
             if (methodParams == null) {
-                methodParams = new ArrayList<String>();
+                methodParams = new ArrayList<>();
                 methods.put(methodName, methodParams);
             }
 

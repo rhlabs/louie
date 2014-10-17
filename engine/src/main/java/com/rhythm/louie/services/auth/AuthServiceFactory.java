@@ -62,11 +62,7 @@ public class AuthServiceFactory implements ServiceFactory {
 
         @Override
         public Result executeCommand(RequestContext req) throws Exception {
-            if (req.getLocalPort()!=DefaultLouieConnection.AUTH_PORT && 
-                req.getLocalPort()!=DefaultLouieConnection.sslPort()) {
-                     LOGGER.warn("Warning: Calls to Auth service on insecure port: {}", req.getLocalPort());
-            }
-            
+
             Result result = super.executeCommand(req);
 
             // Store the newly created Identity into the request object 

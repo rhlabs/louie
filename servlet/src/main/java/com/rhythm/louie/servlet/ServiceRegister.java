@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
 import org.slf4j.LoggerFactory;
 
@@ -23,27 +24,12 @@ import org.slf4j.LoggerFactory;
  * Web application lifecycle listener.
  * @author cjohnson
  */
-public abstract class ServiceRegister implements ServletContextListener {
+@WebListener()
+public class ServiceRegister implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            
-            // Init services
-            for (ServiceFactory factory : loadFactories()) {
-                ServiceManager.addService(factory);
-            }
-
-            try {
-                Class<?> c = Class.forName("com.rhythm.swagr.SwagrServiceFactory");
-                @SuppressWarnings("unchecked")
-                Method factoryMethod = c.getDeclaredMethod("getInstance");
-                ServiceFactory swagrFactory = (ServiceFactory) factoryMethod.invoke(c);
-                ServiceManager.addService(swagrFactory);
-            } catch (Exception ex){
-                //LoggerFactory.getLogger(ServiceRegister.class.getName()).error("SWAGr Service was not loaded");
-            }
-            
             ServiceManager.initialize(sce.getServletContext());
         } catch (Exception ex) {
             Logger.getLogger(ServiceRegister.class.getName()).log(Level.SEVERE, 
@@ -56,5 +42,4 @@ public abstract class ServiceRegister implements ServletContextListener {
         ServiceManager.shutdown();
     }
     
-    abstract public Collection<ServiceFactory> loadFactories();
 }

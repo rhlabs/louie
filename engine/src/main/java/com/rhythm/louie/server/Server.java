@@ -21,7 +21,7 @@ import com.rhythm.louie.info.InfoProtos.ServerPB;
  */
 public class Server {
     private static String DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
-    public static void setDefaultGateway(String gateway) {
+    protected static void setDefaultGateway(String gateway) { 
         if (gateway==null) {
             DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
         } else {
@@ -34,7 +34,6 @@ public class Server {
         UNKNOWN.host = "localhost";
         UNKNOWN.location = "UNKNOWN";
         UNKNOWN.timezone = TimeZone.getDefault().getDisplayName();
-        
         // set gateway again here just to be sure it gets set correctly on initialize
         UNKNOWN.gateway = Constants.DEFAULT_GATEWAY;
     }
@@ -51,6 +50,8 @@ public class Server {
     private static final Map<String,Server> SERVERS_BY_LOCATION = 
             Collections.synchronizedMap(new HashMap<String,Server>());
     
+    private final Map<String,String> properties;
+    
     private static List<Server> ALL_SERVERS = Collections.emptyList();
     private static List<ServerPB> ALL_SERVER_PBS = Collections.emptyList();
     private static List<String> SERVER_LOCATIONS = Collections.emptyList();
@@ -61,174 +62,186 @@ public class Server {
     private String display;
     private String location;
     private String gateway;
-    private boolean mutualSSL;
-    private String sslPass;
-    private String sslCAPass;
-    private int sslPort;
-    private String sslGateway;
     private String ip;
     private boolean router;
+    private boolean centralAuth;
+    private int port;
+    
+    private static String defaultTimezone;
+    private static String defaultHost;
+    private static String defaultDisplay;
+    private static String defaultLocation;
+    private static String defaultIP;
+    private static boolean defaultRouter;
+    private static int defaultPort;
     
     private ServerPB pb;
     
-    public static void processServerProperties(Properties props) {
-        synchronized(SERVERS) {
-            for (String key : props.stringPropertyNames()) {
-                String value = props.getProperty(key);
-            
-                String[] keyParts = key.split("\\.",2);
-                String serverName = keyParts[0];
-                
-                Server server = SERVERS.get(serverName);
-                if (server==null) {
-                    server = new Server(serverName);
-                    SERVERS.put(serverName,server);
-                }
-                
-                if (keyParts.length==1) {
-                    server.host=value.trim();
-                } else {
-                    String attribute = keyParts[1];
-                    switch (attribute) {
-                        case "display":
-                            server.display=value;
-                            break;
-                        case "timezone":
-                            server.timezone=value;
-                            break;
-                        case "location":
-                            server.location=value;
-                            break;
-                        case "gateway":
-                            server.gateway=value;
-                            break;
-                        case "mutual_ssl":
-                            server.mutualSSL=value.equals("true");
-                            break;
-                        case "ssl_port":
-                            server.sslPort=Integer.parseInt(value);
-                            break;
-                        case "ssl_gateway":
-                            server.sslGateway=value;
-                            break;
-                        case "ssl_pass":
-                            server.sslPass=value;
-                            break;
-                        case "ssl_ca_pass":
-                            server.sslCAPass=value;
-                            break;
-                        case "ip":
-                            server.ip=value;
-                            break;
-                        case "router":
-                            server.router=Boolean.parseBoolean(value);
-                            if (server.router) {
-                                ROUTER = server;
-                            }   break;
-                        case "central_auth":
-                            CENTRAL_AUTH = server;
-                            break;
-                        default:
-                            LoggerFactory.getLogger(Server.class)
-                                    .warn("Warning! Unknown Server Property: {}", key);
-                            break;
-                    }
-                }
-            }
-            
-            if (SERVERS.isEmpty()) {
+
+    protected static void processServers(List<Server> servers) {
+        for (Server server : servers) {
+            SERVERS.put(server.getName(), server);
+            if (server.centralAuth) CENTRAL_AUTH = server;
+            if (server.router) ROUTER = server;
+        }
+        
+        if (SERVERS.isEmpty()) {
+            LoggerFactory.getLogger(Server.class)
+                    .warn("No servers found, setting to localhost");
+            Server server = new Server("LOCAL");
+            server.host = "localhost";
+            server.location="LOCAL";
+            server.timezone=TimeZone.getDefault().getDisplayName();
+            SERVERS.put("localhost", server);
+
+            Server.LOCAL = server;
+        }
+
+        List<String> disabled = new ArrayList<>();
+
+        for (Server server : SERVERS.values()) {
+            try {
+                String addr = InetAddress.getByName(server.getHostName()).getHostAddress();
+                SERVERS_BY_ADDRESS.put(new ServerKey(addr,server.getGateway()), server);
+            } catch (UnknownHostException ex) {
                 LoggerFactory.getLogger(Server.class)
-                        .warn("No servers found, setting to localhost");
-                Server server = new Server("LOCAL");
-                server.host = "localhost";
-                server.location="LOCAL";
-                server.timezone=TimeZone.getDefault().getDisplayName();
-                SERVERS.put("localhost", server);
-                
-                Server.LOCAL = server;
-            }
-            
-            List<String> disabled = new ArrayList<>();
-            
-            for (Server server : SERVERS.values()) {
-                try {
-                    String addr = InetAddress.getByName(server.getHostName()).getHostAddress();
-                    SERVERS_BY_ADDRESS.put(new ServerKey(addr,server.getGateway()), server);
-                } catch (UnknownHostException ex) {
-                    LoggerFactory.getLogger(Server.class)
-                            .warn("Failed to resolve hostname {} into ip, will "
-                            + "try to put any specified IP.",server.getHostName());
-                    if (server.getIp() != null) {
-                        SERVERS_BY_ADDRESS.put(new ServerKey(server.getIp(), server.getGateway()), server);
-                    }
+                        .warn("Failed to resolve hostname {} into ip, will "
+                        + "try to put any specified IP.",server.getHostName());
+                if (server.getIp() != null) {
+                    SERVERS_BY_ADDRESS.put(new ServerKey(server.getIp(), server.getGateway()), server);
                 }
-                String location = server.getLocation();
-                if (location.isEmpty()) {
-                    LoggerFactory.getLogger(Server.class)
-                            .error("Server {} does not specify a location!  DISABLING!", server.getName());
-                    disabled.add(server.getName());
-                } else {
-                    if (LOCAL != null) {
-                        if (LOCAL.getLocation().equals(location)) {
-                            // lame way to ensure only THIS server is keyed for THIS location (routing machinery)
-                            if (LOCAL.getHostName().equals(server.getHostName())) {    
-                                SERVERS_BY_LOCATION.put(server.getLocation(),server);                            
-                            } else {
-                                LoggerFactory.getLogger(Server.class)
-                                        .info("Additional server {} found for location {}",server.getHostName(),location);
-                            }
+            }
+            String location = server.getLocation();
+            if (location.isEmpty()) {
+                LoggerFactory.getLogger(Server.class)
+                        .error("Server {} does not specify a location!  DISABLING!", server.getName());
+                disabled.add(server.getName());
+            } else {
+                if (LOCAL != null) {
+                    if (LOCAL.getLocation().equals(location)) {
+                        //lame way to ensure only THIS server is keyed for THIS location (routing machinery)
+                        if (LOCAL.getHostName().equals(server.getHostName())) {     
+                            SERVERS_BY_LOCATION.put(server.getLocation(),server);                            
                         } else {
-                            SERVERS_BY_LOCATION.put(server.getLocation(),server);
+                            LoggerFactory.getLogger(Server.class)
+                                    .info("Additional server {} found for location {}",server.getHostName(),location);
                         }
+                    } else {
+                        SERVERS_BY_LOCATION.put(server.getLocation(),server);
                     }
                 }
-            }
-            
-            for (String disableName : disabled) {
-                SERVERS.remove(disableName);
-            }
-            
-            ALL_SERVERS = Collections.unmodifiableList(new ArrayList<>(SERVERS.values()));
-            List<ServerPB> serverPBs = new ArrayList<>(ALL_SERVERS.size());
-            for (Server server : Server.allServers()) {
-                server.pb = ServerPB.newBuilder()
-                        .setName(server.getName())
-                        .setHost(server.getHostName())
-                        .setLocation(server.getLocation())
-                        .setTimezone(server.getTimezone())
-                        .setDisplay(server.getDisplay())
-                        .build();
-                serverPBs.add(server.pb);
-            }
-            ALL_SERVER_PBS = Collections.unmodifiableList(serverPBs);
-            SERVER_LOCATIONS = Collections.unmodifiableList(new ArrayList<>(SERVERS_BY_LOCATION.keySet()));
-            
-            //Print
-            StringBuilder sb = new StringBuilder();
-            sb.append("\nServers:\n\n");
-            for (Server server : Server.allServers()) {
-                sb.append(server.getName()).append(":").append(server.getHostName());
-                sb.append(" - ").append(server.getLocation());
-                if (server.isSSLMutual()) {
-                    sb.append(" (SSL)");
-                }
-                sb.append("\n");
-                if (server.getIp().equals(LocalConstants.IP)) {
-                    Server.LOCAL = server;
-                }
-            }
-            sb.append("\n");
-            
-            if (Server.LOCAL!=UNKNOWN) {
-                sb.append("Current Server: ").append(Server.LOCAL.getName());
-            }
-            LoggerFactory.getLogger(Server.class).info(sb.toString());
-            
-            if (Server.LOCAL==UNKNOWN) {
-                LoggerFactory.getLogger(Server.class)
-                        .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
             }
         }
+
+        for (String disableName : disabled) {
+            SERVERS.remove(disableName);
+        }
+
+        ALL_SERVERS = Collections.unmodifiableList(new ArrayList<>(SERVERS.values()));
+        List<ServerPB> serverPBs = new ArrayList<>(ALL_SERVERS.size());
+        for (Server server : Server.allServers()) {
+            server.pb = ServerPB.newBuilder()
+                    .setName(server.getName())
+                    .setHost(server.getHostName())
+                    .setLocation(server.getLocation())
+                    .setTimezone(server.getTimezone())
+                    .setDisplay(server.getDisplay())
+                    .build();
+            serverPBs.add(server.pb);
+        }
+        ALL_SERVER_PBS = Collections.unmodifiableList(serverPBs);
+        SERVER_LOCATIONS = Collections.unmodifiableList(new ArrayList<>(SERVERS_BY_LOCATION.keySet()));
+
+        //Print
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nServers:\n\n");
+        for (Server server : Server.allServers()) {
+            sb.append(server.getName()).append(":").append(server.getHostName());
+            sb.append(" - ").append(server.getLocation());
+            sb.append("\n");
+            if (server.getIp().equals(LocalConstants.IP)) {
+                Server.LOCAL = server;
+            }
+        }
+        sb.append("\n");
+
+        if (Server.LOCAL!=UNKNOWN) {
+            sb.append("Current Server: ").append(Server.LOCAL.getName());
+        }
+        LoggerFactory.getLogger(Server.class).info(sb.toString());
+
+        if (Server.LOCAL==UNKNOWN) {
+            LoggerFactory.getLogger(Server.class)
+                    .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
+        }
+    }
+
+    protected void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+
+    protected void setHost(String host) {
+        this.host = host;
+    }
+
+    protected void setDisplay(String display) {
+        this.display = display;
+    }
+
+    protected void setLocation(String location) {
+        this.location = location;
+    }
+
+    protected void setGateway(String gateway) {
+        this.gateway = gateway;
+    }
+
+    protected void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    protected void setRouter(boolean router) {
+        this.router = router;
+    }
+
+    protected void setCentralAuth(boolean centralAuth) {
+        this.centralAuth = centralAuth;
+    }
+    
+    protected void setPort(int port) {
+        this.port = port;
+    }
+    
+    protected static void setDefaultTimezone(String timezone) {
+        defaultTimezone = timezone;
+    }
+
+    protected static void setDefaultHost(String host) {
+        defaultHost = host;
+    }
+
+    protected static void setDefaultDisplay(String display) {
+        defaultDisplay = display;
+    }
+
+    protected static void setDefaultLocation(String location) {
+        defaultLocation = location;
+    }
+
+    protected static void setDefaultIP(String IP) {
+        defaultIP = IP;
+    }
+
+    protected static void setDefaultRouter(boolean router) {
+        defaultRouter = router;
+    }
+    
+    protected static void setDefaultPort(int port) {
+        defaultPort = port;
+    }
+    
+    protected void addCustomProperty(String key, String value) {
+        properties.put(key, value);
     }
     
     /**
@@ -249,7 +262,7 @@ public class Server {
         }
         return SERVERS_BY_ADDRESS.get(new ServerKey(addr,gateway));
     }
-    
+
     /**
      * Similar to getResolvedServer, but assumes you have already collected 
      * the valid IP address of the target host
@@ -274,20 +287,17 @@ public class Server {
         return SERVER_LOCATIONS;
     }
     
-    private Server(String name) {
+    protected Server(String name) {
         this.name = name;
-        this.host = "";
-        this.ip = null;
-        this.display = "";
-        this.timezone = "";
-        this.location = "";
-        this.mutualSSL = false;
-        this.sslCAPass = null;
-        this.sslPass = null;
-        this.sslPort = 0;
-        this.sslGateway = null;
+        this.host = defaultHost;
+        this.ip = (defaultIP == null || defaultIP.isEmpty()) ? null : defaultIP;
+        this.display = defaultDisplay;
+        this.timezone = defaultTimezone;
+        this.location = defaultLocation;
         this.gateway = DEFAULT_GATEWAY;
-        this.router = false;
+        this.router = defaultRouter;
+        this.port = defaultPort;
+        properties = new HashMap<>();
     }
      
     public static List<Server> allServers() {
@@ -338,24 +348,18 @@ public class Server {
         return gateway;
     }
     
-    public boolean isSSLMutual() {
-        return mutualSSL;
-    }
-
-    public int getSSLPort() {
-        return sslPort;
+    public int getPort() {
+        return port;
     }
     
-    public String getSSLPassword() {
-        return sslPass;
+    public String getCustomProperty(String key) {
+        return properties.get(key);
     }
     
-    public String getSSLCAPassword() {
-        return sslCAPass;
-    }
-    
-    public String getSSLGateway() {
-        return sslGateway;
+    public String getCustomProperty(String key, String def) {
+        String value = properties.get(key);
+        if (value == null) return def;
+        return value;
     }
     
     public ServerPB toPB() {

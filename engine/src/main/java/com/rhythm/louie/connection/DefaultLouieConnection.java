@@ -5,15 +5,27 @@
  */
 package com.rhythm.louie.connection;
 
+import java.io.*;
+import java.net.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import com.google.protobuf.Message;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rhythm.louie.Constants;
 import com.rhythm.louie.exception.LouieRequestException;
 import com.rhythm.louie.exception.LouieResponseException;
-import com.rhythm.louie.request.RequestContextManager;
-import com.rhythm.louie.stream.Consumers;
-import com.rhythm.louie.stream.SingleConsumer;
-
 import com.rhythm.louie.pb.PBParam;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.RequestContextManager;
+import com.rhythm.louie.request.data.Data;
+import com.rhythm.louie.server.Server;
+import com.rhythm.louie.services.auth.AuthService;
+import com.rhythm.louie.stream.*;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.RequestHeaderPB;
@@ -22,30 +34,6 @@ import com.rhythm.pb.RequestProtos.ResponseHeaderPB;
 import com.rhythm.pb.RequestProtos.ResponsePB;
 import com.rhythm.pb.RequestProtos.SessionKey;
 
-import com.rhythm.louie.request.RequestContext;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.rhythm.louie.Constants;
-import com.rhythm.louie.services.auth.AuthService;
-import com.rhythm.louie.stream.Consumer;
-
-import com.rhythm.louie.request.data.Data;
-
 /**
  * @author cjohnson
  * Created: Jan 17, 2012 2:23:53 PM
@@ -53,10 +41,6 @@ import com.rhythm.louie.request.data.Data;
 public class DefaultLouieConnection implements LouieConnection {
     private final Logger LOGGER = LoggerFactory.getLogger(DefaultLouieConnection.class);
             
-    private static int PORT = 8080;
-    public static final int AUTH_PORT = 8787;
-    private static int SSL_PORT = 8181;
-    
     private static final String AUTH_SERVICE = AuthService.SERVICE_NAME;
     private static final AtomicInteger txId = new AtomicInteger(0);
     
@@ -64,6 +48,10 @@ public class DefaultLouieConnection implements LouieConnection {
     private String host;
     private SessionKey key;
 
+    private int port = 8080;
+    private int auth_port = 8787;
+    private int ssl_port = 8181;
+    
     private boolean authBehaviorEnabled = false;
     private boolean requestOnSSL = false;
     private SSLConfig sslConfig;
@@ -97,14 +85,18 @@ public class DefaultLouieConnection implements LouieConnection {
         if (gateway != null) {
             this.gateway = gateway;
         }
-
         if (key != null) {
             this.key = SessionKey.newBuilder().setKey(key).build();
         }
     }
     
-    static public int sslPort() {
-        return SSL_PORT;
+    protected DefaultLouieConnection(IdentityPB identity, Server server) {
+        this.identity = identity;
+        this.host = server.getIp();
+        this.gateway = server.getGateway();
+        if (server.getPort() != 0) {
+            this.port = server.getPort();
+        }
     }
     
     protected DefaultLouieConnection(IdentityPB identity, SSLConfig sslConfig) {
@@ -121,7 +113,7 @@ public class DefaultLouieConnection implements LouieConnection {
         this.requestOnSSL = true;
         this.sslConfig = sslConfig;
         if(sslConfig.getPort() != 0) {
-            SSL_PORT = sslConfig.getPort();
+            ssl_port = sslConfig.getPort();
         }
         if(sslConfig.getGateway() != null) {
             setGateway(sslConfig.getGateway());
@@ -148,23 +140,23 @@ public class DefaultLouieConnection implements LouieConnection {
     }
     
     private URL getAuthURL() {
-        return getUrl("http://"+host+":"+AUTH_PORT+"/"+gateway+"/pb");
+        return getUrl("http://"+host+":"+auth_port+"/"+gateway+"/pb");
     }
     
     private URL getPBURL() {
-        return getUrl("http://"+host+":"+PORT+"/"+gateway+"/pb");
+        return getUrl("http://"+host+":"+port+"/"+gateway+"/pb");
     }
     
     private URL getSecurePBURL() {
-        return getUrl("https://"+host+":"+SSL_PORT+"/"+gateway+"/pb");
+        return getUrl("https://"+host+":"+ssl_port+"/"+gateway+"/pb");
     }
     
     private URL getJsonURL() {
-        return getUrl("http://"+host+":"+PORT+"/"+gateway+"/json");
+        return getUrl("http://"+host+":"+port+"/"+gateway+"/json");
     }
     
     private URL getSecureJsonURL() {
-        return getUrl("https://"+host+":"+SSL_PORT+"/"+gateway+"/json");
+        return getUrl("https://"+host+":"+ssl_port+"/"+gateway+"/json");
     }
     
     private URL getUrl(String urlStr) {
@@ -501,7 +493,7 @@ public class DefaultLouieConnection implements LouieConnection {
 
     @Override
     public void setPort(int port) {
-        PORT = port;
+        this.port = port;
     }
     
     class HttpException extends Exception {

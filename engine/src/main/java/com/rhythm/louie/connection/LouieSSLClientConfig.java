@@ -26,25 +26,25 @@ public class LouieSSLClientConfig extends SSLClientConfig implements SSLConfig{
         setHost(server.getHostName());
         setSSLPass(CERT_DEFAULT_PASS);
         setSSLCAPass(CA_KEYSTORE_DEFAULT_PASS);
-        String clientSSLCert = System.getProperty("clientSSLCert");
-        String clientSSLCACert = System.getProperty("clientSSLCACert");
-        if (clientSSLCert != null && clientSSLCACert != null){
-            this.clientCert = clientSSLCert;
-            this.caKeystore = clientSSLCACert;
-            //check for passwords to override the hardcoded defaults.
-            String localSSLPassword = Server.LOCAL.getSSLPassword();
-            String localSSLCAPassword = Server.LOCAL.getSSLCAPassword();
-            if (localSSLPassword != null) {
-                setSSLPass(localSSLPassword);
-            }
-            if (localSSLCAPassword != null) {
-                setSSLCAPass(localSSLCAPassword);
-            }
-            gateway = server.getSSLGateway(); 
-            port = server.getSSLPort(); 
-        } else {
-            throw new Exception("No JVM args found for ssl certificates");
-        }
+//        String clientSSLCert = System.getProperty("clientSSLCert");
+//        String clientSSLCACert = System.getProperty("clientSSLCACert");
+//        if (clientSSLCert != null && clientSSLCACert != null){
+//            this.clientCert = clientSSLCert;
+//            this.caKeystore = clientSSLCACert;
+//            //check for passwords to override the hardcoded defaults.
+//            String localSSLPassword = Server.LOCAL.getSSLPassword();
+//            String localSSLCAPassword = Server.LOCAL.getSSLCAPassword();
+//            if (localSSLPassword != null) {
+//                setSSLPass(localSSLPassword);
+//            }
+//            if (localSSLCAPassword != null) {
+//                setSSLCAPass(localSSLCAPassword);
+//            }
+//            gateway = server.getSSLGateway(); 
+//            port = server.getSSLPort(); 
+//        } else {
+//            throw new Exception("No JVM args found for ssl certificates");
+//        }
     }
     
     @Override

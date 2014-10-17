@@ -33,4 +33,13 @@
             <activatedProfile>python</activatedProfile>
         </activatedProfiles>
     </action>
+    <action>
+            <actionName>CUSTOM-clean build error</actionName>
+            <displayName>clean build error</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+                <goal>-e</goal>
+            </goals>
+        </action>
     </actions>

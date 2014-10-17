@@ -236,19 +236,19 @@ public class LouieConnectionFactory {
     
     private static LouieConnection getMutualSSLConnection(IdentityPB id, Server server) {
         LouieConnection conn;
-        if (server.isSSLMutual()) { 
-            SSLConfig sslConfig;
-            try {
-                sslConfig = new LouieSSLClientConfig(server);
-            } catch (Exception ex) {
-                LoggerFactory.getLogger(LouieConnectionFactory.class)
-                    .error("Error creating SSL config", ex);
-                return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
-            }
-            return new DefaultLouieConnection(id,sslConfig);
-        }
+//        if (server.isSSLMutual()) { 
+//            SSLConfig sslConfig;
+//            try {
+//                sslConfig = new LouieSSLClientConfig(server);
+//            } catch (Exception ex) {
+//                LoggerFactory.getLogger(LouieConnectionFactory.class)
+//                    .error("Error creating SSL config", ex);
+//                return new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
+//            }
+//            return new DefaultLouieConnection(id,sslConfig);
+//        }
         //else attempt a regular http connection, what the heck!
-        conn = new DefaultLouieConnection(id,server.getIp(),null,server.getGateway());
+        conn = new DefaultLouieConnection(id,server);
         return conn;
     }
     

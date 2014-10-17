@@ -14,9 +14,9 @@ import javax.jms.QueueConnectionFactory;
  * @author eyasukoc
  */
 public interface JmsAdapter {
-    public static String HOST_KEY = "jms.host";
-    public static String PORT_KEY = "jms.port";
-    public static String FAILOVER_KEY = "jms.failover";
+    public static String HOST_KEY = "host";
+    public static String PORT_KEY = "port";
+    public static String FAILOVER_KEY = "failover";
     public void configure(Map<String,String> configs);
     public QueueConnectionFactory getQueueConnectionFactory();
 }

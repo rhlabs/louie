@@ -5,20 +5,21 @@
  */
 package com.rhythm.louie.jms;
 
-import com.rhythm.louie.server.ServiceProperties;
 
 import java.util.*;
 
-import javax.jms.BytesMessage;
-import javax.jms.Destination;
-import javax.jms.Message;
-import javax.jms.Session;
+import javax.jms.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.louie.request.data.Data;
 import com.rhythm.louie.jms.JmsProtos.*;
+import com.rhythm.louie.jms.JmsProtos.ContentPB;
+import com.rhythm.louie.jms.JmsProtos.MessageBPB;
+import com.rhythm.louie.request.data.Data;
+import com.rhythm.louie.server.CustomProperty;
+import com.rhythm.louie.server.LouieProperties;
+import com.rhythm.louie.server.ServiceProperties;
 
 /**
  *
@@ -55,9 +56,10 @@ public class MessageManager {
     }
     
     private static void loadJMSAdapter() throws MessageAdapterException {
-        ServiceProperties defaultProps = ServiceProperties.getDefaultServiceProperties();
+        CustomProperty jmsProp = LouieProperties.getCustomProperty("messaging");
+//        ServiceProperties defaultProps = ServiceProperties.getDefaultServiceProperties();
         
-        String adapterClass = defaultProps.getMessageAdapter();
+        String adapterClass = jmsProp.getProperty("jmsadapter");
         if (adapterClass == null) {
             adapterClass = System.getProperty(SYSTEM_PROP_KEY);
             if (adapterClass == null) {
@@ -76,9 +78,9 @@ public class MessageManager {
         }
         
         Map<String,String> configHash = new HashMap<String,String>();
-        configHash.put(JmsAdapter.HOST_KEY, defaultProps.getCustomProperty(JmsAdapter.HOST_KEY, DEFAULT_HOST));
-        configHash.put(JmsAdapter.PORT_KEY, defaultProps.getCustomProperty(JmsAdapter.PORT_KEY, Integer.toString(DEFAULT_PORT)));
-        configHash.put(JmsAdapter.FAILOVER_KEY, defaultProps.getCustomProperty(JmsAdapter.FAILOVER_KEY, "true"));
+        configHash.put(JmsAdapter.HOST_KEY, jmsProp.getProperty(JmsAdapter.HOST_KEY, DEFAULT_HOST));
+        configHash.put(JmsAdapter.PORT_KEY, jmsProp.getProperty(JmsAdapter.PORT_KEY, Integer.toString(DEFAULT_PORT)));
+        configHash.put(JmsAdapter.FAILOVER_KEY, jmsProp.getProperty(JmsAdapter.FAILOVER_KEY, "true"));
         jmsAdapter.configure(configHash);
     }
     
