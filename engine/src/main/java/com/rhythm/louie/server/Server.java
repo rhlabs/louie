@@ -331,7 +331,11 @@ public class Server {
     public String getIp() {
         if (ip == null) {
             try {
-                ip = InetAddress.getByName(host).getHostAddress();
+                InetAddress targetAddr = InetAddress.getByName(host);
+                if (targetAddr.isLoopbackAddress()) {
+                    targetAddr = InetAddress.getLocalHost();
+                }
+                ip = targetAddr.getHostAddress();
             } catch (UnknownHostException ex) {
                 LoggerFactory.getLogger(Server.class)
                         .error("ERROR getting IP for " + host+" : "+ex.toString());

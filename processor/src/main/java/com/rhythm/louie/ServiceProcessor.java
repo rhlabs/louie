@@ -19,6 +19,8 @@ import javax.tools.FileObject;
 
 import com.rhythm.louie.generator.*;
 
+import com.rhythm.louie.process.ServiceHandler;
+
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
@@ -57,11 +59,11 @@ public class ServiceProcessor extends AbstractProcessor {
                         "################################################\n");
     }
 
-    public static final String SERVICES_FILE = "META-INF/resources/louie-services";
-    public static final String SERVICEPROVIDER_FILE = "META-INF/resources/louie-serviceproviders";
+    public static final String SERVICE_PROVIDER_FILE = "META-INF/resources/louie-serviceproviders";
+    public static final String SERVICE_HANDLER_FILE = "META-INF/resources/louie-servicehandlers";
     
-    private StringBuilder services = new StringBuilder();
     private StringBuilder serviceProviders = new StringBuilder();
+    private StringBuilder serviceHandlers = new StringBuilder();
     
     @Override
     public boolean process(Set annotations,
@@ -81,7 +83,6 @@ public class ServiceProcessor extends AbstractProcessor {
             try {
                 ServiceInfo info = processService(cl, processingEnv);
                 Generator.generate(info);
-                services.append(cl.getQualifiedName().toString()).append("\n");
             } catch (Exception exc) {
                 processingEnv.getMessager().printMessage(
                             Diagnostic.Kind.NOTE,
@@ -90,8 +91,13 @@ public class ServiceProcessor extends AbstractProcessor {
                 exc.printStackTrace();
             }
         }
-        if (roundEnv.processingOver() && services.length() > 0) { 
-            writeServiceClassProps(services, processingEnv, SERVICES_FILE);
+        
+        for (Element e : roundEnv.getElementsAnnotatedWith(ServiceHandler.class)) {
+            TypeElement cl = (TypeElement) types.asElement(e.asType());
+            serviceHandlers.append(cl.getQualifiedName().toString()).append("\n");
+        }
+        if (roundEnv.processingOver() && serviceHandlers.length() > 0 ) {
+            writeServiceClassProps(serviceHandlers, processingEnv, SERVICE_HANDLER_FILE);
         }
         
         for (Element e : roundEnv.getElementsAnnotatedWith(ServiceProvider.class)) {
@@ -99,7 +105,7 @@ public class ServiceProcessor extends AbstractProcessor {
             serviceProviders.append(cl.getQualifiedName().toString()).append("\n");
         }
         if (roundEnv.processingOver() && serviceProviders.length() > 0 ) {
-            writeServiceClassProps(serviceProviders, processingEnv, SERVICEPROVIDER_FILE);
+            writeServiceClassProps(serviceProviders, processingEnv, SERVICE_PROVIDER_FILE);
         }
         
         return true;

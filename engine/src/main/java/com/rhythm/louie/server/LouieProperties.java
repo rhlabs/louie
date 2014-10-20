@@ -6,6 +6,7 @@
 
 package com.rhythm.louie.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -28,6 +29,7 @@ public class LouieProperties {
     ////////////////////
     
     private static final String NAME = "name";
+    private static final String ALT_PATH = "config_path";
     private static final String DEFAULT = "defaults";
     private static final String RESERVED = "reserved";
     
@@ -65,25 +67,20 @@ public class LouieProperties {
             Server.setDefaultGateway(contextGateway);
         }
         
-        if (configs == null) {
-            LoggerFactory.getLogger(LouieProperties.class)
-                    .warn("Failed to load any Properties file. URL was null, and no JVM arg was set");
-            Server.processServers(Collections.EMPTY_LIST);
-            return;
-        }
-        
-        Document properties;
-        SAXBuilder docBuilder = new SAXBuilder();
-        try {
-            properties = docBuilder.build(configs);
-        } catch (Exception ex) {
-            LoggerFactory.getLogger(LouieProperties.class)
-                    .error("Failed to load properties file! Defaults will be used.\n{}",ex.toString());
-            Server.processServers(Collections.EMPTY_LIST);
-            return;
-        }
+        Document properties = loadDocument(configs);
+        if (properties == null) return;
         
         Element louie = properties.getRootElement();
+        
+        //Check for alternate loading point 
+        Element altLoadPath = louie.getChild(ALT_PATH);
+        if (altLoadPath != null) {
+            //overwrite document and root element with values from alternate config 
+            properties = loadDocument(new File(altLoadPath.getText()).toURI().toURL());
+            if (properties == null) return;
+            
+            louie = properties.getRootElement(); 
+        }
         
         //Process servers
         Element servers = louie.getChild(SERVER_PARENT);
@@ -105,7 +102,20 @@ public class LouieProperties {
             }
             customProperties.put(configName, custom);
         }
-        
+    }
+    
+    private static Document loadDocument(URL configs){
+        Document properties;
+        SAXBuilder docBuilder = new SAXBuilder();
+        try {
+            properties = docBuilder.build(configs);
+        } catch (IOException | JDOMException | NullPointerException ex) {
+            LoggerFactory.getLogger(LouieProperties.class)
+                    .error("Failed to load properties file! Defaults will be used.\n{}",ex.toString());
+            Server.processServers(Collections.EMPTY_LIST);
+            return null;
+        }
+        return properties;
     }
     
     public static void loadInternals() throws JDOMException, IOException {
@@ -146,6 +156,12 @@ public class LouieProperties {
     
     private static void processServers(Element servers){
         List<Server> serverList = new ArrayList<>();
+        
+        if (servers == null) {
+            Server.processServers(Collections.EMPTY_LIST);
+            return;
+        }
+        
         for (Element server : servers.getChildren()) {
             if (!SERVER.equals(server.getName())) continue;
             
@@ -216,6 +232,8 @@ public class LouieProperties {
     
     private static void processServices(Element services, boolean internal) {
         List<ServiceProperties> servicesList = new ArrayList<>();
+        
+        if (services == null) return;
         
         Element defaults = services.getChild(DEFAULT);
         if (defaults != null) processServiceDefaults(defaults);

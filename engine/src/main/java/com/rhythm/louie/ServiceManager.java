@@ -177,7 +177,7 @@ public class ServiceManager {
         //Now, populate additional services using the generated louie-serviceprovider file in each jar
         Enumeration<URL> serviceClasses;
         try {
-            serviceClasses = ServiceManager.class.getClassLoader().getResources(ServiceProcessor.SERVICEPROVIDER_FILE);
+            serviceClasses = ServiceManager.class.getClassLoader().getResources(ServiceProcessor.SERVICE_PROVIDER_FILE);
         } catch (IOException ex) {
             LoggerFactory.getLogger(ServiceManager.class)
                     .error("Failed to fetch ServiceProvider prop files: {}",ex.toString());
@@ -224,8 +224,6 @@ public class ServiceManager {
         Route.initialize(routeProps);
     }
     
-    public static final String LOUIE_WEBXML_PROP = "com.rhythm.louie.properties";
-    
     /**
      * Attempts to locate a full file and path via a property set in web.xml
      * If this fails, it will attempt to locate a URL as a servlet resource
@@ -236,17 +234,11 @@ public class ServiceManager {
      */
     private static void loadProperties(ServletContext context) throws Exception{
         URL louieXml = null;
-        String param = context.getInitParameter(LOUIE_WEBXML_PROP); 
-        if (param != null) {
-            louieXml = new File(param).toURI().toURL();
-        }
-        if (louieXml == null) {
-            try {
-                louieXml = context.getResource(PROP_DIR + LOUIE_PROPERTIES);
-            } catch (MalformedURLException ex) {
-                LoggerFactory.getLogger(ServiceManager.class)
-                        .error("Failed to get URL for Properties file: {}",ex.toString());
-            }
+        try {
+            louieXml = context.getResource(PROP_DIR + LOUIE_PROPERTIES);
+        } catch (MalformedURLException ex) {
+            LoggerFactory.getLogger(ServiceManager.class)
+                    .error("Failed to get URL for Properties file: {}",ex.toString());
         }
         String contextGateway = context.getContextPath().replaceFirst("/", "");
         LouieProperties.processProperties(louieXml, contextGateway);

@@ -5,46 +5,27 @@
  */
 package com.rhythm.louie.clientgen;
 
-import com.rhythm.louie.Classes;
-import com.rhythm.louie.Disabled;
-import com.rhythm.louie.Internal;
-import com.rhythm.louie.process.ServiceCall;
-import com.rhythm.louie.process.ServiceHandler;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.net.*;
+import java.nio.file.*;
+import java.util.*;
 
 import com.google.common.collect.ImmutableSet;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.*;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.LoggerFactory;
+
+import com.rhythm.louie.*;
+import com.rhythm.louie.process.ServiceCall;
 
 /**
  * Executes the LoUIE client generator
@@ -83,22 +64,11 @@ public class GeneratorMojo extends AbstractMojo{
     private String pythondir = "";
     
     /**
-     * A list of package prefixes to look for
+     * An optional list of ServiceHandlers to generate Clients for.
+     * **Does not replace anything that is auto-detected**
      */
     @Parameter
-    private List<String> prefixes;
-    
-    /**
-     * A list of complete PACKAGES to blacklist (not just some prefix)
-     */
-    @Parameter
-    private List<String> blacklist;
-    
-    /**
-     * A list of fully qualified CLASSES to whitelist
-     */
-    @Parameter
-    private List<String> whitelist;
+    private List<String> servicehandlers;
     
     @SuppressWarnings("unchecked")
     @Override
@@ -117,27 +87,6 @@ public class GeneratorMojo extends AbstractMojo{
             ex.printStackTrace();
         }
         
-        // TODO exclude all of com.rhythm.louie once we rename other rh based services
-        if (blacklist == null) blacklist = new ArrayList<>();
-        blacklist.add("com.rhythm.louie");
-        blacklist.add("com.rhythm.louie.servlet");
-        blacklist.add("com.rhythm.louie.client.connection");
-        blacklist.add("com.rhythm.louie.connection");
-        blacklist.add("com.rhythm.louie.email");
-        blacklist.add("com.rhythm.louie.exception");
-        blacklist.add("com.rhythm.louie.jdbc");
-        blacklist.add("com.rhythm.louie.jdbc.query");
-        blacklist.add("com.rhythm.louie.jms");
-        blacklist.add("com.rhythm.louie.log");
-        blacklist.add("com.rhythm.louie.request");
-        blacklist.add("com.rhythm.louie.server");
-        blacklist.add("com.rhythm.louie.servlets");
-        blacklist.add("com.rhythm.louie.stream");
-        blacklist.add("com.rhythm.louie.topology");
-        blacklist.add("com.rhythm.louie.pb");
-        blacklist.add("com.rhythm.louie.pb.command");
-        blacklist.add("com.rhythm.louie.pb.data");
-        
         ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
         Thread.currentThread().setContextClassLoader(cl);
         
@@ -145,8 +94,9 @@ public class GeneratorMojo extends AbstractMojo{
         if (pythondir.startsWith("/")) pythondir = pythondir.substring(1);
         if (!pythondir.endsWith("/")) pythondir = pythondir + "/";
         
-        exec(hostname, gateway, prefixes, whitelist, blacklist, pythonpackage);
+        List<Class<?>> services = loadClasses(servicehandlers);
         
+        process(hostname, gateway, pythonpackage, services);
     }
     
     //////////////////////////// FROM GENERATOR ////////////////////////////////
@@ -156,21 +106,13 @@ public class GeneratorMojo extends AbstractMojo{
     
     protected static final Set<String> LOUIE_SERVICES = ImmutableSet.of("auth","info","test","jmstest");
     
-    public void exec(String host, String gateway, List<String> prefix, List<String> whitelist, List<String> blacklist, String pypackage) {
-        
-        List<Class<?>> services;
+    public void process(String host, String gateway, String pypackage, List<Class<?>> services) {
         
         // sanitize pypath
         pypackage = pypackage.replaceAll("\\.", "\\/");
         if (pypackage.startsWith("/")) pypackage = pypackage.substring(1);
         if (!pypackage.endsWith("/")) pypackage = pypackage + "/";
-        
-        try {
-            services = Classes.getAnnotatedSpecialized(prefix, ServiceHandler.class, whitelist, blacklist);
-        } catch (IOException e) {
-            LoggerFactory.getLogger(GeneratorMojo.class).error("Error Finding Service Handlers", e);
-            return;
-        }
+
         for (Class<?> service : services) {
             List<MethodInfo> pythonMethods = new ArrayList<>();
             try {
@@ -196,6 +138,51 @@ public class GeneratorMojo extends AbstractMojo{
                 LoggerFactory.getLogger(GeneratorMojo.class).error("Error Generating Python Clients", e);
             }
         }
+    }
+    
+    protected List<Class<?>> loadClasses(List<String> serviceHandlers) {
+        List<Class<?>> services = new ArrayList<>();
+        
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        
+        if (serviceHandlers != null) {
+            for (String serviceHandler : serviceHandlers) {
+                try {
+                    Class<?> service = cl.loadClass(serviceHandler);
+                    services.add(service);
+                } catch (ClassNotFoundException ex) {
+                    getLog().error("Failed to load class: " +serviceHandler
+                            + " from ServiceHandler list argument: "+ex.toString());
+                }
+            }
+        }
+        
+        Enumeration<URL> serviceClasses;
+        try {
+            serviceClasses = cl.getResources(ServiceProcessor.SERVICE_HANDLER_FILE);
+        } catch (IOException ex) {
+            getLog().error("Failed to fetch ServiceHandler prop files: "+ex.toString());
+            return services;
+        }
+        
+        while (serviceClasses.hasMoreElements()) {
+            URL serviceClass = serviceClasses.nextElement();
+            
+            try (BufferedReader reader = new BufferedReader( new InputStreamReader(serviceClass.openStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    try {
+                        Class<?> service = cl.loadClass(line);
+                        services.add(service);
+                    } catch (ClassNotFoundException ex) {
+                        getLog().error("Failed to load a class from ServiceHandler prop file: "+ex.toString());
+                    }
+                }
+            } catch (IOException ex) {
+                getLog().error("Failed to parse a ServiceHandler prop file: "+ex.toString());
+            }
+        }
+        return services;
     }
     
     protected void printServiceInfo(ServiceInfo info) {
