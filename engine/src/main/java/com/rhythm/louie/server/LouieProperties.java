@@ -163,54 +163,42 @@ public class LouieProperties {
         }
         
         for (Element server : servers.getChildren()) {
-            if (!SERVER.equals(server.getName())) continue;
+            if (!SERVER.equals(server.getName().toLowerCase())) continue;
             
-            Server prop = new Server(server.getAttributeValue(NAME));
+            String name = null;
+            for (Attribute attr : server.getAttributes()) {
+                if (NAME.equals(attr.getName().toLowerCase())) name = attr.getValue();
+            }
+            if (name == null) {
+                LoggerFactory.getLogger(LouieProperties.class)
+                        .error("A server was missing it's 'name' attribute and will be skipped!");
+                continue;
+            }
+            Server prop = new Server(name);
             
-            List<Element> serverProperties = server.getChildren();
-            
-            Element hostElem = server.getChild(HOST);
-            if (hostElem != null) {
-                prop.setHost(hostElem.getText());
-                serverProperties.remove(hostElem);
-            }
-            Element dispElem = server.getChild(DISPLAY);
-            if (dispElem != null) {
-                prop.setDisplay(dispElem.getText());
-                serverProperties.remove(dispElem);
-            }
-            Element locElem = server.getChild(LOCATION);
-            if (locElem != null) {
-                prop.setLocation(locElem.getText());
-                serverProperties.remove(locElem);
-            }
-            Element gateElem = server.getChild(GATEWAY);
-            if (gateElem != null) {
-                prop.setGateway(gateElem.getText());
-                serverProperties.remove(gateElem);
-            }
-            Element ipElem = server.getChild(IP);
-            if (ipElem != null) {
-                prop.setIp(ipElem.getText());
-                serverProperties.remove(ipElem);
-            }
-            Element routerElem = server.getChild(ROUTER);
-            if (routerElem != null) {
-                prop.setRouter(Boolean.valueOf(routerElem.getText()));
-                serverProperties.remove(routerElem);
-            }
-            Element authElem = server.getChild(CENTRAL_AUTH);
-            if (authElem != null) {
-                prop.setCentralAuth(Boolean.valueOf(authElem.getText()));
-                serverProperties.remove(authElem);
-            }
-            Element portElem = server.getChild(PORT);
-            if (portElem != null) {
-                prop.setPort(Integer.valueOf(portElem.getText()));
-                serverProperties.remove(portElem);
-            }
-            for (Element remains : serverProperties) {
-                prop.addCustomProperty(remains.getName(), remains.getText());
+            for (Element serverProp : server.getChildren()) {
+                String propName = serverProp.getName().toLowerCase();
+                String propValue = serverProp.getText();
+                if (null != propName) switch (propName) {
+                    case HOST: prop.setHost(propValue);
+                        break;
+                    case DISPLAY: prop.setDisplay(propValue);
+                        break;
+                    case LOCATION: prop.setLocation(propValue);
+                        break;
+                    case GATEWAY: prop.setGateway(propValue);
+                        break;
+                    case IP: prop.setIp(propValue);
+                        break;
+                    case ROUTER: prop.setRouter(Boolean.valueOf(propValue));
+                        break;
+                    case CENTRAL_AUTH: prop.setCentralAuth(Boolean.valueOf(propValue));
+                        break;
+                    case PORT: prop.setPort(Integer.valueOf(propValue));
+                        break;
+                    default: prop.addCustomProperty(propName, propValue);
+                        break;
+                }
             }
             serverList.add(prop);
         }
@@ -218,16 +206,26 @@ public class LouieProperties {
     }
     
     private static void processServiceDefaults(Element defaults) {
-        String defCache = defaults.getChildText(CACHING);
-        if (defCache != null) ServiceProperties.setDefaultCaching(Boolean.valueOf(defCache));
-        String defEnable = defaults.getChildText(ENABLE);
-        if (defEnable != null) ServiceProperties.setDefaultEnable(Boolean.valueOf(defEnable));
-        String defMain = defaults.getChildText(CENTRAL_HOST);
-        if (defMain != null) ServiceProperties.setDefaultCentralHost(defMain);
-        String defCentr = defaults.getChildText(CENTRAL);
-        if (defCentr != null) ServiceProperties.setDefaultCentralized(Boolean.valueOf(defCentr));
-        String defReadOnly = defaults.getChildText(READ_ONLY);
-        if (defReadOnly != null) ServiceProperties.setDefaultReadOnly(Boolean.valueOf(defReadOnly));
+        for (Element defaultProp : defaults.getChildren()) {
+            String propName = defaultProp.getName().toLowerCase();
+            String propValue = defaultProp.getText();
+            if (null != propName) switch (propName) {
+                case CACHING: ServiceProperties.setDefaultCaching(Boolean.valueOf(propValue));
+                    break;
+                case ENABLE: ServiceProperties.setDefaultEnable(Boolean.valueOf(propValue));
+                    break;
+                case CENTRAL_HOST: ServiceProperties.setDefaultCentralHost(propValue);
+                    break;
+                case CENTRAL: ServiceProperties.setDefaultCentralized(Boolean.valueOf(propValue));
+                    break;
+                case READ_ONLY: ServiceProperties.setDefaultReadOnly(Boolean.valueOf(propValue));
+                    break;
+                default: 
+                    LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unexpected default service config key {}:{}",propName,propValue);
+                    break;
+            }
+        }
     }
     
     private static void processServices(Element services, boolean internal) {
@@ -235,73 +233,63 @@ public class LouieProperties {
         
         if (services == null) return;
         
-        Element defaults = services.getChild(DEFAULT);
-        if (defaults != null) processServiceDefaults(defaults);
-        
         for (Element service : services.getChildren()) {
-            if (DEFAULT.equals(service.getName())) continue;
-            if (!SERVICE.equals(service.getName())) continue;
+            if (!SERVICE.equals(service.getName().toLowerCase())) continue;
             
-            String serviceName = service.getAttributeValue(NAME);
-            List<Element> serviceProperties = service.getChildren();
-            ServiceProperties prop = new ServiceProperties(serviceName);
-            
-            String enable = service.getAttributeValue(ENABLE);
-            if (enable != null) {
-                prop.setEnable(Boolean.valueOf(enable));
-            }
-            
-            Element cacheElem = service.getChild(CACHING);
-            if (cacheElem != null) {
-                prop.setCaching(Boolean.valueOf(cacheElem.getText()));
-                serviceProperties.remove(cacheElem);
-            }
-            Element centralElem = service.getChild(CENTRAL_HOST);
-            if (centralElem != null) {
-                prop.setCentralLocation(centralElem.getText());
-                serviceProperties.remove(centralElem);
-            }
-            Element centralizedElem = service.getChild(CENTRAL);
-            if (centralizedElem != null) {
-                prop.setCentralized(Boolean.valueOf(centralizedElem.getText()));
-                serviceProperties.remove(centralizedElem);
-            }
-            Element readonlyElem = service.getChild(READ_ONLY);
-            if (readonlyElem != null) {
-                prop.setReadOnly(Boolean.valueOf(readonlyElem.getText()));
-                serviceProperties.remove(readonlyElem);
-            }
-            Element daoClElem = service.getChild(DAO_CL);
-            if (daoClElem != null) {
-                prop.setDaoClass(daoClElem.getText());
-                serviceProperties.remove(daoClElem);
-            }
-            Element cacheClElem = service.getChild(CACHE_CL);
-            if (cacheClElem != null) {
-                prop.setCacheClass(cacheClElem.getText());
-                serviceProperties.remove(cacheClElem);
-            }
-            Element routerClElem = service.getChild(ROUTER_CL);
-            if (routerClElem != null) {
-                prop.setRouterClass(routerClElem.getText());
-                serviceProperties.remove(routerClElem);
-            }
-            Element providerElem = service.getChild(PROVIDER_CL);
-            if (providerElem != null) {
-                prop.setProviderClass(providerElem.getText());
-                serviceProperties.remove(providerElem);
-            }
-            
-            if (internal) {
-                Element reservedElem = service.getChild(RESERVED);
-                if (reservedElem != null) {
-                    prop.setReserved(Boolean.valueOf(reservedElem.getText()));
-                    serviceProperties.remove(providerElem);
+            String serviceName = null;
+            Boolean enable = false;
+            for (Attribute attr : service.getAttributes()) {
+                String propName = attr.getName().toLowerCase();
+                String propValue = attr.getValue();
+                if (null != propName) switch (propName) {
+                    case NAME: serviceName = propValue;
+                        break;
+                    case ENABLE: enable = Boolean.valueOf(propValue);
+                        break;
+                    default: LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unexpected service attribute {}:{}",propName,propValue);
+                        break;
                 }
             }
             
-            for (Element remains : serviceProperties) {
-                prop.addCustomProp(remains.getName(), remains.getText());
+            if (serviceName == null) {
+                LoggerFactory.getLogger(LouieProperties.class)
+                        .error("A service was missing it's 'name' attribute and will be skipped");
+                continue;
+            }
+            
+            ServiceProperties prop = new ServiceProperties(serviceName);
+            if (enable != null) {
+                prop.setEnable(enable);
+            }
+            
+            for (Element serviceProp : service.getChildren()) {
+                String propName = serviceProp.getName().toLowerCase();
+                String propValue = serviceProp.getText();
+                if (null != propName) switch (propName) {
+                    case DEFAULT: processServiceDefaults(serviceProp);
+                        break;
+                    case CACHING: prop.setCaching(Boolean.valueOf(propValue));
+                        break;
+                    case CENTRAL_HOST: prop.setCentralHost(propValue);
+                        break;
+                    case CENTRAL: prop.setCentralized(Boolean.valueOf(propValue));
+                        break;
+                    case READ_ONLY: prop.setReadOnly(Boolean.valueOf(propValue));
+                        break;
+                    case DAO_CL: prop.setDaoClass(propValue);
+                        break;
+                    case CACHE_CL: prop.setCacheClass(propValue);
+                        break;
+                    case ROUTER_CL: prop.setRouterClass(propValue);
+                        break;
+                    case PROVIDER_CL: prop.setProviderClass(propValue);
+                        break;
+                    case RESERVED: 
+                        if (internal) prop.setReserved(Boolean.valueOf(propValue));
+                        break;
+                    default: prop.addCustomProp(propName, propValue);
+                }
             }
             
             servicesList.add(prop);
