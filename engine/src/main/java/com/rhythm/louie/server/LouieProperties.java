@@ -73,34 +73,42 @@ public class LouieProperties {
         Element louie = properties.getRootElement();
         
         //Check for alternate loading point 
-        Element altLoadPath = louie.getChild(ALT_PATH);
-        if (altLoadPath != null) {
-            //overwrite document and root element with values from alternate config 
-            properties = loadDocument(new File(altLoadPath.getText()).toURI().toURL());
-            if (properties == null) return;
-            
+        boolean resetRoot = false;
+        for (Element elem : louie.getChildren()) {
+            if (ALT_PATH.equalsIgnoreCase(elem.getName())) {
+                //overwrite document with values from alternate config 
+                properties = loadDocument(new File(elem.getText()).toURI().toURL());
+                if (properties == null) return;
+                resetRoot = true;
+            }
+        }
+        if (resetRoot) {
+            //reset root to new properties obj root
             louie = properties.getRootElement(); 
         }
         
-        //Process servers
-        Element servers = louie.getChild(SERVER_PARENT);
-        processServers(servers);
-        
-        //Process services
-        Element services = louie.getChild(SERVICE_PARENT);
-        processServices(services, false);
-        
-        //Process custom configs
-        List<Element> louieChildren = louie.getChildren();
-        for (Element louieChild : louieChildren) {
-            String configName = louieChild.getName();
-            if (SERVICE_PARENT.equals(configName) || SERVER_PARENT.equals(configName)) continue;
+        for (Element elem : louie.getChildren()) {
+            String elemName = elem.getName().toLowerCase();
             
-            CustomProperty custom = new CustomProperty(configName);
-            for (Element child : louieChild.getChildren()) {
-                custom.setProperty(child.getName(), child.getText());
+            if (null != elemName) switch(elemName) {
+                case ALT_PATH: LoggerFactory.getLogger(LouieProperties.class)
+                        .warn("Extra config_path alternate loading point specified. "
+                                + "Only one file-switch can be performed.\n"
+                                + "  Please verify what is specified in the embedded xml file.\n"
+                                + "  Found: {}",elem.getText());
+                    break;
+                case SERVER_PARENT: processServers(elem);
+                    break;
+                case SERVICE_PARENT: processServices(elem,false);
+                    break;
+                default: String configName = elemName;
+                    CustomProperty custom = new CustomProperty(configName);
+                    for (Element child : elem.getChildren()) {
+                        custom.setProperty(child.getName(), child.getText());
+                    }
+                    customProperties.put(configName, custom);
+                    break;
             }
-            customProperties.put(configName, custom);
         }
     }
     
@@ -112,7 +120,8 @@ public class LouieProperties {
         } catch (IOException | JDOMException | NullPointerException ex) {
             LoggerFactory.getLogger(LouieProperties.class)
                     .error("Failed to load properties file! Defaults will be used.\n{}",ex.toString());
-            Server.processServers(Collections.EMPTY_LIST);
+            List<Server> empty = Collections.emptyList();
+            Server.processServers(empty);
             return null;
         }
         return properties;
@@ -158,7 +167,8 @@ public class LouieProperties {
         List<Server> serverList = new ArrayList<>();
         
         if (servers == null) {
-            Server.processServers(Collections.EMPTY_LIST);
+            List<Server> empty = Collections.emptyList();
+            Server.processServers(empty);
             return;
         }
         
@@ -232,9 +242,13 @@ public class LouieProperties {
         List<ServiceProperties> servicesList = new ArrayList<>();
         
         if (services == null) return;
+        for (Element elem : services.getChildren()) {
+            if (DEFAULT.equalsIgnoreCase(elem.getName())) processServiceDefaults(elem);
+        }
         
         for (Element service : services.getChildren()) {
-            if (!SERVICE.equals(service.getName().toLowerCase())) continue;
+            String elementName = service.getName();
+            if (!SERVICE.equalsIgnoreCase(elementName)) continue;
             
             String serviceName = null;
             Boolean enable = false;
@@ -267,8 +281,6 @@ public class LouieProperties {
                 String propName = serviceProp.getName().toLowerCase();
                 String propValue = serviceProp.getText();
                 if (null != propName) switch (propName) {
-                    case DEFAULT: processServiceDefaults(serviceProp);
-                        break;
                     case CACHING: prop.setCaching(Boolean.valueOf(propValue));
                         break;
                     case CENTRAL_HOST: prop.setCentralHost(propValue);
