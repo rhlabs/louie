@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.base.Function;
 import com.google.common.collect.TreeTraverser;
 
 /**
@@ -33,9 +34,9 @@ public class Tree<K,V> {
      * Constructs a general purpose tree.  Call addNode and setParent to populate it.
      */
     public Tree() {
-        this.ROOT = new TreeNode<K,V>(null,null);
+        this.ROOT = new TreeNode<>(null,null);
         
-        nodes = new ConcurrentHashMap<K, TreeNode<K,V>>();
+        nodes = new ConcurrentHashMap<>();
         traverser = new TreeTraverser<TreeNode<K,V>>() {
             @Override
             public Iterable<TreeNode<K,V>> children(TreeNode<K,V> node) {
@@ -66,7 +67,7 @@ public class Tree<K,V> {
         TreeNode<K,V> node = nodes.get(key);
         if (node == null) {
             // TreeNode does not exists, so create and set parent to root
-            node = new TreeNode<K,V>(key, null);
+            node = new TreeNode<>(key, null);
             nodes.put(key,node);
             node.setParent(ROOT);
         }
@@ -208,7 +209,7 @@ public class Tree<K,V> {
         if (root==null) {
             return Collections.emptyList();
         }
-        List<TreeNode<K,V>> results = new ArrayList<TreeNode<K,V>>();
+        List<TreeNode<K,V>> results = new ArrayList<>();
         lookupChildren(root, 0, depth, results);
         
         return results;
@@ -250,7 +251,7 @@ public class Tree<K,V> {
             return Collections.emptyList();
         }
         
-        List<TreeNode<K,V>> results = new ArrayList<TreeNode<K,V>>();
+        List<TreeNode<K,V>> results = new ArrayList<>();
         int level = 1;
         while ((depth == 0 || level <= depth) && node.hasParent() && node.getParent()!=ROOT) {
             node = node.getParent();
@@ -272,20 +273,36 @@ public class Tree<K,V> {
      */
     @Override
     public String toString() {
+        return toString(toStringFunc);
+    }
+    
+    private final Function<V,String> toStringFunc = new NodeToStringFunction<>();
+    private class NodeToStringFunction<V> implements Function<V, String> {
+        @Override
+        public String apply(V o) {
+            if (o==null) {
+                return String.valueOf(o);
+            } else {
+                return o.toString();
+            }
+        }
+    }
+    
+    public String toString(Function<V, String> stringFunc) {
         StringBuilder sb = new StringBuilder();
-        for (TreeNode<K,V> child : ROOT.getChildren()) {
-            childToString(child,sb,0);
+        for (TreeNode<K, V> child : ROOT.getChildren()) {
+            childToString(child, sb, 0, stringFunc);
         }
         return sb.toString();
     }
-    
-    private void childToString(TreeNode<K,V> node, StringBuilder sb, int depth) {
-        for (int i=0;i<depth;i++) {
-            sb.append("-");
+
+    private void childToString(TreeNode<K, V> node, StringBuilder sb, int depth, Function<V, String> stringFunc) {
+        for (int i = 0; i < depth; i++) {
+            sb.append("  ");
         }
-        sb.append(node.getValue()).append("\n");
-        for (TreeNode<K,V> child : node.getChildren()) {
-            childToString(child,sb,depth+1);
+        sb.append(stringFunc.apply(node.getValue())).append("\n");
+        for (TreeNode<K, V> child : node.getChildren()) {
+            childToString(child, sb, depth + 1, stringFunc);
         }
     }
 }

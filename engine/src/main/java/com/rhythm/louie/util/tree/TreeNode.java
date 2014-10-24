@@ -88,7 +88,7 @@ public class TreeNode<K, V> {
     protected synchronized void addChild(TreeNode<K, V> child) {
         // lazy create the child map
         if (children == null) {
-            children = new ConcurrentHashMap<K, TreeNode<K, V>>();
+            children = new ConcurrentHashMap<>();
         }
         children.put(child.getKey(), child);
     }
@@ -113,6 +113,9 @@ public class TreeNode<K, V> {
      * @return true if the node has children 
      */
     public boolean hasChildren() {
+        if (children == null) {
+            return false;
+        }
         return !children.isEmpty();
     }
 
