@@ -16,7 +16,7 @@ public class RequestContextManager {
   ThreadLocal<RequestContext> request;
   
   private RequestContextManager() {
-      request = new ThreadLocal<RequestContext>();
+      request = new ThreadLocal<>();
   }
   
   public static RequestContext getRequest() {

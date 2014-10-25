@@ -44,6 +44,7 @@ public class RequestContext {
     private IdentityPB identity;
     private SessionKey sessionKey = null;
     private RoutePB route;
+    private boolean enableRouteUser = true;
     
     private List<RoutePathPB> destinations;
     
@@ -67,12 +68,32 @@ public class RequestContext {
         destinations = null;
     }
     
+    public void enableRouteUser(boolean enable) {
+        enableRouteUser = enable;
+    }
+    
+    public boolean isRouteUserEnabled() {
+        return enableRouteUser;
+    }
+    
+    /**
+     * Returns the effective user for the request.  This user may be different
+     * than the actual user making the request, in the case of routing
+     * @return 
+     */
     @SuppressWarnings("deprecation")
     public String getWho() {
+        if (getRequest().hasRouteUser() && !getRequest().getRouteUser().isEmpty()) {
+            return getRequest().getRouteUser();
+        } else {
+            return getRequester();
+        }
+    }
+    
+    @SuppressWarnings("deprecation")
+    public String getRequester() {
         String who;
-        if (getRequest().hasRouteUser()) {
-            who = getRequest().getRouteUser();
-        } else if (identity!=null) {
+        if (identity!=null) {
             who = identity.getUser();
         } else {
             who = getHeader().getUser();

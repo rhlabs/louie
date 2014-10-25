@@ -327,7 +327,7 @@ public class DefaultLouieConnection implements LouieConnection {
                       .setMethod(command);
 
             // Only send routing info if this is not a auth call
-            if (currentRequest != null && !service.equals(AUTH_SERVICE)) {
+            if (currentRequest != null && currentRequest.isRouteUserEnabled() && !service.equals(AUTH_SERVICE)) {
                 if (currentRequest.getRequest().hasRouteUser()) {
                     reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
                 } else if (currentRequest.getIdentity() != null) {
