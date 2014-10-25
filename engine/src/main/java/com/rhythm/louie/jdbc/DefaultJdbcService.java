@@ -35,7 +35,6 @@ public class DefaultJdbcService implements JdbcService {
     //------------------------------------
     protected PreparedStatement pStatement;
     protected Connection conn;
-    protected ResultSet resultSet;
     protected String sqlString;
 
     protected String dbKey;
@@ -159,18 +158,10 @@ public class DefaultJdbcService implements JdbcService {
 
     //CLOSE
     private void closeStatements() {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-            }
-            resultSet = null;
-        }
         if (pStatement != null) {
             try {
                 pStatement.close();
-            } catch (SQLException e) {
-            }
+            } catch (SQLException e) {}
             pStatement = null;
         }
     }
