@@ -67,6 +67,7 @@ public class TypeUtils {
             type = type.replaceFirst(DATATYPE_PREFIX, "");
             legacyMap.put("rh.pb."+type,"louie."+type);
         }
+        legacyMap.put("rh.pb.IdentityPB","louie.IdentityPB");
     }
     
     private static String listOf(String type) {
