@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<louie>
+
+    <!-- 
+    This file can represent an alternate configuration setup for developers.
+    
+    It is part of a larger (optional) workflow that can help to 
+    support multiple distinct deployment configurations for a single louie-based project.
+    
+    In this workflow, we make use of the LouieProperties config parser's ability to re-direct to another file.
+    If you look at the "dev" profile in the server project pom file, you'll see the usage of the "dev-prep" goal
+    on the louie plugin. When this profile is activated, during packaging the "dev-prep" goal will swap out 
+    the embedded louie.xml file with an alternate file which points to your supplied <devconfigpath> argument
+    In the simplest case, it will point to this file (and which you should therefore fill). This allows
+    you as the developer to specify a customized development configuration which won't impact the default
+    embedded louie.xml (which could represent your production configurations). 
+    
+    -->
+    
+</louie>

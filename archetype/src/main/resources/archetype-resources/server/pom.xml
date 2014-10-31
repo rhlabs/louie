@@ -16,6 +16,7 @@
     <properties>
         <louieclient.host>localhost</louieclient.host>
         <louieclient.gateway>${rootArtifactId}</louieclient.gateway>
+        <devconfigpath>src/main/config/dev/louie-dev.xml</devconfigpath>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +75,29 @@
     </build>
     
     <profiles>
+        <profile>
+            <!-- see server/src/main/config/dev/louie-dev.xml for a brief explanation of this profile -->
+            <id>dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.rhythm.louie</groupId> 
+                        <artifactId>louie-maven-plugin</artifactId>
+                        <version>${louie.version}</version>
+                        <configuration>
+                            <configpath>${devconfigpath}</configpath>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>dev-prep</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>python</id>
             <dependencies>

@@ -87,6 +87,7 @@ public class LouieProperties {
             louie = properties.getRootElement(); 
         }
         
+        boolean serversConfigured = false;
         for (Element elem : louie.getChildren()) {
             String elemName = elem.getName().toLowerCase();
             
@@ -98,6 +99,7 @@ public class LouieProperties {
                                 + "  Found: {}",elem.getText());
                     break;
                 case SERVER_PARENT: processServers(elem);
+                    serversConfigured = true;
                     break;
                 case SERVICE_PARENT: processServices(elem,false);
                     break;
@@ -110,6 +112,7 @@ public class LouieProperties {
                     break;
             }
         }
+        if (!serversConfigured) processServers(null); //ugly bootstrapping workflow
     }
     
     private static Document loadDocument(URL configs){
@@ -147,7 +150,7 @@ public class LouieProperties {
         Server.setDefaultLocation(serverDef.getChildText(LOCATION));
         Server.setDefaultRouter(Boolean.valueOf(serverDef.getChildText(ROUTER)));
         Server.setDefaultPort(Integer.valueOf(serverDef.getChildText(PORT)));
-
+            
         //Load internal defaults into ServiceProperties
         Element serviceDef = louie.getChild("service_defaults");
 
