@@ -22,7 +22,6 @@
 #foreach($service in $services)
                 <li>
                     <a href='?service=${service.serviceName}'>${service.serviceName}</a>
-                    $utils.servicePropertyString(${service.serviceName})
                 </li>
 #end
             </ul>
