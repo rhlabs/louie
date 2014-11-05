@@ -4,8 +4,11 @@
  * Copyright (c) 2011 Rhythm & Hues Studios. All rights reserved.
  */
 
-package com.rhythm.louie;
+package com.rhythm.louie.server;
 
+
+import com.rhythm.louie.Delegate;
+import com.rhythm.louie.ServiceProcessor;
 
 import java.io.*;
 import java.net.*;
@@ -315,18 +318,12 @@ public class ServiceManager {
     }
 
     public static Service getService(String serviceName) throws Exception {
-        Service service;
         if (serviceName.equals("louie")) {
             LoggerFactory.getLogger(ServiceManager.class).warn("Routing legacy service: louie->info");
-            service = servicesByName.get("info");
+            return servicesByName.get("info");
         } else {
-            service = servicesByName.get(serviceName);
+            return servicesByName.get(serviceName);
         }
-        
-        if (service == null) {
-            throw new Exception("No such service: "+serviceName);
-        }
-        return service;
     }
 
     public static boolean hasService(String serviceName) {

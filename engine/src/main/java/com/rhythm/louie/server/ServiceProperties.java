@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.louie.ServiceManager;
 import com.rhythm.louie.service.ServiceUtils;
 
 /**

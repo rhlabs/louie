@@ -138,7 +138,7 @@ public class JsonRouter implements JsonProcess {
                     .setService(system)                                                              
                     .setMethod(method);                                                             
                                                                                                     
-            List<String> args = new ArrayList<String>();                                            
+            List<String> args = new ArrayList<>();                                            
                                                                                                     
             /****************************                                                           
              *         VERSION 1        *                                                           
@@ -207,18 +207,11 @@ public class JsonRouter implements JsonProcess {
             }                                                                                       
                                                                                                     
             RequestProtos.RequestPB request = reqBuilder.build();                                   
-                                                                                                    
-            RequestContext pbReq = new RequestContext(requestHeader,request,DataType.JSON);                       
-            pbReq.addParam(Param.buildJsonParam(args));                                             
-            pbReq.setRemoteAddress(req.getRemoteAddr());                                            
-                                                             
-            RequestProperties props = new RequestProperties();
-            props.setRemoteAddress(req.getRemoteAddr());
-            props.setLocalPort(req.getLocalPort());
-            props.setHostIp(InetAddress.getLocalHost().getHostAddress());
-            props.setGateway(req.getContextPath().substring(1));
+                                         
+            RequestProperties props = RequestProperties.fromHttpRequest(req);
             
-            pbReq.setLocalPort(props.getLocalPort());
+            RequestContext pbReq = new RequestContext(requestHeader,request,DataType.JSON, props);                       
+            pbReq.addParam(Param.buildJsonParam(args));                                             
             pbReq.setRoute(props.createRoute(request.getService()));
             
             if (agent !=null && !agent.isEmpty()) {                                                 
@@ -246,9 +239,9 @@ public class JsonRouter implements JsonProcess {
             HttpServletResponse resp) throws IOException {                                          
         resp.setContentType("application/json");                                                    
                                                                                                     
-        try {                                                                                       
-            long start=System.currentTimeMillis();                                                  
-                                                                                                    
+        try {          
+            long start = System.currentTimeMillis();
+                                                                            
             String user = Strings.nullToEmpty(req.getParameter("user"));                            
             String system = req.getParameter("system");                                             
             String method = req.getParameter("method");                                             
@@ -277,6 +270,7 @@ public class JsonRouter implements JsonProcess {
                
                 if (louieConn == null) {                                                                  
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND,"The requested LoUIE service was not found.");
+                    return;
                 }                                                                                                 
                 ////////////////// PUT DATA INTO THAT CONNECTION ///////////////////                              
                 URLConnection urlConn = louieConn.getJsonForwardingConnection();                                  
@@ -322,13 +316,13 @@ public class JsonRouter implements JsonProcess {
                 reqBuilder.addType(type);                                                    
             }                                                                                
             RequestProtos.RequestPB request = reqBuilder.build();                            
-                                                                                             
-            RequestContext pbReq = new RequestContext(requestHeader, request,DataType.JSON);               
+                                                           
+            RequestProperties props = RequestProperties.fromHttpRequest(req);
+            RequestContext pbReq = new RequestContext(requestHeader, request,DataType.JSON, props);               
             String params = req.getParameter("params");                                      
             if (params!=null && !params.isEmpty()) {                                         
                 pbReq.addParam(Param.buildJsonParam(Arrays.asList(params.split(","))));      
             }                                  
-            pbReq.setRemoteAddress(req.getRemoteAddr());                                     
             pbReq.setUserAgent(Strings.nullToEmpty(req.getHeader("user-agent")));            
             
             Result result = RequestHandler.processSingleRequest(pbReq);                      
@@ -336,7 +330,6 @@ public class JsonRouter implements JsonProcess {
                                                                                              
             long end = System.currentTimeMillis();                                           
             result.setDuration(end-start);                                                   
-            start = end;                                                                     
 
             RequestHandler.logRequest(pbReq, result);
         } catch(Exception e) {                       

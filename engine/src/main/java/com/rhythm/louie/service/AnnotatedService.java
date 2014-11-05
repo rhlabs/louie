@@ -90,22 +90,23 @@ public abstract class AnnotatedService implements Service {
     public PBCommand getCommand(String command,PBParamType params) {
         return commandMap.get(PBCommandType.valueOf(command, params));
     }
-    
+  
     @Override
     public Result executeCommand(RequestContext req) throws Exception {
-         PBCommand cmd = getCommand(req.getRequest().getMethod(),req.getType());
-         if (cmd==null) {
-             throw new Exception("Command Does Not Exist! - "
-                     +getServiceName()+":"+req.getRequest().getMethod()
-                     +"("+req.getType()+")");
-         }
-         String serviceName = req.getRequest().getService();
-         ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-         if (cmd.isUpdate() && props.isReadOnly()){
-             throw new UnsupportedOperationException("Louie Service "+serviceName+" is set to read-only mode.");
-         }
-         Result r = cmd.execute(req);
-         r.setStreaming(cmd.isStreaming());
-         return r;
+        PBCommand cmd = getCommand(req.getRequest().getMethod(), req.getType());
+        if (cmd == null) {
+            throw new Exception("Command Does Not Exist! - "
+                    + getServiceName() + ":" + req.getRequest().getMethod()
+                    + "(" + req.getType() + ")");
+        }
+        if (cmd.isUpdate()) {
+            ServiceProperties props = ServiceProperties.getServiceProperties(name);
+            if (props.isReadOnly()) {
+                throw new UnsupportedOperationException("Louie Service " + name + " is set to read-only mode.");
+            }
+        }
+        Result r = cmd.execute(req);
+        r.setStreaming(cmd.isStreaming());
+        return r;
     }
 }

@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author cjohnson
  */
-public class ProtoProcessor implements ProtoProcess{
+public class ProtoProcessor implements ProtoProcess {
     private final Logger LOGGER = LoggerFactory.getLogger(ProtoProcessor.class);
 
     @Override
@@ -79,7 +79,7 @@ public class ProtoProcessor implements ProtoProcess{
                 throw new Exception("User Route Permission Denied!");
             }
             
-            RequestContext pbReq = null;
+            RequestContext requestContext = null;
             Result result = null;
 
             RoutePB localRoute = props.createRoute(request.getService());
@@ -90,18 +90,16 @@ public class ProtoProcessor implements ProtoProcess{
             }
             
             try {
-                pbReq = new RequestContext(header, request,DataType.PB);
+                requestContext = new RequestContext(header, request, DataType.PB, props);
                 if (header.hasIdentity()) {
-                    pbReq.setSessionKey(sessionKey);
+                    requestContext.setSessionKey(sessionKey);
                 }
-                pbReq.setIdentity(identity);
-                pbReq.readPBParams(input);
-                pbReq.setRemoteAddress(props.getRemoteAddress());
-                pbReq.setLocalPort(props.getLocalPort());
-                pbReq.setRoute(localRoute);
-                result = RequestHandler.processSingleRequest(pbReq);
-                result.setExecTime((System.nanoTime()-start) / 1000000);
-                handleResult(pbReq, result, output);
+                requestContext.setIdentity(identity);
+                requestContext.readPBParams(input);
+                requestContext.setRoute(localRoute);
+                result = RequestHandler.processSingleRequest(requestContext);
+                result.setExecTime((System.nanoTime() - start) / 1000000);
+                handleResult(requestContext, result, output);
             } catch (Exception e) {
                 String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
                 LOGGER.error("ProtoProcessor caught error: "+errorMessage,e);
@@ -112,7 +110,7 @@ public class ProtoProcessor implements ProtoProcess{
                 }
             } finally {
                 long end = System.nanoTime();
-                if (pbReq == null) {
+                if (requestContext == null) {
                     LOGGER.error("Unknown Error, Request is null");
                 } else {
                     if (result == null) {
@@ -120,7 +118,7 @@ public class ProtoProcessor implements ProtoProcess{
                     }
                     result.setDuration((end - start) / 1000000);
                     try {
-                        RequestHandler.logRequest(pbReq, result);
+                        RequestHandler.logRequest(requestContext, result);
                     } catch (Exception le) {
                         LOGGER.error("Error Logging: {}", le.getMessage());
                     }

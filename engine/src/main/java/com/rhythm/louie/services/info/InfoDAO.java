@@ -5,7 +5,7 @@
  */
 package com.rhythm.louie.services.info;
 
-import com.rhythm.louie.ServiceManager;
+import com.rhythm.louie.server.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +50,10 @@ public class InfoDAO implements InfoService {
     }
 
     private ServicePB convertServiceToPB(Service service) throws Exception {
+        if (service == null) {
+            return null;
+        }
+        
         ServicePB.Builder builder = ServicePB.newBuilder()
                 .setName(service.getServiceName());
         

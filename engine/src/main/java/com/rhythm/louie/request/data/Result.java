@@ -61,6 +61,10 @@ public class Result {
     }
     
     public static Result errorResult(Exception e) {
+        return errorResult("",e);
+    }
+
+    public static Result errorResult(String message, Exception e) {
         List<?> args = Collections.emptyList();
         List<? extends Message> results = Collections.emptyList();
         
@@ -74,7 +78,7 @@ public class Result {
                 }
                 e = (Exception) e.getCause();
             }
-            result.setInfo(stack.toString());
+            result.setInfo(message+stack.toString());
         }
 
         return result;

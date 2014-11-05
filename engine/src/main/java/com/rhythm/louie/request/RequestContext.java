@@ -32,12 +32,11 @@ public class RequestContext {
     private final RequestHeaderPB header;
     private final RequestPB request;
     private final DataType dataType;
-    
+    private final RequestProperties props;
+
     private final List<Param> params;
     
     private String userAgent;
-    private String remoteAddress;
-    private int localPort = -1;
     
     private final PBParamType type;
     
@@ -48,12 +47,13 @@ public class RequestContext {
     
     private List<RoutePathPB> destinations;
     
-    public RequestContext(RequestHeaderPB header,
-            RequestPB request,DataType dataType) {
+    public RequestContext(RequestHeaderPB header, RequestPB request,
+            DataType dataType, RequestProperties props) {
 
         this.header = header;
         this.request = request;
         this.dataType = dataType;
+        this.props = props;
         this.params = new ArrayList<>();
         
         List<String> convertedTypes = new ArrayList<>(request.getTypeCount());
@@ -225,20 +225,6 @@ public class RequestContext {
     }
 
     /**
-     * @return the remoteAddress
-     */
-    public String getRemoteAddress() {
-        return remoteAddress;
-    }
-
-    /**
-     * @param remoteAddress the remoteAddress to set
-     */
-    public void setRemoteAddress(String remoteAddress) {
-        this.remoteAddress = remoteAddress;
-    }
-
-    /**
      * @return the dataType
      */
     public DataType getDataType() {
@@ -255,17 +241,10 @@ public class RequestContext {
     /**
      * @return the localPort
      */
-    public int getLocalPort() {
-        return localPort;
+    public RequestProperties getRequestProperties() {
+        return props;
     }
-
-    /**
-     * @param port the localPort to set
-     */
-    public void setLocalPort(int port) {
-        this.localPort = port;
-    }
-
+    
     /**
      * @return the route
      */

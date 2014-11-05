@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.rhythm.louie.ServiceManager;
+import com.rhythm.louie.server.ServiceManager;
 import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.command.PBCommand;
 
@@ -59,12 +59,12 @@ public class ServicesServlet extends HttpServlet {
         Service service;
         try {
             service = ServiceManager.getService(serviceName);
-            if (service==null) {
+            if (service == null) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, 
                         "Error Looking up Service: " + serviceName +"! Service does not exist.");
                 return;
             }
-            properties.put("service", ServiceManager.getService(serviceName));
+            properties.put("service", service);
 
             Map<String, List<PBCommand>> groupedCalls = groupServiceCalls(service);
             properties.put("groups", groupedCalls);

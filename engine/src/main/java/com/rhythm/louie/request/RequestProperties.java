@@ -5,6 +5,13 @@
  */
 package com.rhythm.louie.request;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.LoggerFactory;
+
 import com.rhythm.pb.RequestProtos.RoutePB;
 
 /**
@@ -17,18 +24,33 @@ public class RequestProperties {
     private String gateway;
     private String hostIp;
 
+    public static RequestProperties fromHttpRequest(HttpServletRequest req, String hostIp) {
+        RequestProperties props = new RequestProperties();
+        props.remoteAddress = req.getRemoteAddr();
+        props.localPort = req.getLocalPort();
+        props.gateway = req.getContextPath().substring(1);
+        props.hostIp = hostIp;
+        return props;
+    }
+    
+    public static RequestProperties fromHttpRequest(HttpServletRequest req) {
+        String hostIp;
+        try {
+            hostIp = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException ex) {
+            LoggerFactory.getLogger(RequestProperties.class).error("Error retrieving localhost IP", ex);
+            hostIp = "unknown";
+        }
+        return fromHttpRequest(req, hostIp); 
+    }
+    
+    private RequestProperties() {}
+    
     /**
      * @return the remoteAddress
      */
     public String getRemoteAddress() {
         return remoteAddress;
-    }
-
-    /**
-     * @param remoteAddress the remoteAddress to set
-     */
-    public void setRemoteAddress(String remoteAddress) {
-        this.remoteAddress = remoteAddress;
     }
 
     /**
@@ -39,20 +61,6 @@ public class RequestProperties {
     }
 
     /**
-     * @param localPort the localPort to set
-     */
-    public void setLocalPort(int localPort) {
-        this.localPort = localPort;
-    }
-    
-    /**
-     * @param gateway record the gateway
-     */
-    public void setGateway(String gateway) {
-        this.gateway =gateway;
-    }
-
-    /**
      * @return the current gateway
      */
     public String getGateway() {
@@ -60,19 +68,11 @@ public class RequestProperties {
     }
     
     /**
-     * @param ip record the ip of the server
-     */
-    public void setHostIp(String ip) {
-        this.hostIp = ip;
-    }
-
-    /**
      * @return the hostIp
      */
     public String getHostIp() {
         return hostIp;
     }
-    
     
     public RoutePB createRoute(String service) {
         RoutePB route = RoutePB.newBuilder()

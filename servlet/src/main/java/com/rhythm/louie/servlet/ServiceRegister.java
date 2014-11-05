@@ -6,7 +6,7 @@
 package com.rhythm.louie.servlet;
 
 
-import com.rhythm.louie.ServiceManager;
+import com.rhythm.louie.server.ServiceManager;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

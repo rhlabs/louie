@@ -127,7 +127,7 @@ public class JsonProcessor implements JsonProcess{
                     .setService(service)
                     .setMethod(method);
             
-            List<String> args = new ArrayList<String>();
+            List<String> args = new ArrayList<>();
             
             /****************************
              *         VERSION 1        *
@@ -197,25 +197,18 @@ public class JsonProcessor implements JsonProcess{
             
             RequestPB request = reqBuilder.build();
             
-            RequestContext pbReq = new RequestContext(requestHeader,request,DataType.JSON);
+            RequestProperties props = RequestProperties.fromHttpRequest(req);
+
+            RequestContext pbReq = new RequestContext(requestHeader, request, DataType.JSON, props);
             pbReq.addParam(Param.buildJsonParam(args));
-            pbReq.setRemoteAddress(req.getRemoteAddr());
-            
-            RequestProperties props = new RequestProperties();
-            props.setRemoteAddress(req.getRemoteAddr());
-            props.setLocalPort(req.getLocalPort());
-            props.setHostIp(InetAddress.getLocalHost().getHostAddress());
-            props.setGateway(req.getContextPath().substring(1));
-            
-            pbReq.setLocalPort(props.getLocalPort());
             pbReq.setRoute(props.createRoute(request.getService()));
-            
-            if (agent !=null && !agent.isEmpty()) {
+
+            if (agent != null && !agent.isEmpty()) {
                 pbReq.setUserAgent(agent);
             } else {
                 pbReq.setUserAgent(Strings.nullToEmpty(req.getHeader("user-agent")));
             }
-            
+
             Result result = RequestHandler.processSingleRequest(pbReq);
             result.setExecTime((System.nanoTime()-start) / 1000000);
             handleResult(result,resp);
@@ -279,21 +272,22 @@ public class JsonProcessor implements JsonProcess{
             }
             RequestPB request = reqBuilder.build();
             
-            RequestContext pbReq = new RequestContext(requestHeader, request,DataType.JSON);
+            RequestProperties props = RequestProperties.fromHttpRequest(req);
+
+            RequestContext pbReq = new RequestContext(requestHeader, request, DataType.JSON, props);
             String params = req.getParameter("params");
-            if (params!=null && !params.isEmpty()) {
+            if (params != null && !params.isEmpty()) {
                 pbReq.addParam(Param.buildJsonParam(Arrays.asList(params.split(","))));
             }
-            pbReq.setRemoteAddress(req.getRemoteAddr());
             pbReq.setUserAgent(Strings.nullToEmpty(req.getHeader("user-agent")));
-            
+
             Result result = RequestHandler.processSingleRequest(pbReq);
-            result.setExecTime((System.nanoTime()-start) / 1000000);
-            handleResult(result,resp);
-            result.setDuration((System.nanoTime()-start) / 1000000);
-            
+            result.setExecTime((System.nanoTime() - start) / 1000000);
+            handleResult(result, resp);
+            result.setDuration((System.nanoTime() - start) / 1000000);
+
             RequestHandler.logRequest(pbReq, result);
-        } catch(Exception e) {
+        } catch (Exception e) {
             String errorMessage = e.getMessage()==null ? e.toString(): e.getMessage();
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST,errorMessage);
             LOGGER.error(errorMessage,e);

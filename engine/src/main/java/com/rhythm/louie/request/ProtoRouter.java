@@ -73,7 +73,7 @@ public class ProtoRouter implements ProtoProcess{
     public List<Result> processRequest(InputStream externalInput, OutputStream externalOutput, RequestProperties props) throws Exception{
         long start = System.nanoTime();                                                                                                                                     
         long begin = start;                                                                                                                                                          
-        List<Result> results = new ArrayList<Result>();                                                                                                                              
+        List<Result> results = new ArrayList<>();                                                                                                                              
                                                                                                                                                                                      
         CodedInputStream externalCodedInput = CodedInputStream.newInstance(externalInput);                                                                                           
 //        CodedOutputStream externalCodedOutput = CodedOutputStream.newInstance(externalOutput);                                                                                       
@@ -133,14 +133,12 @@ public class ProtoRouter implements ProtoProcess{
                 Result result = null;                                                                     
 
                 try {
-                    pbReq = new RequestContext(header, request,DataType.PB);
+                    pbReq = new RequestContext(header, request,DataType.PB, props);
                     if (header.hasIdentity()) {
                         pbReq.setSessionKey(sessionKey);
                     }
                     pbReq.setIdentity(identity);                     
                     pbReq.readPBParams(externalInput);                         
-                    pbReq.setRemoteAddress(props.getRemoteAddress());          
-                    pbReq.setLocalPort(props.getLocalPort());                 
                     pbReq.setRoute(localRoute);
                     result = RequestHandler.processSingleRequest(pbReq);       
                     result.setExecTime((System.nanoTime()-start)/1000000);

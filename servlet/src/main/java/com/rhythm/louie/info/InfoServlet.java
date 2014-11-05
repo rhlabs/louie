@@ -22,7 +22,7 @@ import com.google.common.io.Resources;
 
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.louie.ServiceManager;
+import com.rhythm.louie.server.ServiceManager;
 
 /**
  *

@@ -6,7 +6,7 @@
 package ${info.packageName};
 
 import com.rhythm.louie.server.Server;
-import com.rhythm.louie.ServiceManager;
+import com.rhythm.louie.server.ServiceManager;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 

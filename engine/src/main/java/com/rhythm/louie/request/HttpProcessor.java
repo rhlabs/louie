@@ -46,7 +46,7 @@ public class HttpProcessor {
         try {
             ip = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException ex) {
-            LOGGER.error(ex.toString());
+            LOGGER.error("Error retrieving localhost IP", ex);
             ip = "UNKNOWN_ADDRESS";
         }
         localIp = ip;
@@ -55,19 +55,14 @@ public class HttpProcessor {
      public void processRequest(HttpServletRequest req,
             HttpServletResponse resp) throws ServletException, IOException {
         try {
+            if (req.getContentType() == null || !req.getContentType().startsWith("application/x-protobuf")) {
+                throw new Exception("This servlet is not configured to deal with content of type: " + req.getContentType());
+            }
+            
             resp.setContentType("application/x-protobuf");
-
-                if (req.getContentType() == null || !req.getContentType().startsWith("application/x-protobuf")) {
-                    throw new Exception("This servlet is not configured to deal with content of type: "+req.getContentType());
-                }
-                RequestProperties props = new RequestProperties();
-                props.setRemoteAddress(req.getRemoteAddr());
-                props.setLocalPort(req.getLocalPort());
-                props.setHostIp(localIp);
-                props.setGateway(req.getContextPath().substring(1));
-                
-                List<Result> results = processor.processRequest(req.getInputStream(),resp.getOutputStream(),props);
-                //sendHttpError(results,resp);
+            RequestProperties props = RequestProperties.fromHttpRequest(req, localIp);
+            List<Result> results = processor.processRequest(req.getInputStream(), resp.getOutputStream(), props);
+            //sendHttpError(results,resp);
         } catch (LouieRouteException ex) {
             LOGGER.error(ex.toString());
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());

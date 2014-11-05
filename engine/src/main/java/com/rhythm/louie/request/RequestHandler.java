@@ -21,8 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.rhythm.louie.ServiceManager;
-
+import com.rhythm.louie.server.ServiceManager;
 import com.rhythm.louie.service.Service;
 
 import com.rhythm.louie.request.data.Param;
@@ -51,7 +50,7 @@ public class RequestHandler {
             session+="-"+request.getSessionKey().substring(0,Math.min(8,request.getSessionKey().length()));
         }
         MDC.put(LogVars.SESSION, session);
-        MDC.put(LogVars.IP, request.getRemoteAddress());
+        MDC.put(LogVars.IP, request.getRequestProperties().getRemoteAddress());
         MDC.put(LogVars.MODULE, request.getModule());
         MDC.put(LogVars.LANGUAGE,request.getLanguage());
         MDC.put(LogVars.TIME,Long.toString(result.getDuration()));
@@ -243,7 +242,13 @@ public class RequestHandler {
         
         try {
             RequestContextManager.setRequest(pbreq);
-            Service service = ServiceManager.getService(pbreq.getRequest().getService());
+            
+            String serviceName = pbreq.getRequest().getService();
+            Service service = ServiceManager.getService(serviceName);
+            if (service == null) {
+                throw new Exception("No such service: " + serviceName);
+            }
+            
             Result result =  service.executeCommand(pbreq);
             if (result == null) {
                 LoggerFactory.getLogger("").error("Result is null!?");
@@ -252,7 +257,8 @@ public class RequestHandler {
             return result;
         } catch (Exception e) {
             Result result = Result.errorResult(e);
-            String command = pbreq.getRequest().getService() + ":" + pbreq.getRequest().getMethod();
+            String command = pbreq.getRequestProperties().getGateway()+"/"
+                    +pbreq.getRequest().getService() + ":" + pbreq.getRequest().getMethod();
             
             Throwable cause = e;
             if (e instanceof InvocationTargetException && e.getCause()!=null) {
