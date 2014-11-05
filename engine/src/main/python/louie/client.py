@@ -63,7 +63,7 @@ class LouieHttpClient(object):
     """
     _instances = {}
     
-    def __new__(cls, host='louiehost', port='8080', gateway='/louie',
+    def __new__(cls, host='louiehost', port='8080', gateway='louie',
                 authport='8787'):
         with _LOCK:
             try:
@@ -73,7 +73,7 @@ class LouieHttpClient(object):
                 cls._instances[host] = client
                 return client
             
-    def __init__(self, host='louiehost', port='8080', gateway='/louie',
+    def __init__(self, host='louiehost', port='8080', gateway='louie',
                 authport='8787'):
         try:
             self._initialized
@@ -94,7 +94,8 @@ class LouieHttpClient(object):
         self._port = port
         self._authport = authport
         
-        self._gateway = "{0}/pb".format(gateway)
+        self._gateway = gateway
+        self._requestPath = "/{0}/pb".format(self._gateway)
 
         self._identity = IdentityPB()
         self._identity.language = 'python/{0}'.format(sys.version[:3])
@@ -164,7 +165,7 @@ class LouieHttpClient(object):
                     for i in params:
                         paramString += str(i) + ","
                     
-                    LOGGER.debug("LoUIE Request: %s:%s - %s", system, method, paramString)
+                    LOGGER.debug("Request: %s/%s/%s:%s - %s", self._host, self._gateway, system, method, paramString)
                     
                 res = self._doRequest(system, method, params, decodeFunction)
                 self._lockOffRetry = False
@@ -290,7 +291,7 @@ class LouieHttpClient(object):
         
         connection.request(
             "POST", 
-            self._gateway,
+            self._requestPath,
             encodedRequest,
             {"Content-type": "application/x-protobuf"}
         )
@@ -340,7 +341,7 @@ class LouieHttpClient(object):
         for respCnt in range(resHeader.count):
             resBody = decodeDelimitedFromHttp(response, ResponsePB.FromString)
             if resBody.error.description:
-                raise LouieError(resBody.error.description)
+                raise LouieError("{0}/{1} - {2}".format(self._host, self._gateway, resBody.error.description))
             for pbCnt in range(resBody.count):
                 results.append(decodeDelimitedFromHttp(response, decodeFunction))
  

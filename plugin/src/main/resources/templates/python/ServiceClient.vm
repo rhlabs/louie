@@ -29,7 +29,7 @@ SERVICE = '${serviceName}'
 
 class ${baseName}Client(object):
 
-    def __init__(self, host=LOUIE_HOST, port='8080', gateway='/${info.getGateway()}'):
+    def __init__(self, host=LOUIE_HOST, port='8080', gateway='${info.getGateway()}'):
         self.client = LouieHttpClient(host, port, gateway)
 #foreach($method in $info.methodInfos)
 #if ( !$method.isDeprecated() )
