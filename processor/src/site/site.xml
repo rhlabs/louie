@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Louie Processor">
+  <body>
+    <links>
+      <item name="Louie" href="../index.html"/>
+    </links>
+    
+    <!-- Component-specific reports -->
+    <menu ref="reports"/>
+    
+  </body>
+</project>

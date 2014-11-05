@@ -10,7 +10,8 @@
     <artifactId>louie-archetype</artifactId>
     <packaging>maven-archetype</packaging>
     
-    <name>LoUIE Archetype</name>
+    <name>Louie Archetype</name>
+    <description>Maven Archetype for creating Louie-based services</description>
  
     <build>
         <extensions>
@@ -30,20 +31,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
-    <!--
-    <distributionManagement>
-      <repository>
-        <id>deployment</id>
-        <name>Internal Releases</name>
-        <url>http://nexushost.rhythm.com:8081/nexus/content/repositories/releases/</url>
-      </repository>
-      <snapshotRepository>
-        <id>deployment</id>
-        <name>Internal Releases</name>
-        <url>http://nexushost.rhythm.com:8081/nexus/content/repositories/snapshots/</url>
-      </snapshotRepository>
-    </distributionManagement>
-    -->
-
 </project>

@@ -6,19 +6,19 @@ Running a LoUIE based project
 
 * Run your new project from NetBeans: 
 
-[../images/run/nb_run.png]
+[../../images/run/nb_run.png]
 
  <<Right click the Server project and select Run>>
 
-[../images/run/nb_run_select.png]
+[../../images/run/nb_run_select.png]
 
  <<Select your previously configured GlassFish server from the dropdown>>
 
-[../images/run/nb_run_remember.png]
+[../../images/run/nb_run_remember.png]
 
  <<Tell NetBeans to remember your decision. Select Change to specify your parent project (this would be the main exampleproject)>>
 
-[../images/run/app_run.png]
+[../../images/run/app_run.png]
 
  <<Check your server.log file and you should see output similar to this>>
 

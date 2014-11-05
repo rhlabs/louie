@@ -6,15 +6,58 @@
     <version>1.10-SNAPSHOT</version>
   
     <packaging>pom</packaging>
-    <name>LoUIE</name>
-    
+    <name>Louie</name>
+    <description>Louie the Universal Information Exchange</description>
+    <url>https://github.com/Rhythm-and-Hues-Labs/louie</url>
+  
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
     
     <scm>
         <connection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie</connection>
+        <url>https://github.com/Rhythm-and-Hues-Labs/louie</url>
     </scm>
+    
+    <organization>
+        <name>Rhythm &amp; Hues Studios</name>
+        <url>http://www.rhythm.com</url>
+    </organization>
+  
+    <inceptionYear>2011</inceptionYear>
+    <developers>
+        <developer>
+            <id>cjohnson</id>
+            <name>Chris Johnson</name>
+            <email>cjohnson@rhythm.com</email>
+            <organization>Rhythm &amp; Hues Studios</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>America/Los_Angeles</timezone>
+        </developer>
+        <developer>
+            <id>eyasukoc</id>
+            <name>Ellison Yasukochi</name>
+            <email>eyasukoc@rhythm.com</email>
+            <organization>Rhythm &amp; Hues Studios</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>America/Los_Angeles</timezone>
+        </developer>
+        <developer>
+            <id>sfong</id>
+            <name>Steve Fong</name>
+            <email>sfong@rhythm.com</email>
+            <organization>Rhythm &amp; Hues Studios</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>America/Los_Angeles</timezone>
+        </developer>
+    </developers>
+    
     
     <distributionManagement>
         <repository>
@@ -27,12 +70,25 @@
             <name>Internal Releases</name>
             <url>http://nexushost.rhythm.com:8081/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
+        <site>
+            <id>mis.local</id>
+            <url>file:///src/mis/docs/louie</url>
+        </site>
     </distributionManagement>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.license>rh</netbeans.hint.license>
+
+        <javadoc.plugin.version>2.10.1</javadoc.plugin.version>
+        <pmd.plugin.version>3.2</pmd.plugin.version>
+        <findbugs.plugin.version>2.5.5</findbugs.plugin.version>
+        <jxr.plugin.version>2.4</jxr.plugin.version>
+        
+        <maven.compile.source>1.7</maven.compile.source>
+        <maven.compile.target>1.7</maven.compile.target>
     </properties>
+    
     
     <modules>
         <module>processor</module>
@@ -64,7 +120,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.1</version>
+                        <version>${javadoc.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -79,7 +135,52 @@
         </profile>
     </profiles>
     
+    <reporting>	
+        <plugins>
+            <!-- NCSS -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>javancss-maven-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
 
+            <!-- Changes report -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-changes-plugin</artifactId>
+                <version>2.11</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>changes-report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.7</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>index</report>
+                            <report>dependencies</report>
+                            <report>dependency-info</report>
+                            <report>dependency-convergence</report>
+                            <report>dependency-management</report>
+                            <report>project-team</report>
+                            <report>mailing-list</report>
+                            <report>issue-tracking</report>
+                            <report>license</report>
+                            <report>scm</report>
+                            <report>summary</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <build>
         <plugins>
@@ -102,9 +203,10 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>${maven.compile.source}</source>
+                    <target>${maven.compile.target}</target>
                     <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
                     <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
