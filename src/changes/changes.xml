@@ -5,23 +5,176 @@
     <title>Changes</title>
   </properties>
   <body>
-    <release version="1.1" date="2005-03-01" description="Subsequent release">
+    <release version="1.10" date="2014-11-06" description="louie-1.10">
+      <action dev="eyasukoc" type="add">
+        XML base configuration with autoloading services.
+      </action>
+      <action dev="cjohnson" type="update">
+        Service Info pages ported to bootstrap css with velocity templates
+      </action>
+      <action dev="cjohnson" type="update">
+        Site restructuring, findbugs, pmd, javadoc, source, project info, descriptions
+      </action>
+      <action dev="eyasukoc" type="add">
+        Dev plugin workflow to dynamically source a config in your workspace
+      </action>
+      <action dev="cjohnson" type="update">
+        Rename JdbcServices methods to match standard sql classes, Deprecate closeAll in favor of Closable close()
+      </action>
+      <action dev="eyasukoc" type="add">
+         Async package from queue.
+      </action>
+      <action dev="eyasukoc" type="add">
+         System property for configurable jmsadapter (for client side messaging)
+      </action>
       <action dev="cjohnson" type="add">
-        Added additional documentation on how to configure the plugin.
+	 SQL passthrough service.
       </action>
-      <action dev="eyasukoc" type="fix" issue="MPJIRA-11">
-        Enable retrieving component-specific issues.
+      <action dev="eyasukoc" type="update">
+        Renaming of packaging of internal services.
       </action>
-      <action dev="cjohnson" type="remove" due-to="Allan Ramirez" due-to-email="aramirez@exist.com">
-        The element type " link " must be terminated by the matching end-tag.
-        Deleted the erroneous code.
+      <action dev="cjohnson" type="update">
+        Added ability to turn off automatic user routing, expose requester in context
+      </action>
+      <action dev="cjohnson" type="update">
+        Backwards compatibility fixes for louie/info and auth services
+      </action>
+      <action dev="cjohnson,eyasukoc" type="update">
+        JDK 7 migration, assorted bug fixes, code cleanup
       </action>
     </release>
 
-    <release version="1.0" date="2005-01-01" description="First release">
+    <release version="1.9" date="2014-09-26" description="louie-1.9">
+      <action dev="eyasukoc" type="add">
+        Archetype for creating louie-based service projects
+      </action>
+      <action dev="eyasukoc" type="add">
+        Assembly of python generated sources and louie core into zip file.
+      </action>
       <action dev="cjohnson" type="update">
-        Uploaded documentation on how to use the plugin.
+        Upgrade to Protocol Buffers 2.5
+      </action>
+      <action dev="cjohnson,eyasukoc" type="add">
+        Site Documentation
+      </action>
+      <action dev="eyasukoc" type="update">
+        Rename core louie python packages to louie.* rather than rh.louie.*
+      </action>
+      <action dev="eyasukoc" type="update">
+        Fixes to python generation code to remove Rhythm specific conventions.
+      </action>
+      <action dev="cjohnson" type="update">
+        Rename packages to remove legacy conventions
+      </action>
+      <action dev="cjohnson" type="update">
+        Switch to annotation based servlets
+      </action>
+      <action dev="cjohnson" type="update">
+        Backwards compatibility conversions for datatypes
+      </action>
+      <action dev="eyasukoc" type="add">
+        Netbeans actions files for louie specific workflows
       </action>
     </release>
+
+    <release version="1.8" date="2014-09-01" description="louie-1.8">
+      <action dev="cjohnson" type="update">
+        Remove hard coded dependencies on DAO and CacheDelegate, now driven dynamically by annotations
+      </action>
+      <action dev="eyasukoc" type="add">
+        Maven plugin for protocol buffer compiler and service generation.
+      </action>
+      <action dev="eyasukoc" type="add">
+        JMS Adapter pattern for config driven message handling.
+      </action>
+      <action dev="cjohnson" type="update">
+        Rework Service layers to implement Service directly, reversing the layer generation logic for Datatypes.
+      </action>
+      <action dev="cjohnson" type="update">
+        Perl/Python Client generators now scan the generated service handler, which does not have private methods
+      </action>
+      <action dev="cjohnson" type="update">
+	Remove protocol buffer unsigned int and long usage, as the new structure does not support. Switch to int32 and int64 implementations.
+      </action>
+      <action dev="eyasukoc" type="update">
+        Added blacklist/whitelist logic to generator code.
+      </action>
+      <action dev="cjohnson" type="update">
+	Rename annotations Private->Internal, ServiceFacade->Service, delete CommandDescriptor
+      </action>
+      <action dev="eyasukoc" type="remove">
+        Remove EhCache completely
+      </action>
+    </release>
+
+    <release version="1.7" date="2014-07-08" description="louie-1.7">
+      <action dev="eyasukoc" type="add">
+        Louie Router to forward requests to destination servers.
+      </action>
+      <action dev="eyasukoc" type="update">
+        Rename Request and RequestContext to more properly describe their roles.
+      </action>
+      <action dev="eyasukoc" type="update">
+        Consumer pattern for service client requests.
+      </action>
+      <action dev="eyasukoc" type="update">
+        Embed session creation into initial request, rather than doing a seperate auth call.
+      </action>
+      <action dev="eyasukoc" type="update">
+        Streaming Consumer support.
+      </action>
+      <action dev="cjohnson" type="update">
+        Streaming Consumer support for chained streaming data, switched consumer to be an abstract class
+      </action>
+    </release>
+
+    <release version="1.6" date="2014-06-27" description="louie-1.6">
+      <action dev="cjohnson" type="update">
+        Streaming Annotation support
+      </action>
+      <action dev="cjohnson" type="update">
+        Include Route info in Response, Route loop detection bug fixes
+      </action>
+      <action dev="cjohnson" type="update">
+        Core bug fixes for null single arg responses, better handling of null result error
+      </action>
+    </release>
+    
+    <release version="1.5" date="2014-06-18" description="louie-1.5">
+      <action dev="cjohnson" type="update">
+        Set default gateway based upon current deployment
+      </action>
+      <action dev="cjohnson" type="update">
+        Bug fix where new caches were not populating their name properly
+      </action>
+      <action dev="cjohnson" type="update">
+        Rework Result to use static factories and store the original result list.  This allows streaming
+      </action>
+    </release>
+    
+    <release version="1.4" date="2014-06-10" description="louie-1.4">
+      <action dev="eyasukoc" type="add">
+        Guava Cache wrappers for CacheManager
+      </action>
+      <action dev="cjohnson" type="update">
+        Improve FutureList for adding items after created, iterators based upon completion, FutureFaker for simple known results.
+      </action>
+    </release>
+
+    <release version="1.3" date="2014-05-16" description="louie-1.3">
+      <action dev="cjohnson" type="update">
+        Louie Converted to a stand alone project.
+      </action>
+      <action dev="sfong" type="update">
+        Perl/Python service client generation.
+      </action>
+      <action dev="eyasukoc" type="update">
+        Server address resolution uses IPs.
+      </action>
+      <action dev="cjohnson" type="update">
+        ServiceClient] Switch package prefix to be an optional argument.  Defaults scans everything.
+      </action>
+    </release>
+
   </body>
 </document>
