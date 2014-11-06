@@ -7,7 +7,7 @@ Creating a new LoUIE project
 * From the command line:
 
 +-----+
-mvn archetype:generate -DarchetypeGroupId='com.rhythm.louie' -DarchetypeArtifactId='louie-archetype' -DarchetypeVersion='1.9'
+mvn archetype:generate -DarchetypeGroupId='com.rhythm.louie' -DarchetypeArtifactId='louie-archetype' -DarchetypeVersion='1.10'
 
 Define value for property 'groupId': : com.somecompany
 Define value for property 'artifactId': : sample
