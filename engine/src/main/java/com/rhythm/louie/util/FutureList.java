@@ -9,11 +9,11 @@ package com.rhythm.louie.util;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,7 +24,7 @@ public class FutureList<E> implements Collection<E>, List<E> {
     private final List<ListenableFuture<E>> futures;
     
     public FutureList() {
-        futures = new ArrayList<ListenableFuture<E>>();
+        futures = new ArrayList<>();
     }
     
     public FutureList(List<? extends ListenableFuture<E>> futures) {
@@ -46,10 +46,8 @@ public class FutureList<E> implements Collection<E>, List<E> {
     public E get(int index) {
         try {
             return futures.get(index).get();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException | ExecutionException ex) {
+            LoggerFactory.getLogger(FutureList.class).error("Error getting item", ex);
         }
         return null;
     }
@@ -60,7 +58,7 @@ public class FutureList<E> implements Collection<E>, List<E> {
         if (current!=null&&current.isDone()) {
             try {
                 return current.get();
-            } catch (Exception e) {}
+            } catch (InterruptedException | ExecutionException e) {}
         }
         return null;
     }
@@ -88,10 +86,8 @@ public class FutureList<E> implements Collection<E>, List<E> {
         public E next() {
             try {
                 return futureIter.next().get();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ExecutionException ex) {
-                Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException | ExecutionException ex) {
+                LoggerFactory.getLogger(FutureList.class).error("Error iterating", ex);
             }
             return null;
         }
@@ -133,10 +129,8 @@ public class FutureList<E> implements Collection<E>, List<E> {
                     }
                     Thread.sleep(10);
                 }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ExecutionException ex) {
-                Logger.getLogger(FutureList.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException | ExecutionException ex) {
+                LoggerFactory.getLogger(FutureList.class).error("Error iterating", ex);
             }
             return null;
         }

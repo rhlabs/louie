@@ -146,6 +146,9 @@ public class Server {
                     .setLocation(server.getLocation())
                     .setTimezone(server.getTimezone())
                     .setDisplay(server.getDisplay())
+                    .setGateway(server.getGateway())
+                    .setIp(server.getIp())
+                    .setPort(server.getPort())
                     .build();
             serverPBs.add(server.pb);
         }

@@ -5,15 +5,12 @@
  */
 package com.rhythm.louie.services.auth;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.ServiceProvider;
-import com.rhythm.louie.connection.DefaultLouieConnection;
 import com.rhythm.louie.request.RequestContext;
 import com.rhythm.louie.request.data.Param;
 import com.rhythm.louie.request.data.Result;
-import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.ServiceFactory;
 
 import com.rhythm.pb.RequestProtos.IdentityPB;
@@ -24,23 +21,21 @@ import com.rhythm.pb.RequestProtos.IdentityPB;
  */
 @ServiceProvider
 public class AuthServiceFactory implements ServiceFactory {
-    private final Logger LOGGER = LoggerFactory.getLogger(AuthServiceFactory.class);
-    
     private static AuthServiceHandler service;
     
     public AuthServiceFactory() {}
     
-    public static AuthServiceFactory getInstance() {
-        return new AuthServiceFactory();
-    }
-
     @Override
     public String getServiceName() {
         return AuthService.SERVICE_NAME;
     }
     
     @Override
-    public Service getService() {
+    public AuthServiceHandler getService() throws Exception {
+        return loadService();
+    }
+
+    private static synchronized AuthServiceHandler loadService() {
         if (service == null) {
             AuthService dmo = AuthDMO.getInstance();
             service = new AuthPortValidator(dmo);
@@ -48,12 +43,11 @@ public class AuthServiceFactory implements ServiceFactory {
         return service;
     }
     
-    public AuthService getServiceClient() {
-        getService();
-        return service.getDelegate();
+    public static AuthService getServiceClient() {
+        return loadService().getDelegate();
     }
     
-    private class AuthPortValidator extends AuthServiceHandler {
+    private static class AuthPortValidator extends AuthServiceHandler {
 
         protected AuthPortValidator(AuthService dmo) {
             super();
@@ -73,7 +67,7 @@ public class AuthServiceFactory implements ServiceFactory {
                     IdentityPB id = (IdentityPB) param.getParsedArg(0);
                     req.setIdentity(id);
                 } catch (Exception e) {
-                    LOGGER.error("Error extracting Identity from createSession");
+                    LoggerFactory.getLogger(AuthServiceFactory.class).error("Error extracting Identity from createSession");
                 }
             }
             return result;

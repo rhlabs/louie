@@ -5,24 +5,10 @@
  */
 package ${info.packageName};
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
-import java.util.List;
-
-import com.rhythm.louie.Classes;
-import com.rhythm.louie.Delegate;
-import com.rhythm.louie.server.Server;
-import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.ServiceProvider;
-import com.rhythm.louie.connection.LouieConnection;
-import com.rhythm.louie.connection.LouieConnectionFactory;
-import com.rhythm.louie.CacheDelegate;
-import com.rhythm.louie.DAO;
-import com.rhythm.louie.Router;
-
+import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.service.ServiceFactory;
+import com.rhythm.louie.service.ServiceUtils;
 
 @ServiceProvider
 public class ${className} implements ServiceFactory {
@@ -60,94 +46,11 @@ public class ${className} implements ServiceFactory {
 
         ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
         
-        ${info.serviceClassName} serviceImpl;
-        if (useRemoteDAO(props)) {
-            Server PRIMARY = Server.getServer(props.getCentralHost());
-            LouieConnection connection = LouieConnectionFactory.getConnectionForServer(PRIMARY);
-            serviceImpl = new ${baseName}RemoteService(connection);
-        } else {
-            serviceImpl = loadLayer(props.getDAOClass(), "${baseName}DAO", DAO.class, false);
-        }
-        if (serviceImpl==null) {
-            throw new Exception("Must define at least a DAO layer");
-        }
-        
-        ${info.serviceClassName} router = loadLayer(props.getRouterClass(), null, Router.class, true);
-        if (router!=null) {
-            ((Delegate<${info.serviceClassName}>)router).setDelegate(serviceImpl);
-            serviceImpl = router;
-        }
-        
-        if (props.isCachingOn()) {
-            ${info.serviceClassName} cache = loadLayer(props.getCacheClass(), "${baseName}CacheDelegate", CacheDelegate.class, true);
-            if (cache!=null) {
-                ((Delegate<${info.serviceClassName}>)cache).setDelegate(serviceImpl);
-                serviceImpl = cache;
-            }
-        }
+        ${info.serviceClassName} serviceImpl = ServiceUtils.loadService(props.getServiceLayers(),${info.serviceClassName}.class);
         
         service = new ${baseName}ServiceHandler();
         service.setDelegate(serviceImpl);
         return service;
     }
 
-    private static boolean useRemoteDAO(ServiceProperties props) throws Exception {
-        if (props.isCentralized()) {
-            Server PRIMARY = Server.getServer(props.getCentralHost());
-            if (PRIMARY == null) {
-                throw new Exception("Cannot establish service!  Unknown MAIN server: " + props.getCentralHost());
-            }
-
-            if (!Server.LOCAL.getLocation().equals(PRIMARY.getLocation())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static ${info.serviceClassName} loadLayer(String property, String defaultName,
-            Class<? extends Annotation> annotation, boolean delegate) throws Exception {
-        Class<?> layer = null;
-        if (property==null) {
-            // no layer override found, so search for the class tagged with the annotation
-
-            List<Class<?>> classes = Classes.getTypesAnnotatedWith("${info.packageName}", annotation);
-            if (classes.size()>1) {
-                throw new Exception("Multiple @"+annotation.getSimpleName()+" classes found");
-            } else if (classes.size()==1) {
-                layer = classes.iterator().next();
-            } else if (defaultName!=null && !defaultName.isEmpty()) {
-                // check to see if the default exists, this helps support legacy behavior
-                try {
-                    layer = Class.forName("${info.packageName}."+defaultName);
-                } catch (ClassNotFoundException e) {}
-            }
-        } else if (!property.isEmpty()) {
-            // Attempt to load the override class
-            layer = Class.forName(property);
-        }
-        if (layer == null) {
-            return null;
-        } else {
-            if (!${info.serviceClassName}.class.isAssignableFrom(layer)) {
-                throw new Exception(layer.getCanonicalName()+" does not implement ${info.serviceClassName}");
-            }
-            if (delegate) {
-                if (!Delegate.class.isAssignableFrom(layer)) {
-                    throw new Exception(layer.getCanonicalName()+" must implement Delegate<${info.serviceClassName}>");
-                }
-                for (Type genericInterface : layer.getGenericInterfaces()) {
-                    if (genericInterface instanceof Delegate) {
-                        Type[] genericTypes = ((ParameterizedType) genericInterface).getActualTypeArguments();
-                        for (Type genericType : genericTypes) {
-                            if (!(genericType instanceof ${info.serviceClassName})) {
-                                throw new Exception(layer.getCanonicalName()+" must implement Delegate<${info.serviceClassName}>");
-                            }
-                        }
-                    }
-                }
-            }
-            return (${info.serviceClassName}) layer.newInstance();
-        }
-    }
 }

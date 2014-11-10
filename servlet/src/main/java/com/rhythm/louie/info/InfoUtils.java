@@ -7,11 +7,15 @@ package com.rhythm.louie.info;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.base.Joiner;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -112,30 +116,17 @@ public class InfoUtils {
     }
 
     public static String servicePropertyString(String serviceName) {
-        StringBuilder sb = new StringBuilder();
         ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-        boolean hasProps = false;
-
-        if (props.isCentralized()) {
-            sb.append("Centralized");
-            hasProps = true;
+        List<String> propLabels = new ArrayList<>();
+        if (props.isReserved()) {
+            propLabels.add("Reserved");
         }
-
         if (props.isReadOnly()) {
-            if (hasProps) {
-                sb.append(" / ");
-            }
-            sb.append("Read Only");
-            hasProps = true;
+            propLabels.add("Read Only");
         }
-
         if (!props.isCachingOn()) {
-            if (hasProps) {
-                sb.append(" / ");
-            }
-            sb.append("Caching OFF");
+            propLabels.add("Caching OFF");
         }
-
-        return sb.toString();
+        return Joiner.on(" / ").join(propLabels);
     }
 }

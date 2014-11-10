@@ -5,6 +5,7 @@
  */
 package ${info.packageName};
 
+import com.rhythm.louie.connection.Connectable;
 import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.Request;
 import com.rhythm.louie.connection.Response;
@@ -16,13 +17,24 @@ import com.rhythm.louie.stream.Consumers;
 import com.rhythm.louie.pb.PBParam;
 import com.rhythm.louie.pb.PBType;
 
-public class ${className} implements ${baseName}Client {
+public class ${className} implements ${baseName}Client, Connectable {
 
-    private final String SYSTEM = "${info.serviceName}";
-    private final LouieConnection connection;
+    private static final String SERVICE_NAME = "${info.serviceName}";
+    private LouieConnection connection;
 
+    public ${className}() {}
     public ${className}(LouieConnection connection) {
         this.connection = connection;
+    }
+
+    @Override
+    public void setConnection(LouieConnection connection) {
+        this.connection = connection;
+    }
+    
+    @Override
+    public LouieConnection getConnection() {
+        return connection;
     }
 #foreach($method in $info.methodInfos)
 #if ($method.isClientAccess()) 
@@ -50,10 +62,10 @@ public class ${className} implements ${baseName}Client {
 #if ( $method.hasParams() )
         PBParam param = PBParam.createParam(${method.builderParamString});
         Request<$returnType> packagedRequest = 
-            Request.newParams(consumer, SYSTEM, "${method.name}", param, 
+            Request.newParams(consumer, SERVICE_NAME, "${method.name}", param, 
 #else
         Request<$returnType> packagedRequest = 
-            Request.newParams(consumer, SYSTEM, "${method.name}", 
+            Request.newParams(consumer, SERVICE_NAME, "${method.name}", 
 #end
             ${returnType}.getDefaultInstance());
         connection.request(packagedRequest);
@@ -74,10 +86,10 @@ public class ${className} implements ${baseName}Client {
 #if ( $method.hasParams() )
         PBParam param = PBParam.createParam(${method.builderParamString});
         Request<$returnType> packagedRequest = 
-            Request.newParams(consumer, SYSTEM, "${method.name}", param, 
+            Request.newParams(consumer, SERVICE_NAME, "${method.name}", param, 
 #else
         Request<$returnType> packagedRequest = 
-            Request.newParams(consumer, SYSTEM, "${method.name}", 
+            Request.newParams(consumer, SERVICE_NAME, "${method.name}", 
 #end
             ${returnType}.getDefaultInstance());
         return connection.request(packagedRequest);

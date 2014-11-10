@@ -7,7 +7,6 @@ package com.rhythm.louie.services.info;
 
 import java.util.List;
 
-import com.rhythm.louie.NoFactory;
 import com.rhythm.louie.Service;
 
 import com.rhythm.louie.info.InfoProtos.*;
@@ -16,7 +15,6 @@ import com.rhythm.louie.info.InfoProtos.*;
  *
  * @author cjohnson
  */
-@NoFactory
 @Service
 public interface InfoService {
     public static final String SERVICE_NAME = "info";

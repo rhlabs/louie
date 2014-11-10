@@ -35,4 +35,7 @@ message ServerPB {
     optional string       host       = 3;
     optional string       display    = 4;
     optional string       location   = 5;
+    optional string       gateway    = 6;
+    optional string       ip         = 7;
+    optional int32        port       = 8;
 }

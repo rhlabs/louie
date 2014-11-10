@@ -5,17 +5,31 @@
  */
 package ${info.packageName};
 
+import com.rhythm.louie.connection.Connectable;
 import com.rhythm.louie.connection.LouieConnection;
 
-public class ${className} implements ${info.serviceClassName} {
-    private final ${baseName}Client remoteClient;
+public class ${className} implements ${info.serviceClassName}, Connectable {
+    private final ${baseName}ServiceClient remoteClient;
 
+    public ${className}() {
+        this.remoteClient = new ${baseName}ServiceClient();
+    }
     public ${className}(LouieConnection connection) {
-        this.remoteClient = ${baseName}ClientFactory.getClient(connection);
+        this.remoteClient = new ${baseName}ServiceClient(connection);
     }
 
     public ${baseName}Client getRemoteClient() {
         return remoteClient;
+    }
+
+    @Override
+    public void setConnection(LouieConnection connection) {
+        remoteClient.setConnection(connection);
+    }
+    
+    @Override
+    public LouieConnection getConnection() {
+        return remoteClient.getConnection();
     }
 #foreach($method in $info.methodInfos)
 

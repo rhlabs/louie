@@ -15,6 +15,10 @@ import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.service.layer.AnnotatedServiceLayer;
+import com.rhythm.louie.service.layer.CustomServiceLayer;
+import com.rhythm.louie.service.layer.RemoteServiceLayer;
+
 /**
  * A central driver for populating ServiceProperties and Server objects, as well as additional
  * CustomProperty objects from multiple xml configuration files.
@@ -37,14 +41,17 @@ public class LouieProperties {
     private static final String SERVICE = "service";
     private static final String SERVICE_PARENT = "services";
     private static final String ENABLE = "enable";
-    private static final String CENTRAL_HOST = "central_host";
-    private static final String CENTRAL = "centralized";
+    private static final String REMOTE_HOST = "remote_host";
     private static final String READ_ONLY = "read_only";
     private static final String CACHING = "caching";
     private static final String PROVIDER_CL = "provider_class";
-    private static final String DAO_CL = "dao_class";
-    private static final String CACHE_CL = "cache_class";
-    private static final String ROUTER_CL = "router_class";
+    
+    private static final String LAYERS = "layers";
+    private static final String LAYER = "layer";
+    private static final String LAYER_DAO = "dao";
+    private static final String LAYER_CACHE = "cache";
+    private static final String LAYER_ROUTER = "router";
+    private static final String LAYER_REMOTE = "remote";
     
     //servers
     private static final String SERVER = "server";
@@ -155,9 +162,7 @@ public class LouieProperties {
         Element serviceDef = louie.getChild("service_defaults");
 
         ServiceProperties.setDefaultCaching(Boolean.valueOf(serviceDef.getChildText(CACHING)));
-        ServiceProperties.setDefaultCentralized(Boolean.valueOf(serviceDef.getChildText(CENTRAL)));
         ServiceProperties.setDefaultEnable(Boolean.valueOf(serviceDef.getChildText(ENABLE)));
-        ServiceProperties.setDefaultCentralHost(serviceDef.getChildText(CENTRAL_HOST));
         ServiceProperties.setDefaultReadOnly(Boolean.valueOf(serviceDef.getChildText(READ_ONLY)));
 
         //Load internal services into ServiceProperties
@@ -227,9 +232,7 @@ public class LouieProperties {
                     break;
                 case ENABLE: ServiceProperties.setDefaultEnable(Boolean.valueOf(propValue));
                     break;
-                case CENTRAL_HOST: ServiceProperties.setDefaultCentralHost(propValue);
-                    break;
-                case CENTRAL: ServiceProperties.setDefaultCentralized(Boolean.valueOf(propValue));
+                case REMOTE_HOST: ServiceProperties.setDefaultRemoteHost(propValue);
                     break;
                 case READ_ONLY: ServiceProperties.setDefaultReadOnly(Boolean.valueOf(propValue));
                     break;
@@ -242,19 +245,28 @@ public class LouieProperties {
     }
     
     private static void processServices(Element services, boolean internal) {
-        List<ServiceProperties> servicesList = new ArrayList<>();
-        
         if (services == null) return;
+        
         for (Element elem : services.getChildren()) {
-            if (DEFAULT.equalsIgnoreCase(elem.getName())) processServiceDefaults(elem);
+            if (DEFAULT.equalsIgnoreCase(elem.getName())) {
+                processServiceDefaults(elem);
+                break;
+            }
         }
         
+        List<ServiceProperties> servicesList = new ArrayList<>();
         for (Element service : services.getChildren()) {
             String elementName = service.getName();
-            if (!SERVICE.equalsIgnoreCase(elementName)) continue;
+            if (!SERVICE.equalsIgnoreCase(elementName)) {
+                if (!DEFAULT.equalsIgnoreCase(elementName)) {
+                    LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unknown {} element: {}", SERVICE_PARENT, elementName);
+                }
+                continue;
+            }
             
             String serviceName = null;
-            Boolean enable = false;
+            Boolean enable = null;
             for (Attribute attr : service.getAttributes()) {
                 String propName = attr.getName().toLowerCase();
                 String propValue = attr.getValue();
@@ -286,22 +298,15 @@ public class LouieProperties {
                 if (null != propName) switch (propName) {
                     case CACHING: prop.setCaching(Boolean.valueOf(propValue));
                         break;
-                    case CENTRAL_HOST: prop.setCentralHost(propValue);
-                        break;
-                    case CENTRAL: prop.setCentralized(Boolean.valueOf(propValue));
-                        break;
                     case READ_ONLY: prop.setReadOnly(Boolean.valueOf(propValue));
-                        break;
-                    case DAO_CL: prop.setDaoClass(propValue);
-                        break;
-                    case CACHE_CL: prop.setCacheClass(propValue);
-                        break;
-                    case ROUTER_CL: prop.setRouterClass(propValue);
                         break;
                     case PROVIDER_CL: prop.setProviderClass(propValue);
                         break;
                     case RESERVED: 
                         if (internal) prop.setReserved(Boolean.valueOf(propValue));
+                        break;
+                    case LAYERS:
+                        processServiceLayers(serviceProp, prop);
                         break;
                     default: prop.addCustomProp(propName, propValue);
                 }
@@ -311,6 +316,36 @@ public class LouieProperties {
         }
         
         ServiceProperties.processServices(servicesList);
+    }
+    
+    private static void processServiceLayers(Element layers, ServiceProperties props) {
+        for (Element layer : layers.getChildren()) {
+            String layerName = layer.getName().toLowerCase();
+            switch (layerName) {
+                case LAYER:
+                    props.addLayer(new CustomServiceLayer(layer.getAttributeValue("class")));
+                    break;
+                case LAYER_DAO:
+                    props.addLayer(AnnotatedServiceLayer.DAO);
+                    break;
+                case LAYER_CACHE:
+                    props.addLayer(AnnotatedServiceLayer.CACHE);
+                    break;
+                case LAYER_ROUTER:
+                    props.addLayer(AnnotatedServiceLayer.ROUTER);
+                    break;
+                case LAYER_REMOTE:
+                    String host = layer.getAttributeValue("host");
+                    if (host==null || host.trim().isEmpty()) {
+                        host = ServiceProperties.getDefaultRemoteHost();
+                    }
+                    props.addLayer(new RemoteServiceLayer(host));
+                    break;
+                default:
+                    LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unkown layer:{}",layerName);
+            }
+        }
     }
     
     public static CustomProperty getCustomProperty(String key) {

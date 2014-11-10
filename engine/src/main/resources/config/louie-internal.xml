@@ -11,8 +11,6 @@
     </server_defaults>
     <service_defaults>
         <enable>true</enable>
-        <main></main>
-        <centralized>false</centralized>
         <read_only>false</read_only>
         <caching>true</caching>
     </service_defaults>

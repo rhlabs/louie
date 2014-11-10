@@ -23,7 +23,6 @@ import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.email.EmailService;
 import com.rhythm.louie.jms.*;
-import com.rhythm.louie.server.*;
 import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.ServiceFactory;
 import com.rhythm.louie.topology.Route;
@@ -105,53 +104,59 @@ public class ServiceManager {
         }
         
         // Load Services
-        StringBuilder disabled = new StringBuilder();
-        StringBuilder sb = new StringBuilder();
-        sb.append("\nServices:\n\n");
+        StringBuilder sb = new StringBuilder("\nInitializing Services");
         
+        sb.append("\nReserved Services:\n");
+        initializeServices(sb, true);
+        
+        sb.append("\nServices:\n");
+        initializeServices(sb, false);
+        
+        LOGGER.info(sb.toString());
+    }
+    
+    private static void initializeServices(StringBuilder sb, boolean reserved) throws MessageAdapterException {
         for (ServiceFactory factory : serviceFactories.values()) {
             String serviceName = factory.getServiceName().toLowerCase();
             ServiceProperties props = ServiceProperties.getServiceProperties(serviceName);
-            if (props.isEnabled()) {
-                sb.append(String.format("%-15s",serviceName));
-                try {
-                    long start = System.nanoTime();
-                    initializeService(factory);
-                    long time = (System.nanoTime()-start) / 1000000;
-                    sb.append(String.format("%6d ms - ",time));
-                    
-                    int depth = 0;
-                    Object level = servicesByName.get(serviceName);
-                    while(level instanceof Delegate) {
-                        level = ((Delegate)level).getDelegate();
-                        if (depth>0) {
-                            sb.append("->");
-                        }
-                        sb.append(level.getClass().getSimpleName());
-                        depth++;
+            if (props.isReserved()!=reserved || !props.isEnabled()) {
+                continue;
+            }
+            
+            sb.append(String.format("%-15s", serviceName));
+            try {
+                long start = System.nanoTime();
+                initializeService(factory);
+                long time = (System.nanoTime() - start) / 1000000;
+                sb.append(String.format("%6d ms - ", time));
+
+                int depth = 0;
+                Object level = servicesByName.get(serviceName);
+                while (level instanceof Delegate) {
+                    level = ((Delegate) level).getDelegate();
+                    if (depth > 0) {
+                        sb.append("->");
                     }
-                    
-                    if (props.isCentralized()) {
-                        sb.append(" || centralized @ ").append(props.getCentralHost());
-                    }
-                    if (props.isReadOnly()) {
-                        sb.append(" || Read-Only");
-                    }
-                    sb.append("\n");
-                } catch (MessageAdapterException ex) {
-                    throw ex;
-                } catch (Exception ex) {
-                    failedServiceProviders.put(factory.getClass().getSimpleName(), ex.toString());
-                    sb.append(" - ERROR: ")
-                            .append(ex.toString())
-                            .append("\n");
+                    sb.append(level.getClass().getSimpleName());
+                    depth++;
                 }
-            } else {
-                disabled.append(factory.getServiceName()).append("\n");
+
+                if (props.isReadOnly()) {
+                    sb.append(" || Read-Only");
+                }
+                if (!props.isCachingOn()) {
+                    sb.append(" || Caching OFF");
+                }
+                sb.append("\n");
+            } catch (MessageAdapterException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                failedServiceProviders.put(factory.getClass().getSimpleName(), ex.toString());
+                sb.append(" - ERROR: ")
+                        .append(ex.toString())
+                        .append("\n");
             }
         }
-        
-        LOGGER.info(sb.toString());
     }
     
     private static final String CONF_DIR = "/WEB-INF/conf/"; //old

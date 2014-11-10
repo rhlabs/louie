@@ -49,11 +49,8 @@
             "enable" as the default, this specifies whether this deployment behaves as opt-in or opt-out for starting up services
             <enable>true</enable> 
             
-            "central_host" represents a central host for centralized services (services which reroute all calls to a specific host
-            <central_host>LA</central_host> 
-            
-            "centralized" correlates to central_host, and is a boolean to indicate whether a service is centralized
-            <centralized>false</centralized> 
+            "remote_host" represents a remote host for remote layers (services which reroute all calls to a specific host)
+            <remote_host>LA</central_host> 
             
             "readonly" disables Service methods which were annotated w/ @Updating
             <readonly>false</readonly>
@@ -71,8 +68,14 @@
         "service" can also be flushed out with nested configurations
         <service name="hardware" >
             
+            Service Layers can be configured to cusomize the service stack
+            Ommitting layers will default to loading annotation based layers
+            <layers>
+                <cache />
+                <layer class="com.something.hardware.DifferentDAO" />
+            </layers>
+            
             Any configuration specified here will override anything found in the defaults
-            <centralized>true</centralized>
             <readonly>true</readonly>
             
             "gibberish_prop" represents a custom property for a particular service. It is locatable via .getCustomProperty() on the ServiceProperties object

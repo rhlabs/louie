@@ -18,4 +18,8 @@ public class LouieException extends Exception{
     public LouieException (Exception ex) {
         super(ex);
     }
+    
+    public LouieException (String message, Exception ex) {
+        super(message, ex);
+    }
 }

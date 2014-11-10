@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.service.ServiceUtils;
+import com.rhythm.louie.service.layer.ServiceLayer;
 
 /**
  *
@@ -20,27 +21,21 @@ public class ServiceProperties {
     
     private static final Map<String,ServiceProperties> SERVICES = new ConcurrentHashMap<>();
     
-    private final String name;
-    private boolean enable;
-    private String centralHost;
-    private boolean centralized;
-    private boolean readOnly;
-    private boolean caching;
-    private boolean reserved = false;
-    
-    private String daoClass = null;
-    private String cacheClass = null;
-    private String routerClass = null;
-    private String providerClass = null;
-    
     /* Basic defaults */
     private static boolean defaultEnable;
-    private static String defaultCentralHost;
-    private static boolean defaultCentralized;
+    private static String defaultRemoteHost;
     private static boolean defaultReadOnly;
     private static boolean defaultCaching;
     
+    /* Instance properties */
+    private final String name;
+    private boolean enable;
+    private boolean readOnly;
+    private boolean caching;
+    private boolean reserved = false;
+    private String providerClass = null;
     
+    private final List<ServiceLayer> layers;
     private final Map<String,String> properties;
     
     /**
@@ -76,28 +71,18 @@ public class ServiceProperties {
     protected ServiceProperties(String name) { 
         this.name = name;
         this.enable = defaultEnable;
-        this.centralHost = defaultCentralHost;
-        this.centralized = defaultCentralized;
         this.readOnly = defaultReadOnly;
         this.caching = defaultCaching;
         properties = new ConcurrentHashMap<>();
+        layers = new ArrayList<>();
     }
      
-
     public String getName() {
         return name;
     }
     
-    public String getCentralHost() {
-        return centralHost;
-    }
-    
     public boolean isEnabled() {
         return enable;
-    }
-    
-    public boolean isCentralized() {
-        return centralized;
     }
     
     public boolean isReadOnly() {
@@ -112,20 +97,12 @@ public class ServiceProperties {
         return reserved;
     }
     
-    public String getDAOClass() {
-        return daoClass;
-    }
-    
-    public String getCacheClass() {
-        return cacheClass;
-    }
-    
-    public String getRouterClass() {
-        return routerClass;
-    }
-    
     public String getProviderClass() {
         return providerClass;
+    }
+    
+    synchronized public List<ServiceLayer> getServiceLayers() {
+        return Collections.unmodifiableList(layers);
     }
     
     public String getCustomProperty(String attribute,String def) {
@@ -166,14 +143,6 @@ public class ServiceProperties {
         this.enable = enable;
     }
 
-    protected void setCentralHost(String centralHost) {
-        this.centralHost = centralHost;
-    }
-
-    protected void setCentralized(boolean centralized) {
-        this.centralized = centralized;
-    }
-
     protected void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }
@@ -186,34 +155,28 @@ public class ServiceProperties {
         this.reserved = reserved;
     }
 
-    protected void setDaoClass(String daoClass) {
-        this.daoClass = daoClass;
-    }
-
-    protected void setCacheClass(String cacheClass) {
-        this.cacheClass = cacheClass;
-    }
-
-    protected void setRouterClass(String routerClass) {
-        this.routerClass = routerClass;
-    }
-    
     protected void setProviderClass(String providerClass) {
         this.providerClass = providerClass;
     }
 
+    synchronized protected void addLayer(ServiceLayer layer) {
+        layers.add(layer);
+    }
+    
+    // Static Defaults
+    
     protected static void setDefaultEnable(boolean defaultEnable) {
         ServiceProperties.defaultEnable = defaultEnable;
     }
 
-    protected static void setDefaultCentralHost(String defaultHost) {
-        ServiceProperties.defaultCentralHost = defaultHost;
+    protected static void setDefaultRemoteHost(String defaultHost) {
+        ServiceProperties.defaultRemoteHost = defaultHost;
     }
 
-    protected static void setDefaultCentralized(boolean defaultCentralized) {
-        ServiceProperties.defaultCentralized = defaultCentralized;
+    public static String getDefaultRemoteHost() {
+        return defaultRemoteHost;
     }
-
+    
     protected static void setDefaultReadOnly(boolean defaultReadOnly) {
         ServiceProperties.defaultReadOnly = defaultReadOnly;
     }
@@ -221,6 +184,8 @@ public class ServiceProperties {
     protected static void setDefaultCaching(boolean defaultCaching) {
         ServiceProperties.defaultCaching = defaultCaching;
     }
+    
+    // Process
     
     protected static void processServices(List<ServiceProperties> services) {
         for (ServiceProperties prop : services) {
