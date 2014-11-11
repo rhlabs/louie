@@ -36,8 +36,8 @@ public class ServiceManager {
         Collections.synchronizedMap(new TreeMap<String, Service>());
     private static boolean init = false;
     
-    private static final Map<String, ServiceFactory> serviceFactories = new HashMap<>();
-    private static final Map<String, String> failedServiceProviders = new HashMap<>();
+    private static final Map<String, ServiceFactory> serviceFactories = new TreeMap<>();
+    private static final Map<String, String> failedServiceProviders = new TreeMap<>();
     
     private ServiceManager() {};
     

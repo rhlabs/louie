@@ -109,4 +109,9 @@ public abstract class AnnotatedService implements Service {
         r.setStreaming(cmd.isStreaming());
         return r;
     }
+    
+    @Override
+    public boolean isReserved() {
+        return ServiceProperties.getServiceProperties(name).isReserved();
+    }
 }

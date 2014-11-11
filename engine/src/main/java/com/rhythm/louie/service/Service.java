@@ -34,4 +34,6 @@ public interface Service {
     
     MessageHandler getMessageHandler();
     
+    boolean isReserved();
+    
 }

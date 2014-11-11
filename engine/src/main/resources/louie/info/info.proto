@@ -9,13 +9,15 @@ option java_outer_classname = "InfoProtos";
 option java_generate_equals_and_hash = true;
 
 message ServicePB {
-    optional string        name       = 1;
-    repeated CommandPB     commands   = 2;
+    optional string       name         = 1;
+    repeated MethodPB     methods      = 2;
+
+    optional bool         reserved     = 10 [default = false];
 }
 
-message CommandPB {
+message MethodPB {
     optional string       name              = 1;
-    repeated ArgPB        args              = 2;
+    repeated ParamPB      params            = 2;
     optional string       returntype        = 3;
     optional string       description       = 4;
     optional bool         deprecated        = 5 [default = false];
@@ -24,7 +26,7 @@ message CommandPB {
     optional string       javadoc           = 10;
 }
 
-message ArgPB {
+message ParamPB {
     optional string       name   = 1;
     optional string       type   = 2;
 }

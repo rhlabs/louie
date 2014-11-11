@@ -19,6 +19,7 @@ import com.rhythm.louie.service.command.PBParamType;
 import com.rhythm.louie.service.Service;
 
 import com.rhythm.louie.info.InfoProtos.*;
+import com.rhythm.louie.server.ServiceProperties;
 
 /**
  * @author cjohnson
@@ -55,13 +56,14 @@ public class InfoDAO implements InfoService {
         }
         
         ServicePB.Builder builder = ServicePB.newBuilder()
-                .setName(service.getServiceName());
+                .setName(service.getServiceName())
+                .setReserved(service.isReserved());
         
         for (PBCommand command : service.getCommands()) {
             if (command.isInternal()) {
                 continue;
             }
-            CommandPB.Builder commandBuilder = CommandPB.newBuilder()
+            MethodPB.Builder method = MethodPB.newBuilder()
                     .setName(command.getCommandName())
                     .setDescription(command.getDescription())
                     .setReturntype(command.getReturnType())
@@ -69,14 +71,13 @@ public class InfoDAO implements InfoService {
                     .setReturnList(command.returnList());
 
             for (PBParamType param : command.getArguments() ) {
-                commandBuilder.clearArgs();
+                method.clearParams();
                 for (ArgType arg : param.getTypes()) {
-                    commandBuilder.addArgs(ArgPB.newBuilder()
+                    method.addParamsBuilder()
                             .setName(arg.getName())
-                            .setType(arg.getType())
-                            .build());
+                            .setType(arg.getType());
                 }
-                builder.addCommands(commandBuilder.build());
+                builder.addMethods(method.build());
             }
         }
         return builder.build();

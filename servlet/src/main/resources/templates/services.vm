@@ -20,9 +20,22 @@
                     Services
                 </li>
 #foreach($service in $services)
+#if(!$service.isReserved())
                 <li>
                     <a href='?service=${service.serviceName}'>${service.serviceName}</a>
                 </li>
+#end
+#end
+
+                <li class="sidebar-brand">
+                    Reserved Services
+                </li>
+#foreach($service in $services)
+#if($service.isReserved())
+                <li>
+                    <a href='?service=${service.serviceName}'>${service.serviceName}</a>
+                </li>
+#end
 #end
             </ul>
         </div>
