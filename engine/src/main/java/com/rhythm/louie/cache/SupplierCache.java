@@ -26,9 +26,10 @@ public class SupplierCache <V> implements Cache<Object, V> {
     
     private final String name;
     private final Supplier<V> supplier;
-    private Supplier<V> cache;
     private final long duration;
     private final TimeUnit timeUnit;
+    
+    private Supplier<V> cache;
     
     @SuppressWarnings("unchecked")
     public static <V> SupplierCache<V> nonCaching(String name, Supplier<V> supplier) {
@@ -64,16 +65,16 @@ public class SupplierCache <V> implements Cache<Object, V> {
         this.supplier = supplier;
         this.duration = duration;
         this.timeUnit = timeUnit;
-        createCache();
+        cache = createCache();
     }
 
-    private synchronized void createCache() {
+    private Supplier<V> createCache() {
         if (duration==0) {
-            cache = supplier;
+            return supplier;
         } else if (duration<0) {
-            cache = Suppliers.memoize(supplier);
+            return Suppliers.memoize(supplier);
         } else {
-            cache = Suppliers.memoizeWithExpiration(supplier,duration,timeUnit);
+            return Suppliers.memoizeWithExpiration(supplier,duration,timeUnit);
         }
     }
     
@@ -83,6 +84,18 @@ public class SupplierCache <V> implements Cache<Object, V> {
     
     public V get() {
         return cache.get();
+    }
+    
+    /**
+     * Calls the underlying supplier, re-storing it in the cache
+     * 
+     * @return the new value
+     */
+    public V reload() {
+        Supplier<V> temp = createCache();
+        V value = temp.get();
+        cache = temp;
+        return value;
     }
     
     @Override
@@ -108,7 +121,7 @@ public class SupplierCache <V> implements Cache<Object, V> {
     public void clear() throws Exception {
         // Only way to clear a memoized supplier is to throw away the whole thing
         // So we do this here to just recreate the memoized supplier, if needed
-        createCache();
+        cache = createCache();
     }
 
     @Override
