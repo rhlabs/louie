@@ -7,19 +7,16 @@ package com.rhythm.louie.jms;
 
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.louie.jms.JmsProtos.*;
 import com.rhythm.louie.jms.JmsProtos.ContentPB;
 import com.rhythm.louie.jms.JmsProtos.MessageBPB;
 import com.rhythm.louie.request.data.Data;
-import com.rhythm.louie.server.CustomProperty;
-import com.rhythm.louie.server.LouieProperties;
-import com.rhythm.louie.server.ServiceProperties;
 
 /**
  *
@@ -28,16 +25,11 @@ import com.rhythm.louie.server.ServiceProperties;
 public class MessageManager {
     private final Logger LOGGER = LoggerFactory.getLogger(MessageManager.class);
     
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 61616;
-    private static final String SYSTEM_PROP_KEY = "com.rhythm.louie.jmsadapter";
-    
     private static JmsAdapter jmsAdapter = null;
     
-    private final Map<String, List<MessageProcessor>> messageProcessors 
-            = Collections.synchronizedMap(new HashMap<String, List<MessageProcessor>>());
+    private final Map<String, List<MessageProcessor>> messageProcessors = new ConcurrentHashMap<>();
     
-    private final List<ManagedListener> listeners = new ArrayList<ManagedListener>();
+    private final List<ManagedListener> listeners = new ArrayList<>();
     
     private MessageManager() {}
     
@@ -49,38 +41,29 @@ public class MessageManager {
         private static final MessageManager INSTANCE = new MessageManager();
     }
     
-    synchronized private static void loadJMSAdapterIfNeeded() throws MessageAdapterException {
+    synchronized private void loadJMSAdapterIfNeeded() throws MessageAdapterException {
         if (jmsAdapter == null) {
             loadJMSAdapter();
         }
     }
     
-    private static void loadJMSAdapter() throws MessageAdapterException {
-        CustomProperty jmsProp = LouieProperties.getCustomProperty("messaging");
-//        ServiceProperties defaultProps = ServiceProperties.getDefaultServiceProperties();
-        
-        String adapterClass = jmsProp.getProperty("jmsadapter");
-        if (adapterClass == null) {
-            adapterClass = System.getProperty(SYSTEM_PROP_KEY);
-            if (adapterClass == null) {
-                throw new MessageAdapterException("A message server adapter class "
-                    + "must be specified in the service configs!");
-            }
+    private void loadJMSAdapter() throws MessageAdapterException {
+        if (MessagingProperties.getAdapterClass() == null) {
+            throw new MessageAdapterException("A message server adapter class "
+                + "must be specified in the service configs!");
         }
+        LOGGER.info("Loading JmsAdapter: {}", MessagingProperties.getAdapterClass());
+       
         try {
-            jmsAdapter = (JmsAdapter) Class.forName(adapterClass).newInstance();
-        } catch (ClassNotFoundException ex) {
-            throw new MessageAdapterException(ex);
-        } catch (InstantiationException ex) {
-            throw new MessageAdapterException(ex);
-        } catch (IllegalAccessException ex) {
+            jmsAdapter = (JmsAdapter) Class.forName(MessagingProperties.getAdapterClass()).newInstance();
+        } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             throw new MessageAdapterException(ex);
         }
         
-        Map<String,String> configHash = new HashMap<String,String>();
-        configHash.put(JmsAdapter.HOST_KEY, jmsProp.getProperty(JmsAdapter.HOST_KEY, DEFAULT_HOST));
-        configHash.put(JmsAdapter.PORT_KEY, jmsProp.getProperty(JmsAdapter.PORT_KEY, Integer.toString(DEFAULT_PORT)));
-        configHash.put(JmsAdapter.FAILOVER_KEY, jmsProp.getProperty(JmsAdapter.FAILOVER_KEY, "true"));
+        Map<String,String> configHash = new HashMap<>();
+        configHash.put(JmsAdapter.HOST_KEY, MessagingProperties.getHost());
+        configHash.put(JmsAdapter.PORT_KEY, MessagingProperties.getPort());
+        configHash.put(JmsAdapter.FAILOVER_KEY, MessagingProperties.getFailover());
         jmsAdapter.configure(configHash);
     }
     
@@ -88,23 +71,40 @@ public class MessageManager {
         return jmsAdapter;
     }
     
-    public void listenToTopic(String topicName) throws MessageAdapterException {
+    // TODO toggle between server and client registration by an internal flag, rather than exposing
+    // both interfaces.  Should just have a single registerListener call
+    public void registerClientListener(String service, MessageHandler mh) throws MessageAdapterException {
         loadJMSAdapterIfNeeded();
-        listeners.add(new ManagedTopicListener(topicName));
+
+        listenTo(MessagingProperties.getClientType(),
+                 MessagingProperties.getClientPrefix()+ service);
+        
+        addMessageHandler(mh);
     }
     
-    public void listenToTopic(String topicName,Collection<MessageType> messageTypes) throws MessageAdapterException {
+    public void registerServerListener(String service, MessageHandler mh) throws MessageAdapterException {
         loadJMSAdapterIfNeeded();
-        listeners.add(new ManagedTopicListener(topicName,messageTypes));
+
+        listenTo(MessagingProperties.getServerType(),
+                 MessagingProperties.getServerPrefix()+ service);
+        
+        addMessageHandler(mh);
     }
     
-    public void listenToQueue(String queueName) throws MessageAdapterException {
-        loadJMSAdapterIfNeeded();
-        listeners.add(new ManagedQueueListener(queueName));
+    private void listenTo(String destinationType, String destinationName) {
+        switch (destinationType) {
+            case "queue":
+                listeners.add(new ManagedQueueListener(destinationName));
+                break;
+            case "topic":
+                listeners.add(new ManagedTopicListener(destinationName));
+                break;
+            default:
+                LOGGER.error("Unable to create message! Unknown Message Type: {}", destinationType);
+        }
     }
     
-    public void addMessageHandler(MessageHandler mh) throws MessageAdapterException {
-        loadJMSAdapterIfNeeded();
+    private void addMessageHandler(MessageHandler mh) throws MessageAdapterException {
         for(MessageProcessor processor : mh.getMessageProcessors() ) {
             addMessageProcessor(processor.getType(), processor);
         }
@@ -113,7 +113,7 @@ public class MessageManager {
     private void addMessageProcessor(String type, MessageProcessor messageProcessor) {
         List<MessageProcessor> messageProcessorList = messageProcessors.get(type);
         if (messageProcessorList == null) {
-            messageProcessorList = new ArrayList<MessageProcessor>();
+            messageProcessorList = new ArrayList<>();
         }
         messageProcessorList.add(messageProcessor);
         messageProcessors.put(type, messageProcessorList);

@@ -10,6 +10,7 @@ import com.google.protobuf.Message;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -49,7 +50,12 @@ public class MessageUpdate {
         }
     }
 
+    // TODO all these permutations are terrible. Should convert this to a builder pattern
     public void sendUpdate(String service, MessageAction action, Collection<Message> pbList) throws Exception {
+        this.sendUpdate(service, action, pbList, null);
+    }
+
+    public void sendUpdate(String service, MessageAction action, Collection<Message> pbList, Map<String,String> headers) throws Exception {
         if (queue==null) {
             throw new Exception("Executor Not initialized!");
         }
@@ -58,17 +64,24 @@ public class MessageUpdate {
         }
         JmsAdapter jms = MessageManager.getAdapter();
         if (jms!=null) {
-            MessageTask task = new MessageTask(service, jms.getQueueConnectionFactory(), action, pbList);
+            MessageTask task = new MessageTask(service, jms, action, pbList, headers);
             queue.submit(task);
         } else {
             LoggerFactory.getLogger(this.getClass()).error("Unable to send "+service+" message: No adapter Configured!");
         }
     }
     
+    public void sendUpdate(String service, MessageAction action, Message pb, Map<String,String> headers) throws Exception {
+        if (pb==null) {
+            return;
+        }
+        sendUpdate(service, action, Collections.singletonList(pb), headers);
+    }
+    
     public void sendUpdate(String service, MessageAction action, Message pb) throws Exception {
         if (pb==null) {
             return;
         }
-        sendUpdate(service, action, Collections.singletonList(pb));
+        sendUpdate(service, action, Collections.singletonList(pb), null);
     }
 }

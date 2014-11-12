@@ -53,13 +53,13 @@ public class ServiceManager {
         StringBuilder versionInfo = new StringBuilder();
         
         for (BuildProperties build : BuildProperties.getServiceBuildProperties()) {
-            if("LoUIE Processor".equals(build.getName())) continue; //hardcoded processor skip
+            if("Louie Processor".equals(build.getName())) continue; //hardcoded processor skip
             versionInfo.append("  ").append(build.getName()).append(": ")
                     .append(build.getVersion()).append(" ")
                     .append(build.getBuildString()).append("\n");
         }
         LOGGER.info("\n********************************************************\n"
-                + "LoUIE ServiceManager Initialization - \n{}"
+                + "Louie ServiceManager Initialization - \n{}"
                 + "\n********************************************************\n"
                 + "{} : {}",
                 versionInfo,
@@ -286,8 +286,7 @@ public class ServiceManager {
         MessageHandler mh = service.getMessageHandler();
         if (mh!=null) {
             try {
-                MessageManager.getInstance().listenToQueue("Server.current." + service.getServiceName() + "Update");
-                MessageManager.getInstance().addMessageHandler(mh);
+                MessageManager.getInstance().registerServerListener(service.getServiceName(), mh);
             } catch (MessageAdapterException e) {
                 LoggerFactory.getLogger(ServiceManager.class).
                         error("Unable to listen to messages for service: "+service.getServiceName(),e);
@@ -300,7 +299,7 @@ public class ServiceManager {
     public static synchronized void shutdown() {
         Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
         
-        LOGGER.info("LoUIE Shutdown Initiated");
+        LOGGER.info("Louie Shutdown Initiated");
         
         MessageManager.getInstance().shutdown();
         
@@ -319,7 +318,7 @@ public class ServiceManager {
         
         servicesByName.clear();
         
-        LOGGER.info("All LoUIE Services Shutdown");
+        LOGGER.info("All Louie Services Shutdown");
     }
 
     public static Service getService(String serviceName) throws Exception {

@@ -7,8 +7,12 @@
 package com.rhythm.louie.activemq;
 
 import com.rhythm.louie.jms.JmsAdapter;
+
 import java.util.Map;
+
 import javax.jms.QueueConnectionFactory;
+import javax.jms.TopicConnectionFactory;
+
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 /**
@@ -17,7 +21,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
  */
 public class ActiveMQAdapter implements JmsAdapter {
 
-    private ActiveMQConnectionFactory amqcf;
+    private ActiveMQConnectionFactory connectionFactory;
     private String host,port;
     private boolean failover;
     
@@ -25,24 +29,33 @@ public class ActiveMQAdapter implements JmsAdapter {
    
     @Override
     public QueueConnectionFactory getQueueConnectionFactory() {
-        if (amqcf == null) {    
-            StringBuilder url = new StringBuilder();
+        return getConnectionFactory();
+    }
+    
+    @Override
+    public TopicConnectionFactory getTopicConnectionFactory() {
+        return getConnectionFactory();
+    }
+    
+    private synchronized ActiveMQConnectionFactory getConnectionFactory() {
+        if (connectionFactory == null) {
+            String url = "tcp://"+host+":"+port;
             if (failover) {
-                url.append("failover:(tcp://");
-                url.append(host).append(":").append(port).append("?trace=false)");
-            } else {
-                url.append("tcp://");
-                url.append(host).append(":").append(port);
+                url = "failover:("+url+"?trace=false)";
             }
-            amqcf = new ActiveMQConnectionFactory(url.toString());
+            connectionFactory = new ActiveMQConnectionFactory(url);
         }
-        return amqcf;
+        return connectionFactory;
     }
 
     @Override
-    public void configure(Map<String, String> configs) {
+    public synchronized void configure(Map<String, String> configs) {
         this.host = configs.get(HOST_KEY);
         this.port = configs.get(PORT_KEY);
         this.failover = Boolean.valueOf(configs.get(FAILOVER_KEY));
+        
+        connectionFactory = null;
     }
 }
+
+   

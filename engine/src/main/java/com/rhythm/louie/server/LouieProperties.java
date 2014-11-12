@@ -15,6 +15,8 @@ import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.jms.MessagingProperties;
+
 import com.rhythm.louie.service.layer.AnnotatedServiceLayer;
 import com.rhythm.louie.service.layer.CustomServiceLayer;
 import com.rhythm.louie.service.layer.RemoteServiceLayer;
@@ -67,6 +69,13 @@ public class LouieProperties {
     private static final String PORT = "port";
     private static final String SECURE = "secure";
     
+    //messaging
+    private static final String MESSAGING = "messaging";
+    
+    public static CustomProperty getCustomProperty(String key) {
+        return customProperties.get(key);
+    }
+    
     public static void processProperties(URL configs, String contextGateway) throws Exception {
         loadInternals(); //this code organization is weird but it's from iterations of design
         
@@ -111,6 +120,9 @@ public class LouieProperties {
                     break;
                 case SERVICE_PARENT: processServices(elem,false);
                     break;
+                case MESSAGING: 
+                    MessagingProperties.processMessaging(elem);
+                    break;
                 default: String configName = elemName;
                     CustomProperty custom = new CustomProperty(configName);
                     for (Element child : elem.getChildren()) {
@@ -138,7 +150,7 @@ public class LouieProperties {
         return properties;
     }
     
-    public static void loadInternals() throws JDOMException, IOException {
+    private static void loadInternals() throws JDOMException, IOException {
         Document internals;
         SAXBuilder docBuilder = new SAXBuilder();
 
@@ -314,10 +326,8 @@ public class LouieProperties {
                     default: prop.addCustomProp(propName, propValue);
                 }
             }
-            
             servicesList.add(prop);
         }
-        
         ServiceProperties.processServices(servicesList);
     }
     
@@ -349,10 +359,6 @@ public class LouieProperties {
                             .warn("Unkown layer:{}",layerName);
             }
         }
-    }
-    
-    public static CustomProperty getCustomProperty(String key) {
-        return customProperties.get(key);
     }
     
 }
