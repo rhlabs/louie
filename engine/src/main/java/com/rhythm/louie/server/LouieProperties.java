@@ -65,6 +65,7 @@ public class LouieProperties {
     private static final String CENTRAL_AUTH = "central_auth";
     private static final String ROUTER = "router";
     private static final String PORT = "port";
+    private static final String SECURE = "secure";
     
     public static void processProperties(URL configs, String contextGateway) throws Exception {
         loadInternals(); //this code organization is weird but it's from iterations of design
@@ -213,6 +214,8 @@ public class LouieProperties {
                     case CENTRAL_AUTH: prop.setCentralAuth(Boolean.valueOf(propValue));
                         break;
                     case PORT: prop.setPort(Integer.valueOf(propValue));
+                        break;
+                    case SECURE: prop.setSecure(Boolean.valueOf(propValue));
                         break;
                     default: prop.addCustomProperty(propName, propValue);
                         break;

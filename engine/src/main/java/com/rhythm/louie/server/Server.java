@@ -65,6 +65,7 @@ public class Server {
     private String ip;
     private boolean router;
     private boolean centralAuth;
+    private boolean secure = false;
     private int port;
     
     private static String defaultTimezone;
@@ -202,6 +203,10 @@ public class Server {
     protected void setIp(String ip) {
         this.ip = ip;
     }
+    
+    protected void setSecure(boolean secure) {
+        this.secure = secure;
+    }
 
     protected void setRouter(boolean router) {
         this.router = router;
@@ -315,6 +320,10 @@ public class Server {
         return router;
     }
     
+    public boolean isSecure() {
+        return secure;
+    }
+    
     public String getName() {
         return name;
     }
@@ -379,6 +388,16 @@ public class Server {
     
     public static Server getRouter() {
         return ROUTER;
+    }
+    
+    public String getUrl() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(isSecure()?"https":"http").append("://");
+        sb.append(getIp()).append(":").append(getPort());
+        sb.append("/").append(getGateway());
+        
+        return sb.toString();
     }
     
     private static class ServerKey {
