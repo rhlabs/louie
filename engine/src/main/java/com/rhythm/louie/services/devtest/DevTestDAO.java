@@ -18,5 +18,10 @@ public class DevTestDAO implements DevTestService {
     public String messageTest(String message) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public Boolean sendEmail(String sender, String receiver, String subject, String body) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }

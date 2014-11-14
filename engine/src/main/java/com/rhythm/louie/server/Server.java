@@ -158,19 +158,15 @@ public class Server {
 
         //Print
         StringBuilder sb = new StringBuilder();
-        sb.append("\nServers:\n\n");
+        sb.append("\n**** Louie Servers ****\n");
         for (Server server : Server.allServers()) {
+            if (server.getIp().equals(LocalConstants.IP)) {
+                Server.LOCAL = server;
+                sb.append("*");
+            }
             sb.append(server.getName()).append(":").append(server.getHostName());
             sb.append(" - ").append(server.getLocation());
             sb.append("\n");
-            if (server.getIp().equals(LocalConstants.IP)) {
-                Server.LOCAL = server;
-            }
-        }
-        sb.append("\n");
-
-        if (Server.LOCAL!=UNKNOWN) {
-            sb.append("Current Server: ").append(Server.LOCAL.getName());
         }
         LoggerFactory.getLogger(Server.class).info(sb.toString());
 

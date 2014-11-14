@@ -41,4 +41,9 @@ public class DevTestServiceTest {
 //        System.out.println("Captured: " + captured);
     }
     
+    @Test
+    public void sendEmail() throws Exception {
+        client.sendEmail("cjohnson@rhythm.com", "cjohnson@rhythm.com", "Testing email services", "Hello!");
+    }
+    
 }

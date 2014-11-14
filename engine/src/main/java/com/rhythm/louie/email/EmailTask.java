@@ -25,12 +25,13 @@ import javax.mail.internet.MimeMessage;
  */
 public class EmailTask implements Runnable {
 
-    private final String SMTP_HOST = "mailhost.rhythm.com";
     private CustomIDMessage msg;
 
-    private EmailTask() {
+    private EmailTask() throws MessagingException {
         java.util.Properties props = new java.util.Properties();
-        props.put("mail.smtp.host", SMTP_HOST);
+        if (!EmailProperties.getSmtpHost().isEmpty()) {
+            props.put("mail.smtp.host", EmailProperties.getSmtpHost());
+        }
         Session session = Session.getDefaultInstance(props, null);
         this.msg = new CustomIDMessage(session);
     }
@@ -47,7 +48,7 @@ public class EmailTask implements Runnable {
         this();
         this.msg.addFrom(new InternetAddress[] {new InternetAddress(from)});
         
-        List<InternetAddress> toAddr = new ArrayList<InternetAddress>();
+        List<InternetAddress> toAddr = new ArrayList<>();
         for (String to : toList){
             toAddr.add(new InternetAddress(to));
         }

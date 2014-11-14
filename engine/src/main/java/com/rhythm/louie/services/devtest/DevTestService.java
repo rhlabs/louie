@@ -23,5 +23,16 @@ public interface DevTestService {
      * @throws Exception 
      */
     public String messageTest(String message) throws Exception;
+    
+    /**
+     * Test sending an email
+     * @param sender
+     * @param receiver
+     * @param subject
+     * @param body
+     * @return
+     * @throws Exception 
+     */
+    public Boolean sendEmail(String sender, String receiver, String subject, String body) throws Exception;
 }
 

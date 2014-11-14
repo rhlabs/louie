@@ -19,6 +19,8 @@ import com.rhythm.pb.DataTypeProtos.StringPB;
 import com.rhythm.louie.service.CacheLayer;
 
 import com.rhythm.louie.CacheDelegate;
+import com.rhythm.louie.email.EmailService;
+import com.rhythm.louie.email.EmailTask;
 
 /**
  *
@@ -64,6 +66,13 @@ public class DevTestCacheDelegate implements CacheLayer, DevTestService, Delegat
     public String messageTest(String message) throws Exception {
         MessageUpdate.getInstance().sendUpdate(SERVICE_NAME, MessageAction.UPDATE, StringPB.newBuilder().setValue(message).build());
         return "Test Service CacheDelegate received: " + message;
+    }
+
+    @Override
+    public Boolean sendEmail(String sender, String receiver, String subject, String body) throws Exception {
+        EmailTask emailTask = new EmailTask(sender, receiver, subject, body);
+        EmailService.getInstance().sendMail(emailTask);
+        return true;
     }
 
     public class TestServiceMessageHandler extends AnnotatedMessageHandler {

@@ -58,17 +58,11 @@ public class ServiceManager {
                     .append(build.getVersion()).append(" ")
                     .append(build.getBuildString()).append("\n");
         }
-        LOGGER.info("\n********************************************************\n"
-                + "Louie ServiceManager Initialization - \n{}"
-                + "\n********************************************************\n"
-                + "{} : {}",
-                versionInfo,
-                LocalConstants.HOST,LocalConstants.HOSTDOMAIN);
+        LOGGER.info("\n**** Louie Initialization ****\n{}",
+                versionInfo);
         init = true;
          
         Identity.registerLouieIdentity();
-        
-        
         
         try {
             loadProperties(context);
@@ -104,9 +98,9 @@ public class ServiceManager {
         }
         
         // Load Services
-        StringBuilder sb = new StringBuilder("\nInitializing Services");
+        StringBuilder sb = new StringBuilder("\n**** Louie Services Online  ****");
         
-        sb.append("\nReserved Services:\n");
+        sb.append("\nReserved:\n");
         initializeServices(sb, true);
         
         sb.append("\nServices:\n");

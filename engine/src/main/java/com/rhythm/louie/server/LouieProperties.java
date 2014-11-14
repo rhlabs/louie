@@ -15,6 +15,7 @@ import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.email.EmailProperties;
 import com.rhythm.louie.jms.MessagingProperties;
 
 import com.rhythm.louie.service.layer.AnnotatedServiceLayer;
@@ -72,6 +73,9 @@ public class LouieProperties {
     //messaging
     private static final String MESSAGING = "messaging";
     
+    // email
+    private static final String EMAIL = "email";
+     
     public static CustomProperty getCustomProperty(String key) {
         return customProperties.get(key);
     }
@@ -85,7 +89,11 @@ public class LouieProperties {
         }
         
         Document properties = loadDocument(configs);
-        if (properties == null) return;
+        if (properties == null) {
+            LoggerFactory.getLogger(LouieProperties.class)
+                        .info("Louie config file not found, running with defaults.");
+            return;
+        }
         
         Element louie = properties.getRootElement();
         
@@ -93,8 +101,11 @@ public class LouieProperties {
         boolean resetRoot = false;
         for (Element elem : louie.getChildren()) {
             if (ALT_PATH.equalsIgnoreCase(elem.getName())) {
+                String altPath = elem.getText().trim();
+                LoggerFactory.getLogger(LouieProperties.class)
+                        .info("Loading Louie configs from alternate file: {}", altPath);
                 //overwrite document with values from alternate config 
-                properties = loadDocument(new File(elem.getText()).toURI().toURL());
+                properties = loadDocument(new File(altPath).toURI().toURL());
                 if (properties == null) return;
                 resetRoot = true;
             }
@@ -123,10 +134,13 @@ public class LouieProperties {
                 case MESSAGING: 
                     MessagingProperties.processMessaging(elem);
                     break;
+                case EMAIL:
+                    EmailProperties.processEmailProperties(elem);
+                    break;
                 default: String configName = elemName;
                     CustomProperty custom = new CustomProperty(configName);
                     for (Element child : elem.getChildren()) {
-                        custom.setProperty(child.getName(), child.getText());
+                        custom.setProperty(child.getName(), child.getText().trim());
                     }
                     customProperties.put(configName, custom);
                     break;
@@ -209,7 +223,7 @@ public class LouieProperties {
             
             for (Element serverProp : server.getChildren()) {
                 String propName = serverProp.getName().toLowerCase();
-                String propValue = serverProp.getText();
+                String propValue = serverProp.getText().trim();
                 if (null != propName) switch (propName) {
                     case HOST: prop.setHost(propValue);
                         break;
@@ -241,7 +255,7 @@ public class LouieProperties {
     private static void processServiceDefaults(Element defaults) {
         for (Element defaultProp : defaults.getChildren()) {
             String propName = defaultProp.getName().toLowerCase();
-            String propValue = defaultProp.getText();
+            String propValue = defaultProp.getText().trim();
             if (null != propName) switch (propName) {
                 case CACHING: ServiceProperties.setDefaultCaching(Boolean.valueOf(propValue));
                     break;
@@ -309,7 +323,7 @@ public class LouieProperties {
             
             for (Element serviceProp : service.getChildren()) {
                 String propName = serviceProp.getName().toLowerCase();
-                String propValue = serviceProp.getText();
+                String propValue = serviceProp.getText().trim();
                 if (null != propName) switch (propName) {
                     case CACHING: prop.setCaching(Boolean.valueOf(propValue));
                         break;
