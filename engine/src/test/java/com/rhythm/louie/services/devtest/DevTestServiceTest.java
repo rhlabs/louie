@@ -26,7 +26,7 @@ public class DevTestServiceTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        LouieConnection conn = LouieConnectionFactory.getLocalConnection(
+        LouieConnection conn = LouieConnectionFactory.getConnection("localhost",
                         Identity.createJUnitIdentity());
         
         client = DevTestClientFactory.getClient(conn);
@@ -35,7 +35,7 @@ public class DevTestServiceTest {
     
     @Test
     public void messageFeedbackTest() throws Exception {
-        String captured = client.messageTest("test1");
+        String captured = client.messageTest("Test Message");
         System.out.println("Captured: " + captured);
 //        captured = client.messageTest("test2");
 //        System.out.println("Captured: " + captured);

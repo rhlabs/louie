@@ -14,6 +14,8 @@ import com.rhythm.louie.Service;
  */
 @Service
 public interface DevTestService {
+    final String SERVICE_NAME = "devtest";
+    
     /**
      * Generates a message using the configured JMS adapter,
      * and the same delegate should receive that message

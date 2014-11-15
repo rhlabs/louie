@@ -28,7 +28,6 @@ import com.rhythm.louie.email.EmailTask;
  */
 @CacheDelegate
 public class DevTestCacheDelegate implements CacheLayer, DevTestService, Delegate<DevTestService> {
-    private final String SERVICE_NAME = "test";
     private DevTestService delegate;
     private final MessageHandler msgHandler;
     
@@ -65,7 +64,7 @@ public class DevTestCacheDelegate implements CacheLayer, DevTestService, Delegat
     @Override
     public String messageTest(String message) throws Exception {
         MessageUpdate.getInstance().sendUpdate(SERVICE_NAME, MessageAction.UPDATE, StringPB.newBuilder().setValue(message).build());
-        return "Test Service CacheDelegate received: " + message;
+        return "Test Service CacheDelegate sent: " + message;
     }
 
     @Override
