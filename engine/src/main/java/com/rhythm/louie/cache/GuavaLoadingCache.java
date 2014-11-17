@@ -83,11 +83,16 @@ public class GuavaLoadingCache<K, V> implements GuavaCache<K, V> {
         }
     }
 
-     @Override
+    /**
+     * Returns the value associated with key in this cache, or null if there is no cached value for key.
+
+     * @param key
+     * @return 
+     */
+    @Override
     public V getIfPresent(K key) {
         return cache.getIfPresent(key);
     }
-
     
     /**
      * Loads a new value for key key, possibly asynchronously. While the new 

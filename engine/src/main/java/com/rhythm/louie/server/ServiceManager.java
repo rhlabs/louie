@@ -51,14 +51,21 @@ public class ServiceManager {
         Logger LOGGER = LoggerFactory.getLogger(ServiceManager.class);
         
         StringBuilder versionInfo = new StringBuilder();
+        StringBuilder louieVersionInfo = new StringBuilder();
         
         for (BuildProperties build : BuildProperties.getServiceBuildProperties()) {
-            if("Louie Processor".equals(build.getName())) continue; //hardcoded processor skip
-            versionInfo.append("  ").append(build.getName()).append(": ")
+            StringBuilder sb = versionInfo;
+            if (build.getBuildVersion().startsWith("louie-")) {
+                if(!"Louie Engine".equals(build.getName())) continue;
+                sb = louieVersionInfo;
+            }
+            sb.append("  ").append(build.getName()).append(": ")
                     .append(build.getVersion()).append(" ")
                     .append(build.getBuildString()).append("\n");
         }
-        LOGGER.info("\n**** Louie Initialization ****\n{}",
+        
+        LOGGER.info("\n**** Louie Initialization ****\n{}{}",
+                louieVersionInfo,
                 versionInfo);
         init = true;
          
