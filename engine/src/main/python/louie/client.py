@@ -27,7 +27,7 @@ import getpass
 import logging
 
 # R&H imports
-from louie.http import HTTPConnection, HTTPException, BadStatusLine
+from louie.http import HTTPConnection, HTTPSConnection, HTTPException, BadStatusLine
 from louie.request_pb2 import SessionKey, IdentityPB
 from louie.request_pb2 import RequestPB, RequestHeaderPB
 from louie.request_pb2 import ResponsePB, ResponseHeaderPB
@@ -63,7 +63,7 @@ class LouieHttpClient(object):
     """
     _instances = {}
     
-    def __new__(cls, host='louiehost', port='8080', gateway='louie',
+    def __new__(cls, host='louiehost', port='8080', gateway='/louie',
                 authport='8787'):
         with _LOCK:
             try:
@@ -73,7 +73,7 @@ class LouieHttpClient(object):
                 cls._instances[host] = client
                 return client
             
-    def __init__(self, host='louiehost', port='8080', gateway='louie',
+    def __init__(self, host='louiehost', port='8080', gateway='/louie',
                 authport='8787'):
         try:
             self._initialized
@@ -94,8 +94,7 @@ class LouieHttpClient(object):
         self._port = port
         self._authport = authport
         
-        self._gateway = gateway
-        self._requestPath = "/{0}/pb".format(self._gateway)
+        self._gateway = "{0}/pb".format(gateway)
 
         self._identity = IdentityPB()
         self._identity.language = 'python/{0}'.format(sys.version[:3])
@@ -119,6 +118,15 @@ class LouieHttpClient(object):
         self._retrySeconds = 120
         
         self._connection = None
+        secured = os.environ.get("LOUIE_SECURE")
+        self._secured = secured.lower() in ("yes", "true", "t", "1") if secured is not None else False
+        if self._secured:
+            self._securePort = os.environ.get("LOUIE_SECURE_PORT")
+            if self._securePort is None:
+                raise ConfigurationError("Failed to set a secure port for https! Please specify a LOUIE_SECURE_PORT env variable")
+            homedir = os.path.expanduser("~")
+            self._secureCert = homedir + "/louie_client.crt"
+            self._secureKey = homedir + "/louie_client.key"
         
         #specialized auth behavior
         self._authEnabled = False
@@ -165,7 +173,7 @@ class LouieHttpClient(object):
                     for i in params:
                         paramString += str(i) + ","
                     
-                    LOGGER.debug("Request: %s/%s/%s:%s - %s", self._host, self._gateway, system, method, paramString)
+                    LOGGER.debug("LoUIE Request: %s:%s - %s", system, method, paramString)
                     
                 res = self._doRequest(system, method, params, decodeFunction)
                 self._lockOffRetry = False
@@ -209,6 +217,14 @@ class LouieHttpClient(object):
         """
         self._authEnabled = enable
         
+    def setCertPath(self, certPath):
+        """ Full path of an x509 certificate """
+        self._securePath = certPath
+        
+    def setKeyPath(self, keyPath):
+        """ Full path of a private key """
+        self._secureKey = keyPath
+        
     # =======================
     # PRIVATE METHODS
     # =======================  
@@ -238,6 +254,23 @@ class LouieHttpClient(object):
                 errs=' '.join([str(arg) for arg in e.args])
             )
             raise ConnectError(errStr)
+        return conn
+    
+    def _createSecureConnection(self):
+        
+        try:
+            conn = HTTPSConnection(self._host, self._securePort,
+                self._secureKey, self._secureCert)
+        except (HTTPException, socket.error, socket.timeout, socket.herror,
+                socket.gaierror) as e:
+            # report all error messages from server
+            errStr = 'Unable to connect host {host}:{port}: {errs}'.format(
+                host=self._host,
+                port=targetPort,
+                errs=' '.join([str(arg) for arg in e.args])
+            )
+            raise ConnectError(errStr)
+            
         return conn
 
     # -----------------------------------------------------------------------------
@@ -285,13 +318,16 @@ class LouieHttpClient(object):
         encodedRequest = encodeDelimited(header) + encodeDelimited(request)
         for param in params:
             encodedRequest +=  encodeDelimited(param)
-        #get a connection            
-        connection = self._createConnection()
+        #get a connection
+        if (self._secured):
+            connection = self._createSecureConnection()
+        else:
+            connection = self._createConnection()
         connection.connect()
         
         connection.request(
             "POST", 
-            self._requestPath,
+            self._gateway,
             encodedRequest,
             {"Content-type": "application/x-protobuf"}
         )
@@ -341,7 +377,7 @@ class LouieHttpClient(object):
         for respCnt in range(resHeader.count):
             resBody = decodeDelimitedFromHttp(response, ResponsePB.FromString)
             if resBody.error.description:
-                raise LouieError("{0}/{1} - {2}".format(self._host, self._gateway, resBody.error.description))
+                raise LouieError(resBody.error.description)
             for pbCnt in range(resBody.count):
                 results.append(decodeDelimitedFromHttp(response, decodeFunction))
  
@@ -381,5 +417,7 @@ class SocketError(ServerError):
     """Fatal socket error."""
     pass
         
-        
+class ConfigurationError(ServerError):
+    """Improper configuration"""
+    pass
         

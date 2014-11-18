@@ -173,6 +173,14 @@ public class LouieConnectionFactory {
         }
     }
     
+    public static LouieConnection getSecureConnection(IdentityPB id, SSLConfig sslConfig) {
+        return new DefaultLouieConnection(id, sslConfig);
+    }
+    
+    public static LouieConnection getSecureConnection(IdentityPB id, SSLConfig sslConfig, String key) {
+        return new DefaultLouieConnection(id, sslConfig, key);
+    }
+    
     public static LouieConnection getConnection(String host) {
         return new DefaultLouieConnection(Identity.getIdentity(),host);
     }

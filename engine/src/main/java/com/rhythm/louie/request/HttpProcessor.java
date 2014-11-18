@@ -5,12 +5,6 @@
  */
 package com.rhythm.louie.request;
 
-import com.rhythm.louie.server.Server;
-import com.rhythm.louie.services.auth.UnauthorizedSessionException;
-import com.rhythm.louie.exception.LouieRouteException;
-
-import com.rhythm.louie.request.data.Result;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -22,6 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.rhythm.louie.exception.LouieRouteException;
+import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.server.Server;
+import com.rhythm.louie.services.auth.UnauthorizedSessionException;
 
 /**
  *
@@ -52,7 +51,7 @@ public class HttpProcessor {
         localIp = ip;
      }
     
-     public void processRequest(HttpServletRequest req,
+    public void processRequest(HttpServletRequest req,
             HttpServletResponse resp) throws ServletException, IOException {
         try {
             if (req.getContentType() == null || !req.getContentType().startsWith("application/x-protobuf")) {
@@ -74,7 +73,7 @@ public class HttpProcessor {
             LOGGER.error("Error Processing Request",e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST,errorMessage);
         }
-     }
+    }
      
     private void sendHttpError(List<Result> results, HttpServletResponse resp) {
         for (Result result : results) {

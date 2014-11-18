@@ -5,12 +5,22 @@
  */
 package com.rhythm.louie.request;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 
-import com.rhythm.louie.services.auth.AuthUtils;
-import com.rhythm.louie.services.auth.SessionStat;
-import com.rhythm.louie.services.auth.UnauthorizedSessionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rhythm.louie.request.data.DataType;
+import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.server.Server;
+import com.rhythm.louie.services.auth.*;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.pb.RequestProtos.IdentityPB;
@@ -21,25 +31,20 @@ import com.rhythm.pb.RequestProtos.ResponsePB;
 import com.rhythm.pb.RequestProtos.RoutePB;
 import com.rhythm.pb.RequestProtos.SessionKey;
 
-import com.rhythm.louie.request.data.DataType;
-import com.rhythm.louie.request.data.Result;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author cjohnson
  */
 public class ProtoProcessor implements ProtoProcess {
     private final Logger LOGGER = LoggerFactory.getLogger(ProtoProcessor.class);
-
+    private final Pattern userCN;
+    private final boolean secured;
+    
+    public ProtoProcessor() {
+        secured = Server.LOCAL.isSecure();
+        userCN = Pattern.compile(".*CN=([\\w\\s]+),*.*");
+    }
+    
     @Override
     public List<Result> processRequest(InputStream input, OutputStream output, RequestProperties props) throws UnauthorizedSessionException, IOException, Exception {
         long start = System.nanoTime();
@@ -59,7 +64,19 @@ public class ProtoProcessor implements ProtoProcess {
         } else { //initial request, we will handle creating and returning a key
             if (header.hasIdentity()) { //to make backwards compatible
                 identity = header.getIdentity();
-                sessionKey = AuthUtils.createKey(identity);
+                if (secured) {
+                    Matcher match = userCN.matcher(props.getRemoteUser());
+                    if (match.matches()) {
+                        if (identity.getUser().equalsIgnoreCase(match.group(1))) {
+                            sessionKey = AuthUtils.createKey(identity);
+                        }
+                    }
+                } else {
+                    sessionKey = AuthUtils.createKey(identity);
+                }
+            }
+            if (sessionKey == null && secured) {
+                throw new UnauthenticatedException("Unable to create a Session Key, likely due to authentication failure");
             }
         }
         

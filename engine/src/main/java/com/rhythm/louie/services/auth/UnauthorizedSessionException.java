@@ -5,13 +5,15 @@
  */
 package com.rhythm.louie.services.auth;
 
+import com.rhythm.louie.exception.LouieException;
+
 import com.rhythm.pb.RequestProtos.SessionKey;
 
 /**
  *
  * @author cjohnson
  */
-public class UnauthorizedSessionException extends Exception {
+public class UnauthorizedSessionException extends LouieException {
     public UnauthorizedSessionException(SessionKey key) {
         super("Invalid Session Key: "+(key==null?null:key.getKey()));
     }

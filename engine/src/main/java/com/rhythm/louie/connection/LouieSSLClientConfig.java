@@ -5,6 +5,8 @@
  */
 package com.rhythm.louie.connection;
 
+import com.rhythm.louie.server.CustomProperty;
+import com.rhythm.louie.server.LouieProperties;
 import com.rhythm.louie.server.Server;
 
 /**
@@ -15,8 +17,11 @@ public class LouieSSLClientConfig extends SSLClientConfig implements SSLConfig{
 
     //all gets could return 0 or null, so check appropriately during usage.
     
-    private static final String CERT_DEFAULT_PASS = "cbgbomfug";
-    private static final String CA_KEYSTORE_DEFAULT_PASS = "cbgbomfug";
+//    private static final String CERT_DEFAULT_PASS = "cbgbomfug";
+//    private static final String CA_KEYSTORE_DEFAULT_PASS = "cbgbomfug";
+    private static final String SSL_CONFIG_KEY = "ssl";
+    private static final String CERT_PATH_KEY = "cert_path";
+    private static final String CA_PATH_KEY = "ca_path";
     
     private String gateway,clientCert,caKeystore;
     private int port;
@@ -24,8 +29,11 @@ public class LouieSSLClientConfig extends SSLClientConfig implements SSLConfig{
     
     public LouieSSLClientConfig(Server server) throws Exception {
         setHost(server.getHostName());
-        setSSLPass(CERT_DEFAULT_PASS);
-        setSSLCAPass(CA_KEYSTORE_DEFAULT_PASS);
+        CustomProperty sslProps = LouieProperties.getCustomProperty(SSL_CONFIG_KEY);
+        String certPath = sslProps.getProperty(CERT_PATH_KEY);
+        String caPath = sslProps.getProperty(CA_PATH_KEY);
+//        setSSLPass();
+//        setSSLCAPass();
 //        String clientSSLCert = System.getProperty("clientSSLCert");
 //        String clientSSLCACert = System.getProperty("clientSSLCACert");
 //        if (clientSSLCert != null && clientSSLCACert != null){

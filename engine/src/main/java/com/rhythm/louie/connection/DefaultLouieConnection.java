@@ -9,7 +9,9 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 import com.google.protobuf.Message;
 
@@ -226,10 +228,20 @@ public class DefaultLouieConnection implements LouieConnection {
         connection.setRequestProperty("Content-Type", "application/x-protobuf");
         connection.setReadTimeout(30*1000);
         connection.setConnectTimeout(15*1000);
-
+        connection.setHostnameVerifier(new LouieHostVerifier());
         connection.setSSLSocketFactory(sslConfig.getSSLSocketFactory());
         
         return connection;
+    }
+    
+    private class LouieHostVerifier implements HostnameVerifier{
+
+        @Override
+        public boolean verify(String string, SSLSession ssls) {
+            //TODO check hostname using OCSP or via some crl that we have access to somehow?
+            return true;
+        }
+        
     }
     
     @Override
@@ -297,6 +309,7 @@ public class DefaultLouieConnection implements LouieConnection {
                     connection = getSecureConnection(getSecurePBURL());
                 } catch (Exception e) {
                     LOGGER.error("Error creating secure connection", e);
+                    e.printStackTrace();
                     throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords.");
                 }
             } else {

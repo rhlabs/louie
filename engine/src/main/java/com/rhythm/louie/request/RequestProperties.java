@@ -30,6 +30,8 @@ public class RequestProperties {
         props.localPort = req.getLocalPort();
         props.gateway = req.getContextPath().substring(1);
         props.hostIp = hostIp;
+        props.remoteUser = req.getRemoteUser();
+        props.authenticated = props.remoteUser != null;
         return props;
     }
     
@@ -45,6 +47,9 @@ public class RequestProperties {
     }
     
     private RequestProperties() {}
+
+    private boolean authenticated;
+    private String remoteUser;
     
     /**
      * @return the remoteAddress
@@ -83,4 +88,16 @@ public class RequestProperties {
         return route;
     }
     
+//    protected void setAuthenticated(String remoteUser) {
+//        this.remoteUser = remoteUser;
+//        this.authenticated = (this.remoteUser != null);
+//    }
+    
+    public boolean isAuthenticated() {
+        return authenticated;
+    }
+    
+    public String getRemoteUser() {
+        return remoteUser;
+    }
 }

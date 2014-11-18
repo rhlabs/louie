@@ -8,6 +8,7 @@
         <router>false</router>
         <port>8080</port>
         <gateway>louie</gateway>
+        <secure>false</secure>
     </server_defaults>
     <service_defaults>
         <enable>true</enable>

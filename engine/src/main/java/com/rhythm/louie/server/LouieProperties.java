@@ -184,6 +184,7 @@ public class LouieProperties {
         Server.setDefaultLocation(serverDef.getChildText(LOCATION));
         Server.setDefaultRouter(Boolean.valueOf(serverDef.getChildText(ROUTER)));
         Server.setDefaultPort(Integer.valueOf(serverDef.getChildText(PORT)));
+        Server.setDefaultSecure(Boolean.valueOf(serverDef.getChildText(SECURE)));
             
         //Load internal defaults into ServiceProperties
         Element serviceDef = louie.getChild("service_defaults");

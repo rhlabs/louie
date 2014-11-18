@@ -20,15 +20,7 @@ import com.rhythm.louie.info.InfoProtos.ServerPB;
  * @author cjohnson
  */
 public class Server {
-    private static String DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
-    protected static void setDefaultGateway(String gateway) { 
-        if (gateway==null) {
-            DEFAULT_GATEWAY = Constants.DEFAULT_GATEWAY;
-        } else {
-            DEFAULT_GATEWAY = gateway;
-        }
-    }
-    
+
     public static final Server UNKNOWN = new Server("Unknown");
     static {
         UNKNOWN.host = "localhost";
@@ -68,6 +60,8 @@ public class Server {
     private boolean secure = false;
     private int port;
     
+    private static boolean liveIsDefaultGateway = false;
+    private static String defaultGateway;
     private static String defaultTimezone;
     private static String defaultHost;
     private static String defaultDisplay;
@@ -75,6 +69,7 @@ public class Server {
     private static String defaultIP;
     private static boolean defaultRouter;
     private static int defaultPort;
+    private static boolean defaultSecure;
     
     private ServerPB pb;
     
@@ -86,7 +81,7 @@ public class Server {
             if (server.router) ROUTER = server;
         }
         
-        if (SERVERS.isEmpty()) {
+        if (SERVERS.isEmpty()) {                                        //shouldn't this be picking up what was in defaults?
             LoggerFactory.getLogger(Server.class)
                     .warn("No servers found, setting to localhost");
             Server server = new Server("LOCAL");
@@ -94,7 +89,7 @@ public class Server {
             server.location="LOCAL";
             server.timezone=TimeZone.getDefault().getDisplayName();
             SERVERS.put("localhost", server);
-
+            server.secure = defaultSecure;
             Server.LOCAL = server;
         }
 
@@ -163,6 +158,9 @@ public class Server {
             if (server.getIp().equals(LocalConstants.IP)) {
                 Server.LOCAL = server;
                 sb.append("*");
+                if (liveIsDefaultGateway) {
+                    server.setGateway(defaultGateway); //blindly reset it
+                }
             }
             sb.append(server.getName()).append(":").append(server.getHostName());
             sb.append(" - ").append(server.getLocation());
@@ -174,6 +172,17 @@ public class Server {
             LoggerFactory.getLogger(Server.class)
                     .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
         }
+        
+        printServers();
+    }
+    
+    protected static void setDefaultGateway(String gateway) { 
+        defaultGateway = gateway;
+    }
+    
+    protected static void setLiveGateway(String gateway) {
+        defaultGateway = gateway;
+        liveIsDefaultGateway = true; //that is such shit
     }
 
     protected void setTimezone(String timezone) {
@@ -244,6 +253,10 @@ public class Server {
         defaultPort = port;
     }
     
+    protected static void setDefaultSecure(boolean secure) {
+        defaultSecure = secure;
+    }
+    
     protected void addCustomProperty(String key, String value) {
         properties.put(key, value);
     }
@@ -298,9 +311,10 @@ public class Server {
         this.display = defaultDisplay;
         this.timezone = defaultTimezone;
         this.location = defaultLocation;
-        this.gateway = DEFAULT_GATEWAY;
+        this.gateway = defaultGateway;
         this.router = defaultRouter;
         this.port = defaultPort;
+        this.secure = defaultSecure;
         properties = new HashMap<>();
     }
      
@@ -431,6 +445,25 @@ public class Server {
             return true;
         }
         
+    }
+    
+    public static void printServers() {
+        StringBuilder servers = new StringBuilder();
+        for (Server s : ALL_SERVERS) {
+            servers.append("Server: ").append(s.getName()).append("\n");
+            servers.append("    host:          ").append(s.getHostName()).append("\n");
+            servers.append("    location:      ").append(s.getLocation()).append("\n");
+            servers.append("    display:       ").append(s.getDisplay()).append("\n");
+            servers.append("    timezone:      ").append(s.getTimezone()).append("\n");
+            servers.append("    gateway:       ").append(s.getGateway()).append("\n");
+            servers.append("    port:          ").append(s.getPort()).append("\n");
+            servers.append("    ip:            ").append(s.getIp()).append("\n");
+            servers.append("    router:        ").append(s.isARouter()).append("\n");
+            servers.append("    central_auth:  ").append(s.centralAuth).append("\n");
+            servers.append("    secure:        ").append(s.isSecure()).append("\n");
+            servers.append("\n\n");
+        }
+        System.out.println(servers);
     }
     
 }
