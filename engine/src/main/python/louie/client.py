@@ -94,7 +94,8 @@ class LouieHttpClient(object):
         self._port = port
         self._authport = authport
         
-        self._gateway = "{0}/pb".format(gateway)
+        gateway = gateway.lstrip('/').rstrip('/')
+        self._gateway = "/{0}/pb".format(gateway)
 
         self._identity = IdentityPB()
         self._identity.language = 'python/{0}'.format(sys.version[:3])
