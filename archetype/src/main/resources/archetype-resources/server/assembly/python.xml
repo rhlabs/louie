@@ -40,6 +40,13 @@
       </includes>
       <outputDirectory>/</outputDirectory>
     </dependencySet>
+    <dependencySet>
+      <unpack>true</unpack>
+      <includes>
+        <include>com.rhythm.louie:louie:zip:python:*</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+    </dependencySet>
   </dependencySets>
  
 </assembly>

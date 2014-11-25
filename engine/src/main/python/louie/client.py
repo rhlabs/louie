@@ -63,7 +63,7 @@ class LouieHttpClient(object):
     """
     _instances = {}
     
-    def __new__(cls, host='louiehost', port='8080', gateway='/louie',
+    def __new__(cls, host='louiehost', port='8080', gateway='louie',
                 authport='8787'):
         with _LOCK:
             try:
@@ -73,7 +73,7 @@ class LouieHttpClient(object):
                 cls._instances[host] = client
                 return client
             
-    def __init__(self, host='louiehost', port='8080', gateway='/louie',
+    def __init__(self, host='louiehost', port='8080', gateway='louie',
                 authport='8787'):
         try:
             self._initialized

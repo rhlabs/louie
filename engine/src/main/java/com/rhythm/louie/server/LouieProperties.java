@@ -40,6 +40,8 @@ public class LouieProperties {
     private static final String DEFAULT = "defaults";
     private static final String RESERVED = "reserved";
     
+    private static final String CUSTOM = "custom";
+    
     //services
     private static final String SERVICE = "service";
     private static final String SERVICE_PARENT = "services";
@@ -244,7 +246,13 @@ public class LouieProperties {
                         break;
                     case SECURE: prop.setSecure(Boolean.valueOf(propValue));
                         break;
-                    default: prop.addCustomProperty(propName, propValue);
+                    case CUSTOM: 
+                        for (Element child : serverProp.getChildren()) {
+                            prop.addCustomProperty(child.getName().toLowerCase(), child.getText().trim());
+                        }
+                        break;
+                    default: LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unexpected server property  {}:{}",propName,propValue);
                         break;
                 }
             }
@@ -338,7 +346,13 @@ public class LouieProperties {
                     case LAYERS:
                         processServiceLayers(serviceProp, prop);
                         break;
-                    default: prop.addCustomProp(propName, propValue);
+                    case CUSTOM: 
+                        for (Element child : serviceProp.getChildren()) {
+                            prop.addCustomProp(child.getName().toLowerCase(), child.getText().trim());
+                        }
+                        break;
+                    default: LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unexpected server property  {}:{}",propName,propValue);
                 }
             }
             servicesList.add(prop);

@@ -93,15 +93,6 @@
             <properties>
                 <gen.python>true</gen.python>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>com.rhythm.louie</groupId>
-                    <artifactId>louie</artifactId>
-                    <version>${louie.version}</version>
-                    <classifier>python</classifier>
-                    <type>zip</type>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>

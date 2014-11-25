@@ -29,14 +29,4 @@
   </fileSets>
   <!-- use this section if you want to package dependencies -->
   
-  <dependencySets>
-    <dependencySet>
-      <unpack>true</unpack>
-      <includes>
-        <include>com.rhythm.louie:louie:zip:python:*</include>
-      </includes>
-      <outputDirectory>/</outputDirectory>
-    </dependencySet>
-  </dependencySets>
- 
 </assembly>

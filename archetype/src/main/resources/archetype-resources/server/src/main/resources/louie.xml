@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<louie>
-    <!-- 
+<louie xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://lid1591:8080/xsd/louie_config.xsd">
+<!-- 
     The set of expected keys is visible in the LouieProperties class
     
     

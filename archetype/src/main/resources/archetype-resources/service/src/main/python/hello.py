@@ -4,8 +4,10 @@
 ${symbol_pound}!/usr/bin/python
 
 from ${service_lowercase}.client import ${service_titlecase}Client
+import logging
 
 def main():
+    logging.basicConfig(format='%(asctime)s %(message)s')
     outgoing = 'HELLO WORLD!'
     client = ${service_titlecase}Client()
     print 'sending to server: {0}'.format(outgoing)
