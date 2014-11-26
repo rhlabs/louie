@@ -24,16 +24,10 @@ import javax.mail.internet.MimeMessage;
  * @author sfong
  */
 public class EmailTask implements Runnable {
-
     private CustomIDMessage msg;
 
     private EmailTask() throws MessagingException {
-        java.util.Properties props = new java.util.Properties();
-        if (!EmailProperties.getSmtpHost().isEmpty()) {
-            props.put("mail.smtp.host", EmailProperties.getSmtpHost());
-        }
-        Session session = Session.getDefaultInstance(props, null);
-        this.msg = new CustomIDMessage(session);
+        this.msg = new CustomIDMessage(MailProperties.getSession());
     }
     
     public EmailTask(String from, String to, String subject, String body) throws MessagingException {

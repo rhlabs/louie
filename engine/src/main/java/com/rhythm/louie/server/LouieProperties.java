@@ -15,7 +15,7 @@ import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.LoggerFactory;
 
-import com.rhythm.louie.email.EmailProperties;
+import com.rhythm.louie.email.MailProperties;
 import com.rhythm.louie.jms.MessagingProperties;
 
 import com.rhythm.louie.service.layer.AnnotatedServiceLayer;
@@ -74,7 +74,7 @@ public class LouieProperties {
     private static final String MESSAGING = "messaging";
     
     // email
-    private static final String EMAIL = "email";
+    private static final String MAIL = "mail";
      
     public static CustomProperty getCustomProperty(String key) {
         return customProperties.get(key);
@@ -134,8 +134,8 @@ public class LouieProperties {
                 case MESSAGING: 
                     MessagingProperties.processMessaging(elem);
                     break;
-                case EMAIL:
-                    EmailProperties.processEmailProperties(elem);
+                case MAIL:
+                    MailProperties.processProperties(elem);
                     break;
                 default: String configName = elemName;
                     CustomProperty custom = new CustomProperty(configName);
