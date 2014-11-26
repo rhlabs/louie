@@ -6,14 +6,11 @@
 package com.rhythm.louie.jms;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.jms.*;
 
+import com.google.common.base.Joiner;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 
@@ -102,10 +99,11 @@ public class MessageTask implements Runnable {
             MessageProducer producer = session.createProducer(dest);
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             
-            StringBuilder type = new StringBuilder();
+            Set<String> types = new HashSet<>();
             for (Message pb : pbList) {
-                type.append(pb.getDescriptorForType().getFullName()).append(" ");
+                types.add(pb.getDescriptorForType().getFullName());
             }
+            
             MessageBPB pb = createMessage(action, pbList);
             int size = pb.getSerializedSize();
             byte[] data = new byte[size];
@@ -115,7 +113,7 @@ public class MessageTask implements Runnable {
 
             BytesMessage msg = session.createBytesMessage();
             msg.writeBytes(data);
-            msg.setStringProperty(TYPE, type.toString());
+            msg.setStringProperty(TYPE, Joiner.on(" ").join(types));
             
             for (Map.Entry<String,String> header : headers.entrySet()) {
                 if (header.getKey().equals(TYPE)) {
