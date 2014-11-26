@@ -8,6 +8,9 @@ package com.rhythm.louie.jdbc;
 
 import java.sql.Connection;
 
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
 /**
  *
  * @author cjohnson
@@ -22,7 +25,8 @@ public class DatasourceConnectionFactory implements ConnectionFactory {
 
     @Override
     public Connection createConnection() throws Exception {
-        ServiceLocator sl = new ServiceLocator();
-        return sl.getDataSource(datasource).getConnection();
+        InitialContext ic = new InitialContext();
+        DataSource ds = (DataSource) ic.lookup(datasource);
+        return ds.getConnection();
     }
 }
