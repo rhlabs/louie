@@ -7,6 +7,7 @@ package com.rhythm.louie.email;
 
 import java.util.Properties;
 
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.naming.InitialContext;
 
@@ -41,7 +42,7 @@ public class MailProperties {
 //         </custom>
 //    </mail>
 //                   
-        private static String jndi = null;
+    private static String jndi = null;
 
     public static void processProperties(Element email) {
         for (Element prop : email.getChildren()) {
@@ -79,16 +80,24 @@ public class MailProperties {
     }
 
     // Session
-    public static synchronized Session getSession() {
+    public static Session getSession() throws MessagingException {
         if (jndi != null) {
             try {
                 InitialContext ic = new InitialContext();
                 return (Session) ic.lookup(jndi);
             } catch (Exception e) {
-                LoggerFactory.getLogger(MailProperties.class)
-                        .error("Unable to load mail session from jndi. Using Default", e);
+                throw new MessagingException("Unable to load mail session from JNDI", e);
             }
+        } else {
+            return loadSessionForProps();
         }
-        return Session.getDefaultInstance(props, null);
+    }
+    
+    private static Session session = null;
+    private static synchronized Session loadSessionForProps() {
+        if (session ==null) {
+            session = Session.getInstance(props);
+        }
+        return session;
     }
 }

@@ -9,8 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import javax.mail.Session;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
@@ -18,8 +16,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  * @author sfong
  */
 public class EmailService {
-    private Session testSession;
-    
     private ExecutorService queue;
     
     private EmailService() {}
