@@ -24,9 +24,6 @@ public class MailProperties {
     
     private static final String JNDI = "jndi";
     private static final String CUSTOM = "custom";
-    private static final String PROPERTY = "property";
-    private static final String NAME = "name";
-    private static final String VALUE = "value";
 
     private static final Properties props = new Properties();
     
@@ -35,10 +32,10 @@ public class MailProperties {
     }
     
 //    <mail>
-//         <jndi name="mail/Sesssion" />
+//         <jndi>mail/Session</jndi>
 //         <custom>
-//            <property name="mail.smtp.host" value="mailhost.rhythm.com" />
-//            <property name="mail.smtp.port" value="123" />
+//            <mail.smtp.host>mailhost.rhythm.com</mail.smpt.host>
+//            <mail.smtp.port>123</mail.smtp.port>
 //         </custom>
 //    </mail>
 //                   
@@ -54,19 +51,7 @@ public class MailProperties {
                         break;
                     case CUSTOM:
                         for (Element customProp : prop.getChildren()) {
-                            if (customProp.getName().equals(PROPERTY)) {
-                                String name = customProp.getAttributeValue(NAME);
-                                String value = customProp.getAttributeValue(VALUE);
-                                if (name == null || value == null) {
-                                    LoggerFactory.getLogger(MailProperties.class)
-                                            .warn("Unable to set property, must specify name and value:{}={}", name, value);
-                                } else {
-                                    props.put(name.trim(), value.trim());
-                                }
-                            } else {
-                                LoggerFactory.getLogger(MailProperties.class)
-                                        .warn("Unknown Custom Element:{}", customProp.getName());
-                            }
+                            props.put(customProp.getName(), customProp.getTextTrim());
                         }
                         break;
                     default:

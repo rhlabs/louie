@@ -39,7 +39,7 @@ public class MessagingProperties {
     private static final String PREFIX = "prefix";
     private static final String TYPE = "type";
     
-    private static final String PROPERTIES = "properties";
+    private static final String CUSTOM = "custom";
     
     // VALUES
     private static String adapterClass = System.getProperty(SYSTEM_PROP_KEY);;
@@ -78,7 +78,7 @@ public class MessagingProperties {
                         updatePrefix = prop.getAttributeValue(PREFIX, getUpdatePrefix());
                         updateType = prop.getAttributeValue(TYPE, getUpdateType());
                         break;
-                    case PROPERTIES:
+                    case CUSTOM:
                         for (Element customProp : prop.getChildren()) {
                             String customName = customProp.getName().toLowerCase();
                             CustomProperty custom = new CustomProperty(customName);

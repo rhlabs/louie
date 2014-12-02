@@ -173,7 +173,7 @@ public class Server {
                     .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
         }
         
-        printServers();
+//        printServers();
     }
     
     protected static void setDefaultGateway(String gateway) { 

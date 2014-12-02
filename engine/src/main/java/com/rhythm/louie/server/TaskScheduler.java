@@ -25,7 +25,7 @@ public class TaskScheduler {
     
     private static final String POLL = "poll";
     
-    private static final int THREAD_POOL_SIZE = 8;
+    private static int THREAD_POOL_SIZE;
     
     private final ScheduledExecutorService scheduler;
     
@@ -33,6 +33,7 @@ public class TaskScheduler {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                     .setNameFormat("louie-taskscheduler-%d").build();
         scheduler = Executors.newScheduledThreadPool(THREAD_POOL_SIZE,threadFactory);
+        THREAD_POOL_SIZE = TaskSchedulerProperties.getThreadPoolSize();
     }
         
     public static TaskScheduler getInstance() {

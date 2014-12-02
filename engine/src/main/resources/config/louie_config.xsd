@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="louie">
+    <xs:annotation>
+      <xs:documentation>louie is the expected root element of the louie configuration file</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="config_path" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>If present, loads the xml file specified, and resets the config parser to load configs from this new file. Nothing else from the current xml file will be parsed.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="servers" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>"servers" denotes a block of known louie deployments</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="server" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:documentation>"server" is an expected element name, and "name" is an expected attribute."name" will represent an easily accessible key for this host w/in the louie environment</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:all>
+                    <xs:element type="xs:string" name="host" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"host" is the address or resolvable host name</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="location" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"location" represents a more constant way for a service to find a remote server (since the serving hardware may change)</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="display" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"display" is informational only</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="timezone" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"timezone" is a Java TimeZone compatible time zone ID. see: TimeZone.getAvailableIDs();</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="gateway" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"gateway" represents an alternate gateway/context-root (Default is 'louie')</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:short" name="port" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"port" is the designated port for HTTP connections (Default is 8080)</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="ip" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"ip" can be specified if the hostname is not resolvable via DNS</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="central_auth" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"central_auth" denotes a server which will act as a centralized auth across a distributed set of Louies in one datacenter.</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="router" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"router" will denote and enable an instance to act as a service router for a distributed set of Louies in one datacenter.</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="secure" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"secure" denotes that this host will be reachable only through HTTPS and that users will have to be properly authenticated</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="custom" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>Any custom configurations must be placed inside this block</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax">
+                            <xs:annotation>
+                              <xs:documentation>This custom configuration will be handled as key:value where key is the element name and value is the element value</xs:documentation>
+                            </xs:annotation>
+                          </xs:any>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:all>
+                  <xs:attribute type="xs:string" name="name"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="services" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>"services" is an expected element, denoting a block of configured services for this deployment</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="defaults" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>"defaults" is an expected element name, representing default configurations for any serviceswhich may not be explicitly configured here. (Service configurations are generated for anyfound services without explicit configurations by inheriting these defaults)</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:all>
+                    <xs:element type="xs:string" name="enable" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"enable" as the default, this specifies whether this deployment behaves as opt-in or opt-out for starting up services</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="remote_host" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"remote_host" represents a remote host for remote layers (services which reroute all calls to a specific host)</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="read_only" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"readonly" disables Service methods which were annotated w/ @Updating</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="caching" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"caching" can enable/disable a caching layer (Currently it is up to the developer to check this w/in their Service implementation)</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:all>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="service" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:documentation>"service" is an expected element representing a specific service configuration"name" is the service name, which must the implementation service name"enable" is an optional attribute which overrides whatever was specified in the default "enable""service" can also be flushed out with nested configurations</xs:documentation>
+                </xs:annotation>
+                <xs:complexType mixed="true">
+                 <xs:all>
+                    <xs:element name="layers" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>Service Layers can be configured to cusomize the service stackOmmitting layers will default to loading annotation based layers</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:all>
+                          <xs:element type="xs:string" name="cache" minOccurs="0"/>
+                          <xs:element type="xs:string" name="router" minOccurs="0"/>
+                          <xs:element type="xs:string" name="dao" minOccurs="0"/>
+                          <xs:element type="xs:string" name="remote" minOccurs="0"/>
+                          <xs:element name="layer" minOccurs="0">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:string" name="class"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:all>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:string" name="read_only" minOccurs="0" maxOccurs="1"> 
+                      <xs:annotation>
+                        <xs:documentation>Any configuration specified here will override anything found in the defaults</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="remote_host" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>Specifies a remote host that this service should connect to for routed configurations</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="caching" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>Enable or disable caching per service</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="provider_class" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>A service factory which will be used to load this service at deploy time. Only necessary for custom providers or multiple identically named services</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="custom" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>Any custom configurations must be placed inside this block</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax">
+                            <xs:annotation>
+                              <xs:documentation>This custom configuration will be handled as key:value where key is the element name and value is the element value</xs:documentation>
+                            </xs:annotation>
+                          </xs:any>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:all>
+                  <xs:attribute type="xs:string" name="name"/>
+                  <xs:attribute type="xs:string" name="enable" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Enable or disable a service</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="messaging" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>"messaging" and "jmsadapter" are used to configure a JMS implementation</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="jmsadapter" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute type="xs:string" name="class"/>
+                  <xs:attribute type="xs:string" name="host"/>
+                  <xs:attribute type="xs:string" name="port"/>
+                  <xs:attribute type="xs:string" name="failover"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="server" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute type="xs:string" name="prefix"/>
+                  <xs:attribute type="xs:string" name="type"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="client" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute type="xs:string" name="prefix"/>
+                  <xs:attribute type="xs:string" name="type"/>
+                </xs:complexType>  
+              </xs:element>
+              <xs:element name="update" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute type="xs:string" name="prefix"/>
+                  <xs:attribute type="xs:string" name="type"/>
+                </xs:complexType>  
+              </xs:element>
+              <xs:element name="custom" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>Any custom configurations must be placed inside this block</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:all>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="mail" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>email configurations</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="jndi">
+                <xs:complexType>
+                  <xs:attribute type="xs:string" name="name"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="custom" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>Any custom configurations must be placed inside this block</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:any minOccurs="0" processContents="lax">
+                      <xs:annotation>
+                        <xs:documentation>This custom configuration will be handled as key:value where key is the element name and value is the element value</xs:documentation>
+                      </xs:annotation>
+                    </xs:any>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:all>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="scheduler" minOccurs="0">
+            <xs:annotation>
+                <xs:documentation>task scheduler configurations</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+                <xs:all>
+                    <xs:element type="xs:string" name="thread_pool_size" minOccurs="0" maxOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Specify a maximum thread pool size for the task scheduler</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:all>
+            </xs:complexType>
+                    
+        </xs:element>
+        <xs:element name="custom" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Any custom configurations must be placed inside this block</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax">
+                <xs:annotation>
+                  <xs:documentation>Custom Properties are usable via LouieProperties.getCustomProperty() and can contain one level of nested information</xs:documentation>
+                </xs:annotation>
+              </xs:any>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,4 +1,4 @@
-<louie>
+<louie xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="./louie_internal_config.xsd">
     <server_defaults>
         <host></host>
         <ip></ip>
@@ -31,4 +31,7 @@
         <service name="sql" enable="false"/>
         <service name="devtest" enable="false"/>
     </core_services>
+    <scheduler_defaults>
+        <thread_pool_size>8</thread_pool_size>
+    </scheduler_defaults>
 </louie>

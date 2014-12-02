@@ -1,0 +1,55 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="louie">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="server_defaults">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="host"/>
+              <xs:element type="xs:string" name="ip"/>
+              <xs:element type="xs:string" name="display"/>
+              <xs:element type="xs:string" name="timezone"/>
+              <xs:element type="xs:string" name="location"/>
+              <xs:element type="xs:string" name="router"/>
+              <xs:element type="xs:short" name="port"/>
+              <xs:element type="xs:string" name="gateway"/>
+              <xs:element type="xs:string" name="secure"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="service_defaults">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="enable"/>
+              <xs:element type="xs:string" name="read_only"/>
+              <xs:element type="xs:string" name="caching"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="core_services">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="service" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType mixed="true">
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="reserved" minOccurs="0"/>
+                    <xs:element type="xs:string" name="provider_class" minOccurs="0"/>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="name" use="optional"/>
+                  <xs:attribute type="xs:string" name="enable" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="scheduler_defaults">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:byte" name="thread_pool_size"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

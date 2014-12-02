@@ -77,7 +77,25 @@ public class LouieProperties {
     
     // email
     private static final String MAIL = "mail";
+    
+    //scheduler
+    private static final String SCHEDULER = "scheduler";
+    private static final String POOL_SIZE = "thread_pool_size";
      
+    /**
+     * An example of what a custom property block might look like:
+     * <custom>
+     *   <prop_one>
+     *     <key_one>value</key_one>
+     *     <key_two>value</key_two>
+     *   </prop_one>
+     *   <prop_two>
+     *     <key_three>value</key_three>
+     *   </prop_two>
+     * </custom>
+     * @param key the top level element name inside the custom block
+     * @return a CustomProperty, if one was found
+     */
     public static CustomProperty getCustomProperty(String key) {
         return customProperties.get(key);
     }
@@ -139,12 +157,14 @@ public class LouieProperties {
                 case MAIL:
                     MailProperties.processProperties(elem);
                     break;
-                default: String configName = elemName;
-                    CustomProperty custom = new CustomProperty(configName);
-                    for (Element child : elem.getChildren()) {
-                        custom.setProperty(child.getName(), child.getText().trim());
-                    }
-                    customProperties.put(configName, custom);
+                case SCHEDULER:
+                    TaskSchedulerProperties.setThreadPoolSize(Integer.parseInt(elem.getChildText(POOL_SIZE)));
+                    break;
+                case CUSTOM:
+                    processCustomProperties(elem);
+                    break;
+                default: LoggerFactory.getLogger(LouieProperties.class)
+                            .warn("Unexpected top level property  {}",elemName);
                     break;
             }
         }
@@ -198,6 +218,9 @@ public class LouieProperties {
         //Load internal services into ServiceProperties
         Element coreServices = louie.getChild("core_services");
         processServices(coreServices, true);
+        
+        Element schedDef = louie.getChild("scheduler_defaults");
+        TaskSchedulerProperties.setThreadPoolSize(Integer.parseInt(schedDef.getChildText(POOL_SIZE)));
 
     }
     
@@ -246,9 +269,11 @@ public class LouieProperties {
                         break;
                     case SECURE: prop.setSecure(Boolean.valueOf(propValue));
                         break;
+                    case TIMEZONE: prop.setTimezone(propValue);
+                        break;
                     case CUSTOM: 
                         for (Element child : serverProp.getChildren()) {
-                            prop.addCustomProperty(child.getName().toLowerCase(), child.getText().trim());
+                            prop.addCustomProperty(child.getName(), child.getText().trim());
                         }
                         break;
                     default: LoggerFactory.getLogger(LouieProperties.class)
@@ -348,7 +373,7 @@ public class LouieProperties {
                         break;
                     case CUSTOM: 
                         for (Element child : serviceProp.getChildren()) {
-                            prop.addCustomProp(child.getName().toLowerCase(), child.getText().trim());
+                            prop.addCustomProp(child.getName(), child.getText().trim());
                         }
                         break;
                     default: LoggerFactory.getLogger(LouieProperties.class)
@@ -387,6 +412,17 @@ public class LouieProperties {
                     LoggerFactory.getLogger(LouieProperties.class)
                             .warn("Unkown layer:{}",layerName);
             }
+        }
+    }
+    
+    private static void processCustomProperties(Element customElem) {
+        for (Element customProp : customElem.getChildren()) {
+            String propName = customProp.getName();
+            CustomProperty custom = new CustomProperty(propName);
+            for (Element child : customProp.getChildren()) {
+                custom.setProperty(child.getName(), child.getText().trim());
+            }
+            customProperties.put(propName, custom);
         }
     }
     

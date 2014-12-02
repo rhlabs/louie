@@ -193,6 +193,27 @@ public class ServiceProperties {
             if (existing != null && existing.isReserved()) continue;
             SERVICES.put(prop.getName(), prop); //allows for overwriting non-reserved services
         }
+//        printServices();
     }
 
+    public static void printServices() {
+        StringBuilder out = new StringBuilder();
+        
+        List<ServiceProperties> serviceProps = ServiceProperties.getAllServiceProperties();
+        for (ServiceProperties prop : serviceProps) {
+            out.append("Service:     ").append(prop.getName()).append("\n");
+            out.append("\tenabled:   ").append(prop.isEnabled()).append("\n");
+            out.append("\tprovider:  ").append(prop.getProviderClass()).append("\n");
+            out.append("\tread_only: ").append(prop.isReadOnly()).append("\n");
+            out.append("\tcaching:   ").append(prop.isCachingOn()).append("\n");
+            out.append("\treserved:  ").append(prop.isReserved()).append("\n");
+            out.append("\tlayers:\n");
+            for (ServiceLayer layer : prop.getServiceLayers()) {
+                out.append("\t\t").append(layer.toString()).append("\n");
+            }
+            out.append("\n\n");
+        }
+        System.out.println(out);
+    }
+    
 }
