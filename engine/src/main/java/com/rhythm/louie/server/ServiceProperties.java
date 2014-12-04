@@ -38,6 +38,8 @@ public class ServiceProperties {
     private final List<ServiceLayer> layers;
     private final Map<String,String> properties;
     
+    private String constructedLayers = null;
+    
     /**
      * Returns properties for a service by name, it is recommended to use the 
      * method that takes a class to avoid discrepancies storing the name directly
@@ -127,6 +129,14 @@ public class ServiceProperties {
         }
     }
     
+    public void setLayersString(String layers) {
+        constructedLayers = layers;
+    }
+    
+    public String getConstructedLayers() {
+        return constructedLayers;
+    }
+    
     protected static void addService(String name, ServiceProperties service) {
         SERVICES.put(name,service);
     }
@@ -193,27 +203,27 @@ public class ServiceProperties {
             if (existing != null && existing.isReserved()) continue;
             SERVICES.put(prop.getName(), prop); //allows for overwriting non-reserved services
         }
-//        printServices();
     }
 
-    public static void printServices() {
+    public String printHtmlService() {
         StringBuilder out = new StringBuilder();
         
-        List<ServiceProperties> serviceProps = ServiceProperties.getAllServiceProperties();
-        for (ServiceProperties prop : serviceProps) {
-            out.append("Service:     ").append(prop.getName()).append("\n");
-            out.append("\tenabled:   ").append(prop.isEnabled()).append("\n");
-            out.append("\tprovider:  ").append(prop.getProviderClass()).append("\n");
-            out.append("\tread_only: ").append(prop.isReadOnly()).append("\n");
-            out.append("\tcaching:   ").append(prop.isCachingOn()).append("\n");
-            out.append("\treserved:  ").append(prop.isReserved()).append("\n");
-            out.append("\tlayers:\n");
-            for (ServiceLayer layer : prop.getServiceLayers()) {
-                out.append("\t\t").append(layer.toString()).append("\n");
-            }
-            out.append("\n\n");
+        out.append("<b>enabled:</b>   ").append(isEnabled()).append("<br/>\n");
+        out.append("<b>provider:</b>  ").append(getProviderClass()).append("<br/>\n");
+        out.append("<b>read_only:</b> ").append(isReadOnly()).append("<br/>\n");
+        out.append("<b>caching:</b>   ").append(isCachingOn()).append("<br/>\n");
+        out.append("<b>reserved:</b>  ").append(isReserved()).append("<br/>\n");
+        if (getConstructedLayers() != null) {
+            out.append("<b>layers:</b>    ").append(getConstructedLayers()).append("<br/>\n");
         }
-        System.out.println(out);
+        if (!properties.isEmpty()) {
+            out.append("<b>custom:</b><br/>\n");
+            for (String key : properties.keySet()) {
+                out.append("<b style=\"padding-left:3em\">\t").append(key).append(":</b> ").append(properties.get(key)).append("<br/>\n");
+            }
+        }
+        
+        return out.toString();
     }
     
 }

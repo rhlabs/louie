@@ -16,8 +16,10 @@
           <ul class="nav navbar-nav">
             <li><a href="${contextPath}">Info</a></li>
             <li><a href="${contextPath}/services">Services</a></li>
+            <li><a href="${contextPath}/servers">Servers</a></li>
             <li><a href="${contextPath}/cache">Cache</a></li>
             <li><a href="${contextPath}/build">Build Info</a></li>
+            <li><a href="${contextPath}/downloads">Downloads</a></li>
           </ul>
         </div>
       </div>

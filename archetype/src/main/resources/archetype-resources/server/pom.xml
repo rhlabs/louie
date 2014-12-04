@@ -69,6 +69,14 @@
                 <version>2.1.1</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>target</directory>
+                            <includes>
+                                <include>**/*-python.zip</include>
+                            </includes>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
@@ -133,7 +141,7 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>generate</goal>
                                 </goals>
@@ -146,7 +154,7 @@
                         <executions>
                             <execution>
                                 <id>create-py-distribution</id>
-                                <phase>package</phase>                
+                                <phase>prepare-package</phase>                
                                 <goals>
                                     <goal>single</goal>
                                 </goals>

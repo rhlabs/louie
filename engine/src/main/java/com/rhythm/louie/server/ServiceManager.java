@@ -133,14 +133,18 @@ public class ServiceManager {
 
                 int depth = 0;
                 Object level = servicesByName.get(serviceName);
+                
+                StringBuilder levels = new StringBuilder();
                 while (level instanceof Delegate) {
                     level = ((Delegate) level).getDelegate();
                     if (depth > 0) {
-                        sb.append("->");
+                        levels.append("->");
                     }
-                    sb.append(level.getClass().getSimpleName());
+                    levels.append(level.getClass().getSimpleName());
                     depth++;
                 }
+                props.setLayersString(levels.toString());
+                sb.append(levels);
 
                 if (props.isReadOnly()) {
                     sb.append(" || Read-Only");

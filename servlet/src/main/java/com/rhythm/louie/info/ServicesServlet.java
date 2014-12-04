@@ -10,11 +10,10 @@ import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.rhythm.louie.server.ServiceManager;
+import com.rhythm.louie.server.ServiceProperties;
 import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.command.PBCommand;
 
@@ -34,7 +33,11 @@ public class ServicesServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String service = request.getParameter("service");
-        if (service==null || service.isEmpty()) {
+        String config = request.getParameter("configs");
+        
+        if (config != null && !config.isEmpty()) {
+            listConfigs(request,response,config);
+        } else if (service==null || service.isEmpty()) {
             listAllServices(request,response);
         } else {
             listServiceCalls(service,request,response);
@@ -65,6 +68,12 @@ public class ServicesServlet extends HttpServlet {
                 return;
             }
             properties.put("service", service);
+            
+            Map<String, ServiceProperties> servProps = new HashMap<>();
+            for (ServiceProperties prop : ServiceProperties.getAllServiceProperties()) {
+                servProps.put(prop.getName(), prop);
+            }
+            properties.put("serviceconf", servProps);
 
             Map<String, List<PBCommand>> groupedCalls = groupServiceCalls(service);
             properties.put("groups", groupedCalls);
@@ -123,6 +132,16 @@ public class ServicesServlet extends HttpServlet {
         }
         
         return fixed;
+    }
+    
+    private void listConfigs(HttpServletRequest request, HttpServletResponse response, String config) {
+        Map<String,Object> properties = new HashMap<>();
+        
+        properties.put("services", ServiceManager.getServices());
+        properties.put("serviceconf", ServiceProperties.getAllServiceProperties());
+        properties.put("configs", true);
+        
+        InfoUtils.writeTemplateResponse(request, response,"services.vm", properties);
     }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

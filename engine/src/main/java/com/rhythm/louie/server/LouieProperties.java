@@ -13,6 +13,7 @@ import java.util.*;
 
 import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.email.MailProperties;
@@ -30,6 +31,8 @@ import com.rhythm.louie.service.layer.RemoteServiceLayer;
 public class LouieProperties {
   
     private static final Map<String, CustomProperty> customProperties = new HashMap<>();
+    
+    private static String document;
     
     ////////////////////
     //// Known Keys ////
@@ -183,6 +186,7 @@ public class LouieProperties {
             Server.processServers(empty);
             return null;
         }
+        document = new XMLOutputter().outputString(properties);
         return properties;
     }
     
@@ -424,6 +428,10 @@ public class LouieProperties {
             }
             customProperties.put(propName, custom);
         }
+    }
+    
+    public static String getDocument() {
+        return document;
     }
     
 }

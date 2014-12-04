@@ -16,7 +16,10 @@
         <div id="sidebar-wrapper">
             <ul class="sidebar-nav">
                 <li class="sidebar-brand">
-                    Info
+                    <a href='?'>Info</a>
+                </li>
+                <li class="sidebar-base">
+                    <a href='?config'>Config File</a>
                 </li>
             </ul>
         </div>
@@ -24,7 +27,12 @@
         <!-- Page Content -->
         <div id="page-content-wrapper">
             <div class="container-fluid">
-
+#if ($config)
+                <div class="row">
+                    ${config}
+                </div>
+                
+#else
                 <div class="row">
                     <div class="col-lg-12 title-content">
                       <h1>Louie running at ${contextPath}</h1>
@@ -56,6 +64,7 @@ $line
                         </div>
                     </div>
                 </div>
+#end
 #end
             </div>
         </div>

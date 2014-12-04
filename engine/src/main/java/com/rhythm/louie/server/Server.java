@@ -173,7 +173,6 @@ public class Server {
                     .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
         }
         
-//        printServers();
     }
     
     protected static void setDefaultGateway(String gateway) { 
@@ -444,26 +443,22 @@ public class Server {
             }
             return true;
         }
-        
     }
     
-    public static void printServers() {
-        StringBuilder servers = new StringBuilder();
-        for (Server s : ALL_SERVERS) {
-            servers.append("Server: ").append(s.getName()).append("\n");
-            servers.append("    host:          ").append(s.getHostName()).append("\n");
-            servers.append("    location:      ").append(s.getLocation()).append("\n");
-            servers.append("    display:       ").append(s.getDisplay()).append("\n");
-            servers.append("    timezone:      ").append(s.getTimezone()).append("\n");
-            servers.append("    gateway:       ").append(s.getGateway()).append("\n");
-            servers.append("    port:          ").append(s.getPort()).append("\n");
-            servers.append("    ip:            ").append(s.getIp()).append("\n");
-            servers.append("    router:        ").append(s.isARouter()).append("\n");
-            servers.append("    central_auth:  ").append(s.centralAuth).append("\n");
-            servers.append("    secure:        ").append(s.isSecure()).append("\n");
-            servers.append("\n\n");
-        }
-        System.out.println(servers);
+    public String printHtmlServer() {
+        StringBuilder server = new StringBuilder();
+        server.append("<b>host:</b>         ").append(getHostName()).append("<br/>\n");
+        server.append("<b>location:</b>     ").append(getLocation()).append("<br/>\n");
+        server.append("<b>display:</b>      ").append(getDisplay()).append("<br/>\n");
+        server.append("<b>timezone:</b>     ").append(getTimezone()).append("<br/>\n");
+        server.append("<b>gateway:</b>      ").append(getGateway()).append("<br/>\n");
+        server.append("<b>port:</b>         ").append(getPort()).append("<br/>\n");
+        server.append("<b>ip:</b>           ").append(getIp()).append("<br/>\n");
+        server.append("<b>router:</b>       ").append(isARouter()).append("<br/>\n");
+        server.append("<b>central_auth:</b> ").append(centralAuth).append("<br/>\n");
+        server.append("<b>secure:</b>       ").append(isSecure()).append("<br/>\n");
+        
+        return server.toString();
     }
     
 }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Louie(${contextPath}) - Downloads</title>
+
+#parse("templates/header.vm")
+
+  </head>
+   
+  <body>
+#parse("templates/navbar.vm")
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                
+                </li>
+            </ul>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-lg-12 title-content">
+                      <h1>Downloads</h1>
+                    </div>
+                </div>
+
+                <div>
+#if($pyError == "")
+                    <b><span class="glyphicon glyphicon-download" aria-hidden="true" title="Download"></span><a href='downloads?dl=python'> Download Python zip</a></b>
+#else
+                    <b><span class="glyphicon glyphicon-download" aria-hidden="true" title="Download"></span><font color="red"> ${pyError}</font></b>
+#end
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+#parse("templates/footer.vm")
+  </body>
+</html>
