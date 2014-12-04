@@ -23,18 +23,9 @@ import org.slf4j.LoggerFactory;
 public class TaskScheduler {
     private final Logger LOGGER = LoggerFactory.getLogger(TaskScheduler.class);
     
-    private static final String POLL = "poll";
+    private ScheduledExecutorService scheduler;
     
-    private static int THREAD_POOL_SIZE;
-    
-    private final ScheduledExecutorService scheduler;
-    
-    private TaskScheduler() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                    .setNameFormat("louie-taskscheduler-%d").build();
-        scheduler = Executors.newScheduledThreadPool(THREAD_POOL_SIZE,threadFactory);
-        THREAD_POOL_SIZE = TaskSchedulerProperties.getThreadPoolSize();
-    }
+    private TaskScheduler() {}
         
     public static TaskScheduler getInstance() {
         return TaskSchedulerHolder.INSTANCE;
@@ -44,14 +35,20 @@ public class TaskScheduler {
         private static final TaskScheduler INSTANCE = new TaskScheduler();
     }
     
+    private synchronized ScheduledExecutorService getScheduler() {
+        if (scheduler == null) {
+            ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                    .setNameFormat("louie-taskscheduler-%d").build();
+            scheduler = Executors.newScheduledThreadPool(TaskSchedulerProperties.getThreadPoolSize(),threadFactory);
+        }
+        return scheduler;
+    }
+    
+    
     synchronized public void shutdown() {
         if (scheduler != null) {
             scheduler.shutdownNow();
         }
-    }
-    
-    private boolean isEnabled(ServiceProperties props) {
-        return props.getCustomProperty(POLL, "false").equals("true"); 
     }
     
     /**
@@ -64,7 +61,7 @@ public class TaskScheduler {
      * @see java.util.concurrent.Executor#execute(java.lang.Runnable) 
      */
     public void execute(Runnable command) {
-        scheduler.execute(command);
+        getScheduler().execute(command);
     }
     
      /**
@@ -82,7 +79,7 @@ public class TaskScheduler {
      * java.lang.Runnable, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        return scheduler.schedule(command, delay, unit);
+        return getScheduler().schedule(command, delay, unit);
     }
     
      /**
@@ -107,7 +104,7 @@ public class TaskScheduler {
      * java.lang.Runnable, long, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        return scheduler.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        return getScheduler().scheduleWithFixedDelay(command, initialDelay, delay, unit);
     }
     
     /**
@@ -135,7 +132,7 @@ public class TaskScheduler {
      * java.lang.Runnable, long, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-        return scheduler.scheduleAtFixedRate(command, initialDelay, period, unit);
+        return getScheduler().scheduleAtFixedRate(command, initialDelay, period, unit);
     }
     
     /**
@@ -163,11 +160,6 @@ public class TaskScheduler {
      * java.lang.Runnable, long, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> scheduleWithFixedDelay(ServiceProperties serviceProperties, Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        if (!isEnabled(serviceProperties)) {
-            LOGGER.info("{} Polling DISABLED!", serviceProperties.getName());
-            return null;
-        }
-        LOGGER.info("{} Polling Enabled ({})", serviceProperties.getName(), delay);
-        return scheduler.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        return getScheduler().scheduleWithFixedDelay(command, initialDelay, delay, unit);
     }
 }
