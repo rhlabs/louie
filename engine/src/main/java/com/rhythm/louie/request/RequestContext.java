@@ -83,7 +83,9 @@ public class RequestContext {
      */
     @SuppressWarnings("deprecation")
     public String getWho() {
-        if (getRequest().hasRouteUser() && !getRequest().getRouteUser().isEmpty()) {
+        if (getRequest().hasRouteUser() 
+                && !getRequest().getRouteUser().isEmpty()
+                && isRouteUserEnabled()) {
             return getRequest().getRouteUser();
         } else {
             return getRequester();

@@ -309,7 +309,6 @@ public class DefaultLouieConnection implements LouieConnection {
                     connection = getSecureConnection(getSecurePBURL());
                 } catch (Exception e) {
                     LOGGER.error("Error creating secure connection", e);
-                    e.printStackTrace();
                     throw new HttpsException("Error Connecting via HTTPS. Please verify certificates and passwords.");
                 }
             } else {
@@ -339,23 +338,25 @@ public class DefaultLouieConnection implements LouieConnection {
                       .setService(service)
                       .setMethod(command);
 
-            // Only send routing info if this is not a auth call
-            if (currentRequest != null && currentRequest.isRouteUserEnabled() && !service.equals(AUTH_SERVICE)) {
-                if (currentRequest.getRequest().hasRouteUser()) {
-                    reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
-                } else if (currentRequest.getIdentity() != null) {
+            if (currentRequest != null) {
+                // Only send route user info if it is enabled and this is not a auth call
+                if (currentRequest.isRouteUserEnabled() && !service.equals(AUTH_SERVICE)) {
+                    if (currentRequest.getRequest().hasRouteUser()) {
+                        reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
+                    } else if (currentRequest.getIdentity() != null) {
                     // The identity should be set, so this check should not be needed.
-                    // TODO determine how the identity could be null...
-                    // (identity could be null if key in request is null, but that should not be happening either
+                        // TODO determine how the identity could be null...
+                        // (identity could be null if key in request is null, but that should not be happening either
 
-                    // Set the Routed User, as the current User is may be "LoUIE"
-                    reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
+                        // Set the Routed User, as the current User is may be "LoUIE"
+                        reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
+                    }
                 }
                 // Append any routes you been on and the current Route
                 reqBuilder.addAllRoute(currentRequest.getRequest().getRouteList());
                 reqBuilder.addRoute(currentRequest.getRoute());
             }
-
+            
             for (Message message : req.getParam().getArguments()) {
                 reqBuilder.addType(message.getDescriptorForType().getFullName());
             }
