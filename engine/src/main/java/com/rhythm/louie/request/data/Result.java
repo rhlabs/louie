@@ -86,12 +86,33 @@ public class Result {
     
     private Result(boolean success, List<? extends Object> args, List<? extends Message> messages) {
         this.success = success;
-        this.messages = messages;
+        this.messages = sanitizeMessages(messages);
         this.arguments = args;
         
         size=0;
         duration=0;
         execTime=0;
+    }
+ 
+    private static <T extends Message> List<T> sanitizeMessages(List<T> messages) {
+        // Sanitize the messages for null entries, since that will blow up the client
+        int nullCount = 0;
+        for (Message m : messages) {
+            if (m==null) {
+                nullCount++;
+            }
+        }
+        if (nullCount==0) {
+            return messages;
+        } else {
+            List<T> sanitized = new ArrayList<>(messages.size()-nullCount);
+            for (T m : messages) {
+                if (m!=null) {
+                    sanitized.add(m);
+                }
+            }
+            return sanitized;
+        }
     }
     
     public void setInfo(String info) {
