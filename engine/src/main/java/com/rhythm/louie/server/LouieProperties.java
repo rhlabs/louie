@@ -13,6 +13,7 @@ import java.util.*;
 
 import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.XMLOutputter;
 import org.slf4j.LoggerFactory;
 
@@ -113,8 +114,6 @@ public class LouieProperties {
         
         Document properties = loadDocument(configs);
         if (properties == null) {
-            LoggerFactory.getLogger(LouieProperties.class)
-                        .info("Louie config file not found, running with defaults.");
             return;
         }
         
@@ -176,13 +175,20 @@ public class LouieProperties {
     
     private static Document loadDocument(URL configs){
         Document properties;
-        SAXBuilder docBuilder = new SAXBuilder();
+        SAXBuilder docBuilder = new SAXBuilder(XMLReaders.XSDVALIDATING);
         try {
             properties = docBuilder.build(configs);
-        } catch (IOException | JDOMException | NullPointerException ex) {
+        } catch (NullPointerException ex) {
             LoggerFactory.getLogger(LouieProperties.class)
-                    .error("Failed to load properties file! Defaults will be used.\n{}",ex.toString());
+                    .error("Failed to load properties file. Defaults will be used.\n{}",ex.toString());
             List<Server> empty = Collections.emptyList();
+            Server.processServers(empty);
+            return null;
+        } catch (IOException | JDOMException ex) {
+            LoggerFactory.getLogger(LouieProperties.class)
+                    .error("Properties file error! All services shutdown\n{}",ex.toString());
+            List<Server> empty = Collections.emptyList();
+            ServiceProperties.globalDisable(); //brute disable
             Server.processServers(empty);
             return null;
         }

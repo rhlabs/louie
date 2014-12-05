@@ -27,6 +27,8 @@ public class ServiceProperties {
     private static boolean defaultReadOnly;
     private static boolean defaultCaching;
     
+    private static boolean globalEnable = true;
+    
     /* Instance properties */
     private final String name;
     private boolean enable;
@@ -84,7 +86,8 @@ public class ServiceProperties {
     }
     
     public boolean isEnabled() {
-        return enable;
+        if (reserved) return enable;
+        return (enable && globalEnable);
     }
     
     public boolean isReadOnly() {
@@ -193,6 +196,10 @@ public class ServiceProperties {
 
     protected static void setDefaultCaching(boolean defaultCaching) {
         ServiceProperties.defaultCaching = defaultCaching;
+    }
+    
+    protected static void globalDisable() {
+        globalEnable = false;
     }
     
     // Process
