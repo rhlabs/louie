@@ -35,9 +35,7 @@ public class ServicesServlet extends HttpServlet {
         String service = request.getParameter("service");
         String config = request.getParameter("configs");
         
-        if (config != null && !config.isEmpty()) {
-            listConfigs(request,response,config);
-        } else if (service==null || service.isEmpty()) {
+        if (service==null || service.isEmpty()) {
             listAllServices(request,response);
         } else {
             listServiceCalls(service,request,response);
@@ -132,16 +130,6 @@ public class ServicesServlet extends HttpServlet {
         }
         
         return fixed;
-    }
-    
-    private void listConfigs(HttpServletRequest request, HttpServletResponse response, String config) {
-        Map<String,Object> properties = new HashMap<>();
-        
-        properties.put("services", ServiceManager.getServices());
-        properties.put("serviceconf", ServiceProperties.getAllServiceProperties());
-        properties.put("configs", true);
-        
-        InfoUtils.writeTemplateResponse(request, response,"services.vm", properties);
     }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

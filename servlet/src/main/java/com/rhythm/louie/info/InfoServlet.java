@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.server.LouieProperties;
 import com.rhythm.louie.server.ServiceManager;
+import com.rhythm.louie.server.ServiceProperties;
 
 /**
  *
@@ -39,7 +40,11 @@ public class InfoServlet extends HttpServlet {
         
         String config = request.getParameter("config");
         if (config != null) {
-            properties.put("config", "<xmp>"+LouieProperties.getDocument()+"</xmp>");
+            if ("services".equals(config)) {
+                properties.put("serviceconfig",ServiceProperties.getAllServiceProperties());
+            } else {
+                properties.put("config", "<xmp>"+LouieProperties.getDocument()+"</xmp>");
+            }
         }
 
         List<String> extras = Collections.emptyList();
