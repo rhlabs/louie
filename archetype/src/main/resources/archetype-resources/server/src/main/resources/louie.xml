@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<louie xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance">
+<louie xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://louiehost:8080/xsd/louie_config.xsd">
 <!-- locate louie_config.xsd inside louie engine @ src/main/resources/config/louie_config.xsd and specify as an attribute inside the louie element above. 
     xsi:noNamespaceSchemaLocation="/full/path/on/disk/to/src/main/resources/config/louie_config.xsd"  
     this allows you to run validation on the xml file and will generally make your life easier!
