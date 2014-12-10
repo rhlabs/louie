@@ -259,10 +259,10 @@
           </xs:annotation>
           <xs:complexType>
             <xs:all>
-              <xs:element name="jndi">
-                <xs:complexType>
-                  <xs:attribute type="xs:string" name="name"/>
-                </xs:complexType>
+              <xs:element type="xs:string" name="jndi" minOccurs="0" maxOccurs="1">
+                  <xs:annotation>
+                      <xs:documentation>Specifies the name of a Mail Session resource registered in jndi, ie mail/MySession</xs:documentation>
+                  </xs:annotation>
               </xs:element>
               <xs:element name="custom" minOccurs="0" maxOccurs="1">
                 <xs:annotation>
