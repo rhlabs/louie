@@ -55,6 +55,7 @@ public class Server {
     private String location;
     private String gateway;
     private String ip;
+    private String externalIp;
     private boolean router;
     private boolean centralAuth;
     private boolean secure = false;
@@ -144,6 +145,7 @@ public class Server {
                     .setDisplay(server.getDisplay())
                     .setGateway(server.getGateway())
                     .setIp(server.getIp())
+                    .setExternalIp(server.getExternalIp())
                     .setPort(server.getPort())
                     .build();
             serverPBs.add(server.pb);
@@ -206,6 +208,10 @@ public class Server {
 
     protected void setIp(String ip) {
         this.ip = ip;
+    }
+    
+    protected void setExternalIp(String externalIp) {
+        this.externalIp = externalIp;
     }
     
     protected void setSecure(boolean secure) {
@@ -365,6 +371,13 @@ public class Server {
         return ip;
     }
     
+    public String getExternalIp() {
+        if (externalIp==null || externalIp.isEmpty()) {
+            return getIp();
+        }
+        return externalIp;
+    }
+    
     public String getLocation() {
         return location;
     }
@@ -403,7 +416,7 @@ public class Server {
         StringBuilder sb = new StringBuilder();
         
         sb.append(isSecure()?"https":"http").append("://");
-        sb.append(getIp()).append(":").append(getPort());
+        sb.append(getExternalIp()).append(":").append(getPort());
         sb.append("/").append(getGateway());
         
         return sb.toString();
@@ -454,6 +467,7 @@ public class Server {
         server.append("<b>gateway:</b>      ").append(getGateway()).append("<br/>\n");
         server.append("<b>port:</b>         ").append(getPort()).append("<br/>\n");
         server.append("<b>ip:</b>           ").append(getIp()).append("<br/>\n");
+        server.append("<b>external_ip:</b>  ").append(getExternalIp()).append("<br/>\n");
         server.append("<b>router:</b>       ").append(isARouter()).append("<br/>\n");
         server.append("<b>central_auth:</b> ").append(centralAuth).append("<br/>\n");
         server.append("<b>secure:</b>       ").append(isSecure()).append("<br/>\n");

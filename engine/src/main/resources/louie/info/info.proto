@@ -40,4 +40,5 @@ message ServerPB {
     optional string       gateway    = 6;
     optional string       ip         = 7;
     optional int32        port       = 8;
+    optional string       externalIp = 9;
 }

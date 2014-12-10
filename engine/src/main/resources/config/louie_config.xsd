@@ -58,6 +58,11 @@
                         <xs:documentation>"ip" can be specified if the hostname is not resolvable via DNS</xs:documentation>
                       </xs:annotation>
                     </xs:element>
+                    <xs:element type="xs:string" name="external_ip" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"external_ip" is used in the event that a client does not have access to the servers internal ip</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
                     <xs:element type="xs:string" name="central_auth" minOccurs="0" maxOccurs="1">
                       <xs:annotation>
                         <xs:documentation>"central_auth" denotes a server which will act as a centralized auth across a distributed set of Louies in one datacenter.</xs:documentation>

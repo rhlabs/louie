@@ -71,6 +71,7 @@ public class LouieProperties {
     private static final String LOCATION = "location";
     private static final String GATEWAY = "gateway";
     private static final String IP = "ip";
+    private static final String EXTERNAL_IP = "external_ip";
     private static final String CENTRAL_AUTH = "central_auth";
     private static final String ROUTER = "router";
     private static final String PORT = "port";
@@ -270,6 +271,8 @@ public class LouieProperties {
                     case GATEWAY: prop.setGateway(propValue);
                         break;
                     case IP: prop.setIp(propValue);
+                        break;
+                    case EXTERNAL_IP: prop.setExternalIp(propValue);
                         break;
                     case ROUTER: prop.setRouter(Boolean.valueOf(propValue));
                         break;

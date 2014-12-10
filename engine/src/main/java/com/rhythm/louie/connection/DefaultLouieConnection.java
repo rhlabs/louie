@@ -94,7 +94,7 @@ public class DefaultLouieConnection implements LouieConnection {
     
     protected DefaultLouieConnection(IdentityPB identity, Server server) {
         this.identity = identity;
-        this.host = server.getIp();
+        this.host = server.getExternalIp();
         this.gateway = server.getGateway();
         if (server.getPort() != 0) {
             this.port = server.getPort();
