@@ -48,7 +48,7 @@ public class DevMojo extends AbstractMojo{
         
         StringBuilder louiexml = new StringBuilder();
         louiexml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        louiexml.append("<louie>\n");
+        louiexml.append("<louie xmlns:xsi= \"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://louiehost:8080/xsd/louie_config.xsd\">\n");
         louiexml.append("    <config_path>").append(projectbase.toString()).append("/").append(configpath).append("</config_path>\n");
         louiexml.append("</louie>\n");
         
