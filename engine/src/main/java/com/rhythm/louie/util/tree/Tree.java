@@ -27,7 +27,6 @@ import com.google.common.collect.TreeTraverser;
  */
 public class Tree<K,V> {
     private final TreeNode<K,V> ROOT;
-    private final TreeTraverser<TreeNode<K,V>> traverser;
     private final Map<K,TreeNode<K,V>> nodes;
     
     /**
@@ -37,14 +36,19 @@ public class Tree<K,V> {
         this.ROOT = new TreeNode<>(null,null);
         
         nodes = new ConcurrentHashMap<>();
-        traverser = new TreeTraverser<TreeNode<K,V>>() {
-            @Override
-            public Iterable<TreeNode<K,V>> children(TreeNode<K,V> node) {
-                return node.getChildren();
-            }
-        };
     }
     
+    private class Traverser extends TreeTraverser<TreeNode<K, V>> {
+        @Override
+        public Iterable<TreeNode<K, V>> children(TreeNode<K, V> node) {
+            return node.getChildren();
+        }
+    }
+    
+    public TreeTraverser<TreeNode<K,V>> getTraverser() {
+        return new Traverser();
+    }
+
     /**
      * Returns the ROOT node of the tree.  This is a special node that does not
      * have a key and does not have a value.  This node is not returned in calls
@@ -107,6 +111,7 @@ public class Tree<K,V> {
         for(TreeNode<K,V> child : node.getChildren()) {
             child.setParent(node.getParent());
         }
+        node.getParent().removeChild(node);
         nodes.remove(key);
         return true;
     }
