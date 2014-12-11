@@ -135,7 +135,7 @@ public class PBCompilerMojo extends AbstractMojo{
             makeDir(javadir);
         }
         if (pygen) {
-            pythondir = basedirectory+"/"+pythondir ;
+            pythondir = basedirectory+"/"+pythondir;
             makeDir(pythondir);
         }
         if (cppgen) {

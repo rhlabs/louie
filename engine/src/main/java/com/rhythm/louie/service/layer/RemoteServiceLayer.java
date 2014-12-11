@@ -18,20 +18,51 @@ import com.rhythm.louie.service.ServiceUtils;
 public class RemoteServiceLayer implements ServiceLayer {
 
     private final String host;
-    public RemoteServiceLayer(String host) {
+    private final String gateway;
+    private final int port;
+    private final String server;
+    
+    public RemoteServiceLayer(String server) {
+        this.server = server;
+        this.host = null;
+        this.gateway = null;
+        this.port = 0;
+    }
+    
+    public RemoteServiceLayer(String host, String gateway, int port) {
         this.host = host;
+        this.gateway = gateway;
+        this.port = port;
+        this.server = null;
     }
     
     public String getHost() {
         return host;
     }
     
+    public String getGateway() {
+        return gateway;
+    }
+    
+    public int getPort() {
+        return port;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public <T> T loadLayer(Class<T> service) throws Exception {
-        Server remote = Server.getServer(host);
-        if (remote == null) {
-            throw new Exception("Cannot create remote service! Unknown server: " + host);
+        LouieConnection connection;
+        
+        if (server != null) {
+            Server remote = Server.getServer(server);
+            if (remote == null) {
+                throw new Exception("Cannot create remote service! Unknown server: " + host);
+            }
+            connection = LouieConnectionFactory.getConnectionForServer(remote);
+        } else {
+            connection = LouieConnectionFactory.getConnection(host);
+            connection.setGateway(gateway);
+            connection.setPort(port);
         }
 
         // Not ideal and will break easily, but gets the job done
@@ -40,7 +71,6 @@ public class RemoteServiceLayer implements ServiceLayer {
 
         T remoteLayer = (T) Class.forName(remoteService).newInstance();
         if (remoteLayer instanceof Connectable) {
-            LouieConnection connection = LouieConnectionFactory.getConnectionForServer(remote);
             ((Connectable)remoteLayer).setConnection(connection);
         } else {
             throw new Exception("Remote Service Must implement Connectable!");

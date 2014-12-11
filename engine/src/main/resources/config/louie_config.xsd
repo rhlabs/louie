@@ -118,7 +118,12 @@
                     </xs:element>
                     <xs:element type="xs:string" name="remote_host" minOccurs="0" maxOccurs="1">
                       <xs:annotation>
-                        <xs:documentation>"remote_host" represents a remote host for remote layers (services which reroute all calls to a specific host)</xs:documentation>
+                        <xs:documentation>DEPRECATED in favor of remote_server. "remote_host" represents a remote host for remote layers (services which reroute all calls to a specific host)</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="remote_server" minOccurs="0" maxOccurs="1">
+                      <xs:annotation>
+                        <xs:documentation>"remote_server" represents a remote server from the servers list for remote layers (services which reroute all calls to a specific host)</xs:documentation>
                       </xs:annotation>
                     </xs:element>
                     <xs:element type="xs:string" name="read_only" minOccurs="0" maxOccurs="1">
@@ -149,7 +154,17 @@
                           <xs:element type="xs:string" name="cache" minOccurs="0"/>
                           <xs:element type="xs:string" name="router" minOccurs="0"/>
                           <xs:element type="xs:string" name="dao" minOccurs="0"/>
-                          <xs:element type="xs:string" name="remote" minOccurs="0"/>
+                          <xs:element name="remote" minOccurs="0">
+                              <xs:annotation>
+                                <xs:documentation>"remote" forms a remote layer, connecting to the server specified by the "server" attribute, or to the "host", "gateway", and "port" attributes alternatively</xs:documentation>
+                              </xs:annotation>
+                              <xs:complexType>
+                                  <xs:attribute type="xs:string" name="server"/>
+                                  <xs:attribute type="xs:string" name="host"/>
+                                  <xs:attribute type="xs:string" name="gateway"/>
+                                  <xs:attribute type="xs:string" name="port"/>
+                              </xs:complexType>
+                          </xs:element>
                           <xs:element name="layer" minOccurs="0">
                             <xs:complexType>
                               <xs:simpleContent>
@@ -165,11 +180,6 @@
                     <xs:element type="xs:string" name="read_only" minOccurs="0" maxOccurs="1"> 
                       <xs:annotation>
                         <xs:documentation>Any configuration specified here will override anything found in the defaults</xs:documentation>
-                      </xs:annotation>
-                    </xs:element>
-                    <xs:element type="xs:string" name="remote_host" minOccurs="0" maxOccurs="1">
-                      <xs:annotation>
-                        <xs:documentation>Specifies a remote host that this service should connect to for routed configurations</xs:documentation>
                       </xs:annotation>
                     </xs:element>
                     <xs:element type="xs:string" name="caching" minOccurs="0" maxOccurs="1">

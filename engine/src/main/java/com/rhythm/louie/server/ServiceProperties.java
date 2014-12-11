@@ -24,6 +24,7 @@ public class ServiceProperties {
     /* Basic defaults */
     private static boolean defaultEnable;
     private static String defaultRemoteHost;
+    private static String defaultRemoteServer;
     private static boolean defaultReadOnly;
     private static boolean defaultCaching;
     
@@ -182,12 +183,22 @@ public class ServiceProperties {
         ServiceProperties.defaultEnable = defaultEnable;
     }
 
+    @Deprecated 
     protected static void setDefaultRemoteHost(String defaultHost) {
         ServiceProperties.defaultRemoteHost = defaultHost;
     }
 
+    @Deprecated
     public static String getDefaultRemoteHost() {
         return defaultRemoteHost;
+    }
+    
+    protected static void setDefaultRemoteServer(String defaultServer) {
+        ServiceProperties.defaultRemoteServer = defaultServer;
+    }
+
+    public static String getDefaultRemoteServer() {
+        return defaultRemoteServer;
     }
     
     protected static void setDefaultReadOnly(boolean defaultReadOnly) {
