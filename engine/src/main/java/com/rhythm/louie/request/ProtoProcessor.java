@@ -92,7 +92,7 @@ public class ProtoProcessor implements ProtoProcess {
             if (request == null) {
                 throw new Exception("Improper Request format! Reached EOF prematurely! @ProtoProcessor.processRequest()");
             }
-            if (request.hasRouteUser() && (identity == null || !"LoUIE".equals(identity.getUser()))) {
+            if (request.hasRouteUser() && identity == null) {
                 throw new Exception("User Route Permission Denied!");
             }
             

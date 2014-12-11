@@ -324,7 +324,7 @@ public class DefaultLouieConnection implements LouieConnection {
         headerBuilder.setCount(1);
         if (key == null) {
             headerBuilder.setIdentity(getIdentity());
-        } else if (!command.equals("createSession")){ //lame extra check
+        } else if (!service.equals(AUTH_SERVICE) || !command.equals("createSession")) { //lame extra check
             headerBuilder.setKey(key);
         }
 
@@ -344,7 +344,7 @@ public class DefaultLouieConnection implements LouieConnection {
                     if (currentRequest.getRequest().hasRouteUser()) {
                         reqBuilder.setRouteUser(currentRequest.getRequest().getRouteUser());
                     } else if (currentRequest.getIdentity() != null) {
-                    // The identity should be set, so this check should not be needed.
+                        // The identity should be set, so this check should not be needed.
                         // TODO determine how the identity could be null...
                         // (identity could be null if key in request is null, but that should not be happening either
 
