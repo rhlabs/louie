@@ -153,11 +153,15 @@ public class Tree<K,V> {
     
     /**
      * Inserts all values in the tree into the valuestore
+     *
      * @param valuestore a collection to store the values
      */
     public void getAllValues(Collection<V> valuestore) {
-        for (TreeNode<K,V> node : nodes.values()) {
-            valuestore.add(node.getValue());
+        for (TreeNode<K, V> node : nodes.values()) {
+            // Values can be null if the tree contains parent place holders
+            if (node.getValue() != null) {
+                valuestore.add(node.getValue());
+            }
         }
     }
     
