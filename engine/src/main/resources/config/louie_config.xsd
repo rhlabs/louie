@@ -306,6 +306,35 @@
             </xs:complexType>
                     
         </xs:element>
+        <xs:element name="alerts" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+                <xs:documentation>general alert configurations</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+                <xs:all>
+                    <xs:element type="xs:string" name="email" minOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Specify an email address to send alerts to</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="request_duration" minOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>The duration of time (milliseconds) which a request must surpass in order to qualify as concerning.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="monitor_cycle" minOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>How often to execute the monitor action (in seconds)</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element type="xs:string" name="summary_hour" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>The hour (0-23) of the day in which to generate a summary email. If not specified, no summary is sent.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:all>
+            </xs:complexType>
+        </xs:element>
         <xs:element name="custom" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>Any custom configurations must be placed inside this block</xs:documentation>

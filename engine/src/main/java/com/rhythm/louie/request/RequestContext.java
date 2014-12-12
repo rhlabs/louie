@@ -47,6 +47,10 @@ public class RequestContext {
     
     private List<RoutePathPB> destinations;
     
+    private final long createInstant;
+    private final long createTime;
+    private long threadId;
+    
     public RequestContext(RequestHeaderPB header, RequestPB request,
             DataType dataType, RequestProperties props) {
 
@@ -66,6 +70,8 @@ public class RequestContext {
         
         type = PBParamType.typeForNames(convertedTypes);
         destinations = null;
+        createInstant = System.nanoTime()/1000000;
+        createTime = System.currentTimeMillis();
     }
     
     public void enableRouteUser(boolean enable) {
@@ -164,6 +170,10 @@ public class RequestContext {
         this.sessionKey = key;
     }
     
+    public void setThreadId(long id) {
+        this.threadId = id;
+    }
+    
     public String getSessionKey() {
         if (header.hasKey()) {
             SessionKey key = header.getKey();
@@ -186,6 +196,18 @@ public class RequestContext {
     
     public List<Param> getParams() {
         return params;
+    }
+    
+    public long getCreateInstant() {
+        return createInstant;
+    }
+    
+    public long getCreateTime() {
+        return createTime;
+    }
+    
+    public long getThreadID() {
+        return threadId;
     }
     
     public void addParam(Param param) {

@@ -6,20 +6,27 @@
 package com.rhythm.louie.request;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Joiner;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.email.EmailService;
 import com.rhythm.louie.request.data.DataType;
 import com.rhythm.louie.request.data.Result;
-import com.rhythm.louie.server.Server;
+import com.rhythm.louie.server.*;
 import com.rhythm.louie.services.auth.*;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
@@ -39,10 +46,18 @@ public class ProtoProcessor implements ProtoProcess {
     private final Logger LOGGER = LoggerFactory.getLogger(ProtoProcessor.class);
     private final Pattern userCN;
     private final boolean secured;
+    private final Map<Long, RequestContext> currentRequestMap = new ConcurrentHashMap<>();
     
     public ProtoProcessor() {
         secured = Server.LOCAL.isSecure();
         userCN = Pattern.compile(".*CN=([\\w\\s]+),*.*");
+        int monitorCycle = AlertProperties.getMonitorPollCycle();
+        if (monitorCycle != -1) {
+            TaskScheduler.getInstance().scheduleWithFixedDelay(new RequestMonitor(), monitorCycle, monitorCycle, TimeUnit.SECONDS);
+            LOGGER.info("Request Monitor started");
+        } else {
+            LOGGER.info("No Request Monitor configured");
+        }
     }
     
     @Override
@@ -65,7 +80,14 @@ public class ProtoProcessor implements ProtoProcess {
             if (header.hasIdentity()) { //to make backwards compatible
                 identity = header.getIdentity();
                 if (secured) {
-                    Matcher match = userCN.matcher(props.getRemoteUser());
+                    Matcher match;
+                    try {
+                        match = userCN.matcher(props.getRemoteUser());
+                    } catch (NullPointerException ex) {
+                        LOGGER.error("IMPROPERLY CONFIGURED DEPLOYMENT. This instance is configured to be secure, "
+                                + "but the container has not provided authorization/validation. Please check your web.xml");
+                        throw new Exception("Improperly configured secure server. Please contact your server admin.");
+                    }
                     if (match.matches()) {
                         if (identity.getUser().equalsIgnoreCase(match.group(1))) {
                             sessionKey = AuthUtils.createKey(identity);
@@ -114,6 +136,8 @@ public class ProtoProcessor implements ProtoProcess {
                 requestContext.setIdentity(identity);
                 requestContext.readPBParams(input);
                 requestContext.setRoute(localRoute);
+                requestContext.setThreadId(Thread.currentThread().getId());
+                currentRequestMap.put(requestContext.getThreadID(), requestContext);
                 result = RequestHandler.processSingleRequest(requestContext);
                 result.setExecTime((System.nanoTime() - start) / 1000000);
                 handleResult(requestContext, result, output);
@@ -140,6 +164,7 @@ public class ProtoProcessor implements ProtoProcess {
                         LOGGER.error("Error Logging: {}", le.getMessage());
                     }
                 }
+                currentRequestMap.remove(Thread.currentThread().getId());
                 start = end;
                 results.add(result);
             }
@@ -203,5 +228,121 @@ public class ProtoProcessor implements ProtoProcess {
         }
         codedOutput.flush();
         output.flush();
+    }
+    
+    public List<RequestContext> getLongRunningRequests(long msDuration) {
+        List<RequestContext> longrunning = new ArrayList<>();
+        long currentTime = System.nanoTime()/1000000;
+        for (RequestContext ctx : currentRequestMap.values()) {
+            if (currentTime - ctx.getCreateInstant() > msDuration) {
+                longrunning.add(ctx);
+            }
+        }
+        return longrunning;
+    }
+    
+    private class RequestMonitor implements Runnable {
+        
+        private Set<Long> trackedThreads = new HashSet<>();
+        private final DateTimeFormatter fmt;
+        private long duration = 120000L;
+        private final int summaryHour;
+        private final String email;
+        private int hour;
+        
+        public RequestMonitor() {
+            fmt = DateTimeFormat.forPattern("MM/dd/yyy HH:mm:ss");
+            duration = AlertProperties.getDuration();
+            summaryHour = AlertProperties.getSummaryHour();
+            email = AlertProperties.getEmail();
+            hour = -1;
+        }
+        
+        @Override
+        public void run() {
+            //hour threshold passing logic
+            boolean genSummary = false;
+            int currentHour = new DateTime(System.currentTimeMillis()).getHourOfDay();
+            if (currentHour == summaryHour && currentHour != hour) {
+                genSummary = true;
+            }
+            hour = currentHour;
+            
+            List<RequestContext> requests = getLongRunningRequests(duration);
+            Server local = Server.LOCAL;
+            String subject = local.getName() + "(" + local.getHostName() + ") Louie Request Monitor update";
+            if (!requests.isEmpty()) {
+                Set<Long> foundThreads = new HashSet<>();
+                StringBuilder sb = new StringBuilder();
+                for (RequestContext ctx : requests) {
+                    if (!trackedThreads.contains(ctx.getThreadID()) || genSummary) { //warn only once per request or for summary
+                        sb.append("Thread ID:  ").append(ctx.getThreadID()).append("\n");
+                        sb.append("SessionKey: ").append(ctx.getSessionKey()).append("\n");
+                        sb.append("User:       ").append(ctx.getWho()).append("\n");
+                        sb.append("IP:         ").append(ctx.getRequestProperties().getRemoteAddress()).append("\n");
+                        sb.append("Module:     ").append(ctx.getModule()).append("\n");
+                        sb.append("Language:   ").append(ctx.getLanguage()).append("\n");
+                        DateTime create = new DateTime(ctx.getCreateTime());
+                        sb.append("Start time: ").append(fmt.print(create)).append("\n");
+                        sb.append("Request:    ");
+                        sb.append(ctx.getRequest().getService()).append(":");
+                        sb.append(ctx.getRequest().getMethod()).append("(");
+                        if (ctx.getRequest().getTypeCount() > 0) {
+                            Joiner.on(",").appendTo(sb, ctx.getRequest().getTypeList());
+                        }
+                        sb.append(")");
+                        if (!ctx.getParams().isEmpty()) {
+                            sb.append(" - ");
+                            sb.append("(");
+                            RequestHandler.appendListString(sb,ctx.getParams());
+                            sb.append(")");
+                        }
+                        sb.append("\n\n");
+                    }
+                    foundThreads.add(ctx.getThreadID());
+                }
+                
+                Set<Long> cleared = new HashSet<>(trackedThreads);
+                cleared.removeAll(foundThreads);
+                if (!cleared.isEmpty()) {
+                    sb.append("Cleared thread IDs:\t");
+                    for (long l : cleared) {
+                        sb.append(l).append("\t");
+                    }
+                }
+                
+                trackedThreads = foundThreads;
+                
+                if (sb.length() > 0) {
+                    LOGGER.info("Request Monitor Update:\n{}",sb.toString());
+                    try {
+                        
+                        EmailService.getInstance().sendMail(email, email, subject, sb.toString());
+                        // TODO drive addresses via properties
+                    } catch (Exception ex) {
+                        LOGGER.error(ex.toString());
+                    }
+                }
+                
+            } else {
+                if (!trackedThreads.isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Cleared thread IDs:\t");
+                    for (long l : trackedThreads) {
+                        sb.append(l).append("\t");
+                    }
+                    trackedThreads.clear();
+                    
+                    LOGGER.info("Request Monitor Update:\n{}",sb.toString());
+                    try {
+                        EmailService.getInstance().sendMail(email, email, subject, sb.toString());
+                        // TODO drive addresses via properties
+                    } catch (Exception ex) {
+                        LOGGER.error(ex.toString());
+                    }
+                }
+            }
+        }
+
     }
 }

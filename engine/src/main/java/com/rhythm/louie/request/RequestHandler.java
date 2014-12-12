@@ -95,7 +95,7 @@ public class RequestHandler {
         }
     }
     
-    private static void appendListString(StringBuilder logtext, Collection list) {
+    protected static void appendListString(StringBuilder logtext, Collection list) {
         boolean first = true;
         for (Object o : list) {
             if (first) {

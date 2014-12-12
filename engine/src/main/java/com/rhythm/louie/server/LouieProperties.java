@@ -88,6 +88,9 @@ public class LouieProperties {
     //scheduler
     private static final String SCHEDULER = "scheduler";
     private static final String POOL_SIZE = "thread_pool_size";
+    
+    //alerts
+    private static final String ALERTS = "alerts";
      
     /**
      * An example of what a custom property block might look like:
@@ -164,6 +167,9 @@ public class LouieProperties {
                     break;
                 case SCHEDULER:
                     TaskSchedulerProperties.setThreadPoolSize(Integer.parseInt(elem.getChildText(POOL_SIZE)));
+                    break;
+                case ALERTS:
+                    AlertProperties.processProperties(elem);
                     break;
                 case CUSTOM:
                     processCustomProperties(elem);
