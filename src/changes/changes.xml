@@ -5,6 +5,45 @@
     <title>Changes</title>
   </properties>
   <body>
+    <release version="1.11" date="2014-12-15" description="louie-1.11">
+      <action dev="cjohnson" type="add">
+        Layer based configuration for services
+      </action>
+      <action dev="eyasukoc" type="add">
+        XML validation for configuration file
+      </action>
+      <action dev="eyasukoc" type="add">
+        Security enhancements for authenticating users
+      </action>
+       <action dev="cjohnson" type="add">
+        Disabling of route user to allow service to make calls as itself, rather than requesting user
+      </action>
+      <action dev="cjohnson" type="add">
+        Email properties support, jndi mail sessions
+      </action>
+      <action dev="eyasukoc" type="add">
+        Configuration enhancements for custom property blocks
+      </action>
+      <action dev="cjohnson" type="add">
+        Messaging rework to allow customized naming of topics/queues
+      </action>
+      <action dev="eyasukoc" type="add">
+        Service configuration info added to web pages
+      </action>
+      <action dev="eyasukoc" type="add">
+        Python bundled into war to allow downloading from web
+      </action>
+      <action dev="eyasukoc" type="add">
+        External remote layer support
+      </action>
+      <action dev="cjohnson" type="update">
+        Enhancements and fixes to Tree
+      </action>
+      <action dev="cjohnson/eyasukoc" type="update">
+        Miscellaneous bug fixes
+      </action>
+    </release>
+
     <release version="1.10" date="2014-11-06" description="louie-1.10">
       <action dev="eyasukoc" type="add">
         XML base configuration with autoloading services.
