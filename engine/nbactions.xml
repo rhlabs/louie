@@ -19,7 +19,7 @@
         <displayName>compile java PBs</displayName>
         <goals>
             <goal>remote-resources:process</goal>
-            <goal>rh:pbcompile</goal>
+            <goal>louie:pbcompile</goal>
         </goals>
     </action>
     <action>

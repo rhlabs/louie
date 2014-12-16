@@ -73,6 +73,8 @@ message RequestPB {
 
     repeated RoutePB route    = 20;
     optional string routeUser = 21;
+    optional sint64 threadId  = 22;
+    optional sint64 start_time = 23;
 }
 
 message ResponseHeaderPB {

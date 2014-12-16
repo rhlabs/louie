@@ -46,7 +46,7 @@ public class ProtoProcessor implements ProtoProcess {
     private final Logger LOGGER = LoggerFactory.getLogger(ProtoProcessor.class);
     private final Pattern userCN;
     private final boolean secured;
-    private final Map<Long, RequestContext> currentRequestMap = new ConcurrentHashMap<>();
+    private static final Map<Long, RequestContext> currentRequestMap = new ConcurrentHashMap<>();
     
     public ProtoProcessor() {
         secured = Server.LOCAL.isSecure();
@@ -230,7 +230,15 @@ public class ProtoProcessor implements ProtoProcess {
         output.flush();
     }
     
-    public List<RequestContext> getLongRunningRequests(long msDuration) {
+    public static List<RequestPB> getActiveRequests() {
+        List<RequestPB> reqs = new ArrayList<>();
+        for (RequestContext ctx : currentRequestMap.values()) {
+            reqs.add(ctx.getRequestThreadContext());
+        }
+        return reqs;
+    }
+    
+    private List<RequestContext> getLongRunningRequests(long msDuration) {
         List<RequestContext> longrunning = new ArrayList<>();
         long currentTime = System.nanoTime()/1000000;
         for (RequestContext ctx : currentRequestMap.values()) {
@@ -285,6 +293,7 @@ public class ProtoProcessor implements ProtoProcess {
                         DateTime create = new DateTime(ctx.getCreateTime());
                         sb.append("Start time: ").append(fmt.print(create)).append("\n");
                         sb.append("Request:    ");
+                        
                         sb.append(ctx.getRequest().getService()).append(":");
                         sb.append(ctx.getRequest().getMethod()).append("(");
                         if (ctx.getRequest().getTypeCount() > 0) {
@@ -297,6 +306,8 @@ public class ProtoProcessor implements ProtoProcess {
                             RequestHandler.appendListString(sb,ctx.getParams());
                             sb.append(")");
                         }
+                        sb.append("\n").append("Stacktrace: \n");
+                        sb.append(ThreadInspector.INSTANCE.dumpStack(ctx.getThreadID(), 15));
                         sb.append("\n\n");
                     }
                     foundThreads.add(ctx.getThreadID());
@@ -318,7 +329,6 @@ public class ProtoProcessor implements ProtoProcess {
                     try {
                         
                         EmailService.getInstance().sendMail(email, email, subject, sb.toString());
-                        // TODO drive addresses via properties
                     } catch (Exception ex) {
                         LOGGER.error(ex.toString());
                     }

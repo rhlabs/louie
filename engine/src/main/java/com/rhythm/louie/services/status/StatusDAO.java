@@ -18,6 +18,7 @@ import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.louie.util.CalcList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.server.TaskScheduler;
 import com.rhythm.louie.DAO;
+import com.rhythm.louie.request.ProtoProcessor;
+import com.rhythm.louie.server.ThreadInspector;
 import com.rhythm.louie.stream.StreamingConsumer;
+
+import com.rhythm.pb.RequestProtos.RequestPB;
 
 /**
  *
@@ -179,6 +184,40 @@ public class StatusDAO implements StatusService {
     @Override
     public String updatingTest(String blah) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public List<Long> findDeadlockedThreads() throws Exception {
+        long[] deadlocked = ThreadInspector.INSTANCE.findDeadlockedThreads();
+        List<Long> deadList = new ArrayList<>();
+        if (deadlocked != null) {
+            for (long l : deadlocked) {
+                deadList.add(l);
+            }
+        }
+        return deadList;
+    }
+
+    @Override
+    public String dumpStack(Long threadId, Integer maxDepth) throws Exception {
+        return ThreadInspector.INSTANCE.dumpStack(threadId, maxDepth);
+    }
+
+    @Override
+    public List<Long> findMonitorDeadlockedThreads() throws Exception {
+        long[] deadlocked = ThreadInspector.INSTANCE.findMonitorDeadlockedThreads();
+        List<Long> deadList = new ArrayList<>();
+        if (deadlocked != null) {
+            for (long l : deadlocked) {
+                deadList.add(l);
+            }
+        }
+        return deadList;
+    }
+
+    @Override
+    public List<RequestPB> getActiveRequests() throws Exception {
+        return ProtoProcessor.getActiveRequests();
     }
     
 }

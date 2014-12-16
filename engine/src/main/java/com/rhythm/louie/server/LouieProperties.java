@@ -128,7 +128,7 @@ public class LouieProperties {
         boolean resetRoot = false;
         for (Element elem : louie.getChildren()) {
             if (ALT_PATH.equalsIgnoreCase(elem.getName())) {
-                String altPath = elem.getText().trim();
+                String altPath = elem.getTextTrim();
                 LoggerFactory.getLogger(LouieProperties.class)
                         .info("Loading Louie configs from alternate file: {}", altPath);
                 //overwrite document with values from alternate config 
@@ -165,7 +165,7 @@ public class LouieProperties {
                     MailProperties.processProperties(elem);
                     break;
                 case SCHEDULER:
-                    TaskSchedulerProperties.setThreadPoolSize(Integer.parseInt(elem.getChildText(POOL_SIZE)));
+                    TaskSchedulerProperties.processProperties(elem);
                     break;
                 case ALERTS:
                     AlertProperties.processProperties(elem);
@@ -266,7 +266,7 @@ public class LouieProperties {
             
             for (Element serverProp : server.getChildren()) {
                 String propName = serverProp.getName().toLowerCase();
-                String propValue = serverProp.getText().trim();
+                String propValue = serverProp.getTextTrim();
                 if (null != propName) switch (propName) {
                     case HOST: prop.setHost(propValue);
                         break;
@@ -290,7 +290,7 @@ public class LouieProperties {
                         break;
                     case CUSTOM: 
                         for (Element child : serverProp.getChildren()) {
-                            prop.addCustomProperty(child.getName(), child.getText().trim());
+                            prop.addCustomProperty(child.getName(), child.getTextTrim());
                         }
                         break;
                     default: LoggerFactory.getLogger(LouieProperties.class)
@@ -306,7 +306,7 @@ public class LouieProperties {
     private static void processServiceDefaults(Element defaults) {
         for (Element defaultProp : defaults.getChildren()) {
             String propName = defaultProp.getName().toLowerCase();
-            String propValue = defaultProp.getText().trim();
+            String propValue = defaultProp.getTextTrim();
             if (null != propName) switch (propName) {
                 case CACHING: ServiceProperties.setDefaultCaching(Boolean.valueOf(propValue));
                     break;
@@ -376,7 +376,7 @@ public class LouieProperties {
             
             for (Element serviceProp : service.getChildren()) {
                 String propName = serviceProp.getName().toLowerCase();
-                String propValue = serviceProp.getText().trim();
+                String propValue = serviceProp.getTextTrim();
                 if (null != propName) switch (propName) {
                     case CACHING: prop.setCaching(Boolean.valueOf(propValue));
                         break;
@@ -392,7 +392,7 @@ public class LouieProperties {
                         break;
                     case CUSTOM: 
                         for (Element child : serviceProp.getChildren()) {
-                            prop.addCustomProp(child.getName(), child.getText().trim());
+                            prop.addCustomProp(child.getName(), child.getTextTrim());
                         }
                         break;
                     default: LoggerFactory.getLogger(LouieProperties.class)
@@ -453,7 +453,7 @@ public class LouieProperties {
             String propName = customProp.getName();
             CustomProperty custom = new CustomProperty(propName);
             for (Element child : customProp.getChildren()) {
-                custom.setProperty(child.getName(), child.getText().trim());
+                custom.setProperty(child.getName(), child.getTextTrim());
             }
             customProperties.put(propName, custom);
         }

@@ -1,0 +1,53 @@
+/*
+ * ThreadInspector.java
+ * 
+ * Copyright (c) 2014 Rhythm & Hues Studios. All rights reserved.
+ */
+
+package com.rhythm.louie.server;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+
+/**
+ *
+ * @author eyasukoc
+ */
+public enum ThreadInspector {
+ 
+    INSTANCE;
+    
+    ThreadMXBean threadBean;
+    
+    ThreadInspector() {
+        threadBean = ManagementFactory.getThreadMXBean();
+    }
+    
+    public long[] findDeadlockedThreads() {
+        return threadBean.findDeadlockedThreads();
+    }
+    
+    public long[] findMonitorDeadlockedThreads() {
+        return threadBean.findMonitorDeadlockedThreads();
+    }
+    
+    public ThreadInfo getThreadInfo(long id) {
+        return threadBean.getThreadInfo(id);
+    }
+    
+    public ThreadInfo getThreadInfo(long id, int maxDepth) {
+        return threadBean.getThreadInfo(id, maxDepth);
+    }
+    
+    public String dumpStack(long id, int maxDepth) {
+        ThreadInfo info= threadBean.getThreadInfo(id,maxDepth);
+        StackTraceElement[] trace = info.getStackTrace();
+        StringBuilder builder = new StringBuilder();
+        for (StackTraceElement elem : trace) {
+           builder.append(elem).append("\n");
+        }
+        return builder.toString();
+    }
+    
+}

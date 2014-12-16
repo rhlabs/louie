@@ -5,11 +5,12 @@
  */
 package com.rhythm.louie.server;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -21,11 +22,16 @@ import org.slf4j.LoggerFactory;
  * @author sfong
  */
 public class TaskScheduler {
-    private final Logger LOGGER = LoggerFactory.getLogger(TaskScheduler.class);
     
     private ScheduledExecutorService scheduler;
     
-    private TaskScheduler() {}
+    private final int poolSize;
+    private String jndi = null;
+    
+    private TaskScheduler() {
+        poolSize = TaskSchedulerProperties.getThreadPoolSize();
+        jndi = TaskSchedulerProperties.getJndiKey();
+    }
         
     public static TaskScheduler getInstance() {
         return TaskSchedulerHolder.INSTANCE;
@@ -37,9 +43,21 @@ public class TaskScheduler {
     
     private synchronized ScheduledExecutorService getScheduler() {
         if (scheduler == null) {
+            if (jndi != null) {
+                InitialContext ctx;
+                try {
+                    ctx = new InitialContext();
+                    scheduler = (ManagedScheduledExecutorService) ctx.lookup(jndi);
+                    return scheduler;
+                } catch (NamingException ex) {
+                    LoggerFactory.getLogger(TaskScheduler.class)
+                            .error("Failed to fetch TaskScheduler JNDI resource.");
+                }
+            } 
+            //load w/ no jndi config, or on failure of jndi lookup
             ThreadFactory threadFactory = new ThreadFactoryBuilder()
                     .setNameFormat("louie-taskscheduler-%d").build();
-            scheduler = Executors.newScheduledThreadPool(TaskSchedulerProperties.getThreadPoolSize(),threadFactory);
+            scheduler = Executors.newScheduledThreadPool(poolSize,threadFactory);
         }
         return scheduler;
     }

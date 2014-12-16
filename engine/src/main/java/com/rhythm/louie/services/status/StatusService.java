@@ -6,16 +6,12 @@
 
 package com.rhythm.louie.services.status;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import com.rhythm.louie.Internal;
-import com.rhythm.louie.Service;
-import com.rhythm.louie.Streaming;
-import com.rhythm.louie.Updating;
+import com.rhythm.louie.*;
 
 import com.rhythm.pb.RequestProtos.ErrorPB;
+import com.rhythm.pb.RequestProtos.RequestPB;
 
 /**
  *
@@ -24,6 +20,37 @@ import com.rhythm.pb.RequestProtos.ErrorPB;
 
 @Service
 public interface StatusService {
+    
+    /**
+     * ThreadMXBean
+     * @return Returns a list of thread IDs
+     * @throws Exception 
+     */
+    List<Long> findDeadlockedThreads() throws Exception;
+    
+    /**
+     * ThreadMXBean
+     * @return Returns a list of thread IDs
+     * @throws Exception 
+     */
+    List<Long> findMonitorDeadlockedThreads() throws Exception;
+    
+    /**
+     * ThreadMXBean exploration
+     * @param threadId the threadId
+     * @param maxDepth the number of StackTraceElements to lookup
+     * @return a String representation of a stacktrace
+     * @throws Exception 
+     */
+    String dumpStack(Long threadId, Integer maxDepth) throws Exception;
+    
+    /**
+     * 
+     * @return
+     * @throws Exception 
+     */
+    List<RequestPB> getActiveRequests() throws Exception;
+    
     /**
      * Echoes the value back after sleeping
      * 

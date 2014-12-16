@@ -194,6 +194,13 @@ public class RequestContext {
         return request;
     }
     
+    public RequestPB getRequestThreadContext() {
+        return request.toBuilder()
+                .setThreadId(threadId)
+                .setStartTime(createTime)
+                .build();
+    }
+    
     public List<Param> getParams() {
         return params;
     }
