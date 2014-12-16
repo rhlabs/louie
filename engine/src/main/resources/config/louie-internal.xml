@@ -5,7 +5,6 @@
         <display></display>
         <timezone></timezone>
         <location></location>
-        <router>false</router>
         <port>8080</port>
         <gateway>louie</gateway>
         <secure>false</secure>

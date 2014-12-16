@@ -10,7 +10,6 @@
               <xs:element type="xs:string" name="display"/>
               <xs:element type="xs:string" name="timezone"/>
               <xs:element type="xs:string" name="location"/>
-              <xs:element type="xs:string" name="router"/>
               <xs:element type="xs:short" name="port"/>
               <xs:element type="xs:string" name="gateway"/>
               <xs:element type="xs:string" name="secure"/>

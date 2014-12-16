@@ -25,7 +25,6 @@ import com.rhythm.louie.email.EmailService;
 import com.rhythm.louie.jms.*;
 import com.rhythm.louie.service.Service;
 import com.rhythm.louie.service.ServiceFactory;
-import com.rhythm.louie.topology.Route;
 
 /**
  * @author cjohnson
@@ -85,12 +84,6 @@ public class ServiceManager {
         // Services
         loadServiceProviders();
         
-        // Router
-        if (Server.LOCAL.isARouter()) {
-            LOGGER.info("This Server started as a router.");
-            configureRoutes(context);
-        }
-
         try {
             EmailService.getInstance().initialize();
         } catch (Exception ex) {
@@ -230,11 +223,6 @@ public class ServiceManager {
         for (String failed : failedServiceProviders.keySet()) {
             serviceFactories.remove(failed);
         }
-    }
-    
-    private static void configureRoutes(ServletContext context) {
-        Properties routeProps = loadProperties(context, CONF_DIR, ROUTE_PROPERTIES);
-        Route.initialize(routeProps);
     }
     
     /**

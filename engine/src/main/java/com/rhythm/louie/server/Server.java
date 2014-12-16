@@ -33,7 +33,6 @@ public class Server {
     public static Server LOCAL = UNKNOWN;
     
     private static Server CENTRAL_AUTH = null;
-    private static Server ROUTER = null;
     
     private static final Map<ServerKey,Server> SERVERS_BY_ADDRESS = 
             Collections.synchronizedMap(new HashMap<ServerKey,Server>());
@@ -56,7 +55,6 @@ public class Server {
     private String gateway;
     private String ip;
     private String externalIp;
-    private boolean router;
     private boolean centralAuth;
     private boolean secure = false;
     private int port;
@@ -68,7 +66,6 @@ public class Server {
     private static String defaultDisplay;
     private static String defaultLocation;
     private static String defaultIP;
-    private static boolean defaultRouter;
     private static int defaultPort;
     private static boolean defaultSecure;
     
@@ -79,7 +76,6 @@ public class Server {
         for (Server server : servers) {
             SERVERS.put(server.getName(), server);
             if (server.centralAuth) CENTRAL_AUTH = server;
-            if (server.router) ROUTER = server;
         }
         
         if (SERVERS.isEmpty()) {                                        //shouldn't this be picking up what was in defaults?
@@ -218,10 +214,6 @@ public class Server {
         this.secure = secure;
     }
 
-    protected void setRouter(boolean router) {
-        this.router = router;
-    }
-
     protected void setCentralAuth(boolean centralAuth) {
         this.centralAuth = centralAuth;
     }
@@ -250,10 +242,6 @@ public class Server {
         defaultIP = IP;
     }
 
-    protected static void setDefaultRouter(boolean router) {
-        defaultRouter = router;
-    }
-    
     protected static void setDefaultPort(int port) {
         defaultPort = port;
     }
@@ -317,7 +305,6 @@ public class Server {
         this.timezone = defaultTimezone;
         this.location = defaultLocation;
         this.gateway = defaultGateway;
-        this.router = defaultRouter;
         this.port = defaultPort;
         this.secure = defaultSecure;
         properties = new HashMap<>();
@@ -329,10 +316,6 @@ public class Server {
     
     public static List<ServerPB> allServerPbs() {
         return ALL_SERVER_PBS;
-    }
-    
-    public boolean isARouter() {
-        return router;
     }
     
     public boolean isSecure() {
@@ -408,10 +391,6 @@ public class Server {
         return CENTRAL_AUTH;
     }
     
-    public static Server getRouter() {
-        return ROUTER;
-    }
-    
     public String getUrl() {
         StringBuilder sb = new StringBuilder();
         
@@ -468,7 +447,6 @@ public class Server {
         server.append("<b>port:</b>         ").append(getPort()).append("<br/>\n");
         server.append("<b>ip:</b>           ").append(getIp()).append("<br/>\n");
         server.append("<b>external_ip:</b>  ").append(getExternalIp()).append("<br/>\n");
-        server.append("<b>router:</b>       ").append(isARouter()).append("<br/>\n");
         server.append("<b>central_auth:</b> ").append(centralAuth).append("<br/>\n");
         server.append("<b>secure:</b>       ").append(isSecure()).append("<br/>\n");
         

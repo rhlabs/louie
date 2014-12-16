@@ -33,13 +33,7 @@ public class HttpProcessor {
      
      private final ProtoProcess processor;
      public HttpProcessor() {
-        if (Server.LOCAL.isARouter()) {
-            LOGGER.debug("Instantiating a protorouter");
-            processor = new ProtoRouter();
-        } else {
-            LOGGER.debug("Instantiating a protoprocessor");
-            processor = new ProtoProcessor();
-        }
+        processor = new ProtoProcessor();
         
         String ip;
         try {

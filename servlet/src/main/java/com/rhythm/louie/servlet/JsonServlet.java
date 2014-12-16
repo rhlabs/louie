@@ -7,7 +7,6 @@ package com.rhythm.louie.servlet;
 
 import com.rhythm.louie.request.JsonProcess;
 import com.rhythm.louie.request.JsonProcessor;
-import com.rhythm.louie.request.JsonRouter;
 import com.rhythm.louie.server.Server;
 
 import java.io.IOException;
@@ -29,12 +28,8 @@ public class JsonServlet extends HttpServlet {
     
     @Override
     public void init(ServletConfig config) throws ServletException {
-        if (Server.LOCAL.isARouter()) {
-            processor = new JsonRouter();
-        } else {
-            processor = new JsonProcessor();
-        }
-         super.init(config);
+        processor = new JsonProcessor();
+        super.init(config);
     }
     
     /**

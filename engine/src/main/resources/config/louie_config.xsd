@@ -68,11 +68,6 @@
                         <xs:documentation>"central_auth" denotes a server which will act as a centralized auth across a distributed set of Louies in one datacenter.</xs:documentation>
                       </xs:annotation>
                     </xs:element>
-                    <xs:element type="xs:string" name="router" minOccurs="0" maxOccurs="1">
-                      <xs:annotation>
-                        <xs:documentation>"router" will denote and enable an instance to act as a service router for a distributed set of Louies in one datacenter.</xs:documentation>
-                      </xs:annotation>
-                    </xs:element>
                     <xs:element type="xs:string" name="secure" minOccurs="0" maxOccurs="1">
                       <xs:annotation>
                         <xs:documentation>"secure" denotes that this host will be reachable only through HTTPS and that users will have to be properly authenticated</xs:documentation>

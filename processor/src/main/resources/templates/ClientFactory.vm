@@ -17,20 +17,4 @@ public class ${className} {
         return new ${baseName}ServiceClient(connection);
     }
 
-    /**
-     * findClient attempts to locate a running instance of the relevant service 
-     * on the local deployment or via a router w/in the local network of deployments
-     *
-     * @return Service Client interface regardless of local or remote
-     * @throws Exception 
-     */
-    public static ${info.serviceClassName} findClient() throws Exception {
-        if (ServiceManager.hasService("${info.serviceName}")) {
-            return ${baseName}ServiceFactory.getServiceClient();
-        } else if (Server.getRouter() != null) {
-            return new ${baseName}RemoteService(LouieConnectionFactory.getConnectionForServer(Server.getRouter()));
-        } else {
-            throw new Exception("Could not locate an instance of the ${info.serviceName} service");
-        }
-    }
 }

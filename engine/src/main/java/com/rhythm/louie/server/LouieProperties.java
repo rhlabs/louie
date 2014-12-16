@@ -75,7 +75,6 @@ public class LouieProperties {
     private static final String IP = "ip";
     private static final String EXTERNAL_IP = "external_ip";
     private static final String CENTRAL_AUTH = "central_auth";
-    private static final String ROUTER = "router";
     private static final String PORT = "port";
     private static final String SECURE = "secure";
     
@@ -223,7 +222,6 @@ public class LouieProperties {
         Server.setDefaultIP(serverDef.getChildText(IP));
         Server.setDefaultTimezone(serverDef.getChildText(TIMEZONE));
         Server.setDefaultLocation(serverDef.getChildText(LOCATION));
-        Server.setDefaultRouter(Boolean.valueOf(serverDef.getChildText(ROUTER)));
         Server.setDefaultPort(Integer.valueOf(serverDef.getChildText(PORT)));
         Server.setDefaultSecure(Boolean.valueOf(serverDef.getChildText(SECURE)));
             
@@ -281,8 +279,6 @@ public class LouieProperties {
                     case IP: prop.setIp(propValue);
                         break;
                     case EXTERNAL_IP: prop.setExternalIp(propValue);
-                        break;
-                    case ROUTER: prop.setRouter(Boolean.valueOf(propValue));
                         break;
                     case CENTRAL_AUTH: prop.setCentralAuth(Boolean.valueOf(propValue));
                         break;
