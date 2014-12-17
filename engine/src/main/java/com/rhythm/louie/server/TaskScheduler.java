@@ -5,6 +5,8 @@
  */
 package com.rhythm.louie.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
@@ -24,6 +26,8 @@ import org.slf4j.LoggerFactory;
 public class TaskScheduler {
     
     private ScheduledExecutorService scheduler;
+    
+    private final List<ScheduledFuture<?>> futures = new ArrayList<>();
     
     private final int poolSize;
     private String jndi = null;
@@ -48,6 +52,8 @@ public class TaskScheduler {
                 try {
                     ctx = new InitialContext();
                     scheduler = (ManagedScheduledExecutorService) ctx.lookup(jndi);
+                    LoggerFactory.getLogger(TaskScheduler.class)
+                            .info("Loaded TaskScheduler from JNDI resource.");
                     return scheduler;
                 } catch (NamingException ex) {
                     LoggerFactory.getLogger(TaskScheduler.class)
@@ -65,8 +71,20 @@ public class TaskScheduler {
     
     synchronized public void shutdown() {
         if (scheduler != null) {
-            scheduler.shutdownNow();
+            if (jndi == null) {
+                scheduler.shutdownNow();
+            } else {
+                for (ScheduledFuture<?> future : futures) {
+                    future.cancel(true);
+                }
+            }
         }
+    }
+    
+    public List<ScheduledFuture<?>> getFutures() {
+//        for (ScheduledFuture<?> future : futures){
+//        }
+        return futures;
     }
     
     /**
@@ -82,7 +100,7 @@ public class TaskScheduler {
         getScheduler().execute(command);
     }
     
-     /**
+    /**
      * Creates and executes a one-shot action that becomes enabled
      * after the given delay.
      *
@@ -97,7 +115,9 @@ public class TaskScheduler {
      * java.lang.Runnable, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        return getScheduler().schedule(command, delay, unit);
+        ScheduledFuture<?> future = getScheduler().schedule(command, delay, unit);
+        futures.add(future);
+        return future;
     }
     
      /**
@@ -122,7 +142,9 @@ public class TaskScheduler {
      * java.lang.Runnable, long, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        return getScheduler().scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        ScheduledFuture<?> future = getScheduler().scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        futures.add(future);
+        return future;
     }
     
     /**
@@ -150,7 +172,9 @@ public class TaskScheduler {
      * java.lang.Runnable, long, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-        return getScheduler().scheduleAtFixedRate(command, initialDelay, period, unit);
+        ScheduledFuture<?> future = getScheduler().scheduleAtFixedRate(command, initialDelay, period, unit);
+        futures.add(future);
+        return future;
     }
     
     /**
@@ -178,6 +202,8 @@ public class TaskScheduler {
      * java.lang.Runnable, long, long, java.util.concurrent.TimeUnit) 
      */
     public ScheduledFuture<?> scheduleWithFixedDelay(ServiceProperties serviceProperties, Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        return getScheduler().scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        ScheduledFuture<?> future = getScheduler().scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        futures.add(future);
+        return future;
     }
 }
