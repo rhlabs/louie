@@ -42,13 +42,15 @@ public interface StatusService {
      * @return a String representation of a stacktrace
      * @throws Exception 
      */
+    @Admin
     String dumpStack(Long threadId, Integer maxDepth) throws Exception;
     
     /**
-     * 
+     * Live Request Introspection
      * @return
      * @throws Exception 
      */
+    @Admin
     List<RequestPB> getActiveRequests() throws Exception;
     
     /**

@@ -5,9 +5,7 @@
  */
 package com.rhythm.louie.generator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -17,12 +15,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import com.rhythm.louie.Disabled;
-import com.rhythm.louie.Grouping;
-import com.rhythm.louie.Internal;
+import com.rhythm.louie.*;
 import com.rhythm.louie.process.ServiceCall;
-import com.rhythm.louie.Streaming;
-import com.rhythm.louie.Updating;
 
 /**
  *
@@ -40,6 +34,8 @@ public class MethodInfo {
     private final Updating updating;
     private final Streaming streaming;
     private final Grouping grouping;
+    private final Admin admin;
+    private final Restricted restricted;
     
     private TypeMirror baseReturnType;
     
@@ -58,6 +54,8 @@ public class MethodInfo {
         updating = method.getAnnotation(Updating.class);
         streaming = method.getAnnotation(Streaming.class);
         grouping = method.getAnnotation(Grouping.class);
+        admin = method.getAnnotation(Admin.class);
+        restricted = method.getAnnotation(Restricted.class);
                 
         Elements elems = processingEnv.getElementUtils();
         javaDoc = elems.getDocComment(method);
@@ -98,6 +96,14 @@ public class MethodInfo {
     
     public boolean isStreaming() {
         return streaming!=null;
+    }
+    
+    public boolean isAdminRestricted() {
+        return admin!=null;
+    }
+    
+    public boolean isRestricted() {
+        return restricted!=null;
     }
     
     public boolean isClientAccess() {
@@ -309,6 +315,12 @@ public class MethodInfo {
                 sb.append("groupOrder=").append(grouping.groupOrder()).append(", ");
             }
             sb.append("group=\"").append(grouping.group()).append("\")\n");
+        }
+        if (isAdminRestricted()) {
+            appendSimpleAnnotation(sb, indent, Admin.class, true);
+        }
+        if (isRestricted()) {
+            appendSimpleAnnotation(sb, indent, Restricted.class, true);
         }
         appendSimpleAnnotation(sb, indent, ServiceCall.class, false);
         sb.append("(javadoc=");

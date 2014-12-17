@@ -21,6 +21,7 @@ import com.rhythm.louie.process.ServiceHandler;
 
 import com.rhythm.louie.request.RequestContext;
 import com.rhythm.louie.request.data.Result;
+import com.rhythm.louie.server.AccessManager;
 import com.rhythm.louie.service.command.PBCommand;
 import com.rhythm.louie.service.command.PBCommandType;
 import com.rhythm.louie.service.command.PBParamType;
@@ -99,6 +100,19 @@ public abstract class AnnotatedService implements Service {
                     + getServiceName() + ":" + req.getRequest().getMethod()
                     + "(" + req.getType() + ")");
         }
+        
+        if (cmd.adminAccess()) {
+            if (!AccessManager.isAdminUser(req.getRequester())) {
+                throw new UnsupportedOperationException(req.getRequester()+" does not have admin privileges to access this method.");
+            }
+        }
+        if (cmd.restrictedAccess()) {
+            if (!AccessManager.canUserAccessService(
+                    req.getRequester(), req.getRequest().getService())) {
+                throw new UnsupportedOperationException(req.getRequester()+" does not have privileges to access this method.");
+            }
+        } 
+        
         if (cmd.isUpdate()) {
             ServiceProperties props = ServiceProperties.getServiceProperties(name);
             if (props.isReadOnly()) {

@@ -28,4 +28,6 @@ public interface PBCommand {
     public int getGroupOrder();
     public boolean isInternal();
     public boolean isStreaming();
+    public boolean adminAccess();
+    public boolean restrictedAccess();
 }

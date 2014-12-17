@@ -5,19 +5,8 @@
  */
 package com.rhythm.louie.service.command;
 
-import com.rhythm.louie.service.AnnotatedService;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 
 import com.google.protobuf.AbstractMessage.Builder;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -26,19 +15,13 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.*;
 import com.rhythm.louie.generator.ProcessorUtils;
-
-import com.rhythm.louie.request.data.DataParser;
-import com.rhythm.louie.request.data.DataParser.BuilderParser;
-import com.rhythm.louie.request.data.Param;
-import com.rhythm.louie.request.RequestContext;
-import com.rhythm.louie.request.data.Result;
-
-import com.rhythm.louie.Grouping;
-import com.rhythm.louie.Internal;
 import com.rhythm.louie.process.ServiceCall;
-import com.rhythm.louie.Streaming;
-import com.rhythm.louie.Updating;
+import com.rhythm.louie.request.RequestContext;
+import com.rhythm.louie.request.data.*;
+import com.rhythm.louie.request.data.DataParser.BuilderParser;
+import com.rhythm.louie.service.AnnotatedService;
 
 /**
  * @author cjohnson
@@ -64,6 +47,8 @@ public class ReflectCommand implements PBCommand {
     private final boolean isInternal;
     private final boolean isStreaming;
     private final boolean deprecated;
+    private final boolean adminAccess;
+    private final boolean restrictedAccess;
     
     public ReflectCommand(final AnnotatedService service, final Method meth) throws Exception {
         this.service =service;
@@ -76,6 +61,8 @@ public class ReflectCommand implements PBCommand {
         isInternal = meth.isAnnotationPresent(Internal.class);
         isStreaming = meth.isAnnotationPresent(Streaming.class);
         deprecated = meth.isAnnotationPresent(Deprecated.class);
+        adminAccess = meth.isAnnotationPresent(Admin.class);
+        restrictedAccess = meth.isAnnotationPresent(Restricted.class);
         
         description = ProcessorUtils.extractDescriptionFromJavadoc(serviceCall.javadoc());
         
@@ -292,5 +279,15 @@ public class ReflectCommand implements PBCommand {
     @Override
     public boolean isStreaming() {
         return isStreaming;
+    }
+
+    @Override
+    public boolean adminAccess() {
+        return adminAccess;
+    }
+
+    @Override
+    public boolean restrictedAccess() {
+        return restrictedAccess;
     }
 }

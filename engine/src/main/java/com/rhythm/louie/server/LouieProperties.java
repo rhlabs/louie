@@ -56,6 +56,7 @@ public class LouieProperties {
     private static final String READ_ONLY = "read_only";
     private static final String CACHING = "caching";
     private static final String PROVIDER_CL = "provider_class";
+    private static final String RESPECTED_GROUPS = "respected_groups";
     
     private static final String LAYERS = "layers";
     private static final String LAYER = "layer";
@@ -90,6 +91,9 @@ public class LouieProperties {
     
     //alerts
     private static final String ALERTS = "alerts";
+    
+    //administration
+    private static final String GROUPS = "groups";
      
     /**
      * An example of what a custom property block might look like:
@@ -142,6 +146,11 @@ public class LouieProperties {
             louie = properties.getRootElement(); 
         }
         
+        Element groups = louie.getChild(GROUPS);
+        if (groups != null) {
+            AccessManager.loadGroups(groups);
+        }
+        
         boolean serversConfigured = false;
         for (Element elem : louie.getChildren()) {
             String elemName = elem.getName().toLowerCase();
@@ -172,6 +181,8 @@ public class LouieProperties {
                     break;
                 case CUSTOM:
                     processCustomProperties(elem);
+                    break;
+                case GROUPS:
                     break;
                 default: LoggerFactory.getLogger(LouieProperties.class)
                             .warn("Unexpected top level property  {}",elemName);
@@ -383,6 +394,8 @@ public class LouieProperties {
                     case READ_ONLY: prop.setReadOnly(Boolean.valueOf(propValue));
                         break;
                     case PROVIDER_CL: prop.setProviderClass(propValue);
+                        break;
+                    case RESPECTED_GROUPS: AccessManager.loadServiceAccess(serviceName, serviceProp);
                         break;
                     case RESERVED: 
                         if (internal) prop.setReserved(Boolean.valueOf(propValue));

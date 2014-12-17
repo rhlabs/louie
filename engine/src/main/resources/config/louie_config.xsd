@@ -88,7 +88,7 @@
                       </xs:complexType>
                     </xs:element>
                   </xs:all>
-                  <xs:attribute type="xs:string" name="name"/>
+                  <xs:attribute type="xs:string" name="name" use="required"/>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -136,7 +136,7 @@
               </xs:element>
               <xs:element name="service" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
-                  <xs:documentation>"service" is an expected element representing a specific service configuration"name" is the service name, which must the implementation service name"enable" is an optional attribute which overrides whatever was specified in the default "enable""service" can also be flushed out with nested configurations</xs:documentation>
+                  <xs:documentation>Represents configurations for a single service. Missing fields will be populated by defaults if present.</xs:documentation>
                 </xs:annotation>
                 <xs:complexType mixed="true">
                  <xs:all>
@@ -172,6 +172,16 @@
                         </xs:all>
                       </xs:complexType>
                     </xs:element>
+                    <xs:element name="respected_groups" minOccurs="0" maxOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>A list of groups which may access @Restricted annotated methods. Each group must refer to a configured group in the top level groups element.</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element type="xs:string" name="group" maxOccurs="unbounded"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
                     <xs:element type="xs:string" name="read_only" minOccurs="0" maxOccurs="1"> 
                       <xs:annotation>
                         <xs:documentation>Any configuration specified here will override anything found in the defaults</xs:documentation>
@@ -202,7 +212,7 @@
                       </xs:complexType>
                     </xs:element>
                   </xs:all>
-                  <xs:attribute type="xs:string" name="name"/>
+                  <xs:attribute type="xs:string" name="name" use="required"/>
                   <xs:attribute type="xs:string" name="enable" use="optional">
                     <xs:annotation>
                         <xs:documentation>Enable or disable a service</xs:documentation>
@@ -333,6 +343,26 @@
                         </xs:annotation>
                     </xs:element>
                 </xs:all>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="groups" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+                <xs:documentation>a list of groups, denoted by a group name and containing repeated users</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="group" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>A group definition, with a "name" attribute and a list of users</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element type="xs:string" name="user" maxOccurs="unbounded"/>
+                            </xs:sequence>
+                            <xs:attribute type="xs:string" name="name" use="required"/>    
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
             </xs:complexType>
         </xs:element>
         <xs:element name="custom" minOccurs="0" maxOccurs="1">
