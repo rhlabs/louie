@@ -249,6 +249,9 @@ public class LouieProperties {
         
         Element schedDef = louie.getChild("scheduler_defaults");
         TaskSchedulerProperties.setThreadPoolSize(Integer.parseInt(schedDef.getChildText(POOL_SIZE)));
+        
+        Element accessDef = louie.getChild("group_defaults");
+        AccessManager.loadGroups(accessDef);
 
     }
     

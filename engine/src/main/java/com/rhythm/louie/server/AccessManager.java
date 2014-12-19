@@ -22,12 +22,22 @@ public class AccessManager {
     
     private static final String GROUP_NAME = "name";
     private static final String ADMIN = "admin";
+    private static final String WILDCARD = "%";
+    
+    private static boolean wild = false;
     
     protected static void loadGroups(Element groups) {
         for (Element group : groups.getChildren()) {
             String name = group.getAttributeValue(GROUP_NAME).toLowerCase();
             if (ADMIN.equals(name)) {
+                adminUsers.clear(); //to allow re-loading from a default set by a specific louie.xml impl
+                wild = false;
                 for (Element user : group.getChildren()) {
+                    String u = user.getTextTrim();
+                    if (WILDCARD.equals(u)) {
+                        wild = true;
+                        break;
+                    }
                     adminUsers.add(user.getTextTrim());
                 }
             } else {
@@ -58,6 +68,9 @@ public class AccessManager {
     }
     
     public static boolean isAdminUser(String user) {
+        if (wild == true) {
+            return true;
+        }
         return adminUsers.contains(user);
     }
     

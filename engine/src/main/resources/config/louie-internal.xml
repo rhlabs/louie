@@ -33,4 +33,9 @@
     <scheduler_defaults>
         <thread_pool_size>8</thread_pool_size>
     </scheduler_defaults>
+    <group_defaults>
+        <group name="admin">
+            <user>%</user>
+        </group>
+    </group_defaults>
 </louie>

@@ -48,6 +48,20 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+        <xs:element name="group_defaults">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="group">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="user"/>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="name"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
