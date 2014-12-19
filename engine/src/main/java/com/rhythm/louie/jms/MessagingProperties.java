@@ -48,14 +48,14 @@ public class MessagingProperties {
     private static String failover = "true";
     
     //TODO load these from an internal louie config file
-    private static String serverPrefix = "louie.server.";
-    private static String serverType = "queue";
-    private static String updatePrefix = "louie.update.";
-    private static String updateType = "queue";
+    private static String serverPrefix = "louie."; 
+    private static String serverType = "topic";
+    private static String updatePrefix = "louie.";
+    private static String updateType = "topic";
     private static String clientPrefix = "louie.";
     private static String clientType = "topic";
 
-    public static void processMessaging(Element messaging){
+    public static void processMessaging(Element messaging){ 
         for (Element prop : messaging.getChildren()) {
             String propName = prop.getName().toLowerCase();
             if (null != propName) {
