@@ -16,6 +16,10 @@ import java.util.*;
 
 import javax.servlet.ServletContext;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +41,7 @@ public class ServiceManager {
     
     private static final Map<String, ServiceFactory> serviceFactories = new TreeMap<>();
     private static final Map<String, String> failedServiceProviders = new TreeMap<>();
+    private static final ListMultimap<String,Exception> errors = LinkedListMultimap.create();
     
     private ServiceManager() {};
     
@@ -337,6 +342,14 @@ public class ServiceManager {
 
     public static Map<String, String> getFailedServiceProviders() {
         return Collections.unmodifiableMap(failedServiceProviders);
+    }
+    
+    public static void recordError(String error, Exception e) {
+        errors.put(error,e);
+    }
+    
+    public static ListMultimap<String, Exception> getErrors() {
+        return Multimaps.unmodifiableListMultimap(errors);
     }
     
 }

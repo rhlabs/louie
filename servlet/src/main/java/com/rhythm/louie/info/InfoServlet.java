@@ -57,6 +57,7 @@ public class InfoServlet extends HttpServlet {
 
         properties.put("extras", extras);
         properties.put("fails", ServiceManager.getFailedServiceProviders());
+        properties.put("errors", ServiceManager.getErrors());
         
         InfoUtils.writeTemplateResponse(request, response, "info.vm", properties);
     }

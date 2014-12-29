@@ -204,8 +204,10 @@ public class LouieProperties {
             Server.processServers(empty);
             return null;
         } catch (IOException | JDOMException ex) {
+            String error = "Properties file error! All services shutdown";
+            ServiceManager.recordError(error, ex);
             LoggerFactory.getLogger(LouieProperties.class)
-                    .error("Properties file error! All services shutdown\n{}",ex.toString());
+                    .error("{}\n{}",error,ex.toString());
             List<Server> empty = Collections.emptyList();
             ServiceProperties.globalDisable(); //brute disable
             Server.processServers(empty);
