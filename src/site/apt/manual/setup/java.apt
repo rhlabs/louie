@@ -8,8 +8,8 @@ Java Development Environment
 
   If you are new to Java development you will need to install a Java Development Kit (JDK) and an IDE like {{{http://netbeans.org/}Netbeans}} or {{{http://www.eclipse.org/}Eclipse}}. 
 
-  JDK 7 or later is required for using LoUIE. You can download the latest 7.x JDK with NetBeans IDE Java SE bundle {{{http://www.oracle.com/technetwork/java/javase/downloads/jdk-7-netbeans-download-432126.html}here}}.
-  This is the environment that has been used for all the primary development and testing for LoUIE.
+  JDK 7 or later is required for using Louie. You can download the latest 7.x JDK with NetBeans IDE Java SE bundle {{{http://www.oracle.com/technetwork/java/javase/downloads/jdk-7-netbeans-download-432126.html}here}}.
+  This is the environment that has been used for all the primary development and testing for Louie.
 
   Alternatively you install the latest standalone (8.x) version {{{http://www.oracle.com/technetwork/java/javase/downloads/index.html}here}}
 
@@ -35,9 +35,9 @@ jdk1.7.0_55/
 
 * Maven
 
-  LoUIE uses {{{http://maven.apache.org/}Maven}} for build management.  
+  Louie uses {{{http://maven.apache.org/}Maven}} for build management.  
   Netbeans comes bundled with Maven, so inside of the IDE you will be able to use all 
-  of the features of LoUIE including starting new projects with the louie archetype.  
+  of the features of Louie including starting new projects with the louie archetype.  
  
   If you need to build from the command line you can install maven through a package 
   manager or simply use the maven in netbeans found in the MAVEN_INSTALL/java/maven directory.

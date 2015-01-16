@@ -4,11 +4,11 @@
 
 Protocol Buffers
 
- {{{http://developers.google.com/protocol-buffers}Protocol Buffers}} (PBs) form the basis communication with LoUIE. In order to effectively utilize the capability in LoUIE, you will need to organize your data in PB Messages. Protocol Buffers are used heavily within Google and their documentation is stellar. If you are not familiar with PBs, it is well worth your time becoming comfortable with them and what you can and cannot do.
+ {{{http://developers.google.com/protocol-buffers}Protocol Buffers}} (PBs) form the basis communication with Louie. In order to effectively utilize the capability in Louie, you will need to organize your data in PB Messages. Protocol Buffers are used heavily within Google and their documentation is stellar. If you are not familiar with PBs, it is well worth your time becoming comfortable with them and what you can and cannot do.
 
 * Example
 
- In order explain how PBs are used throughout LoUIE, here is an example proto file found hypothetically in: service/src/main/resources/sample/sample.proto
+ In order explain how PBs are used throughout Louie, here is an example proto file found hypothetically in: service/src/main/resources/sample/sample.proto
 
 +---------+
 package sample;
@@ -35,4 +35,4 @@ message SamplePB {
 
 Client Side
 
- PBs are in general somewhat limiting, as their fundamental purpose is data serialization and not a functional construct. LoUIE services tend to use PBs directly, and this is perfectly fine for most cases, however you will want to encapsulate a PB into your own object at some point to add functionality. It is encouraged that you adopt this pattern in your client side modules.
+ PBs are in general somewhat limiting, as their fundamental purpose is data serialization and not a functional construct. Louie services tend to use PBs directly, and this is perfectly fine for most cases, however you will want to encapsulate a PB into your own object at some point to add functionality. It is encouraged that you adopt this pattern in your client side modules.

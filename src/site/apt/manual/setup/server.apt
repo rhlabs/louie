@@ -4,9 +4,9 @@
 
 Server Configuration
 
- LoUIE can be used on any Java Application Server. Development has been done primarily 
+ Louie can be used on any Java Application Server. Development has been done primarily 
  using Glassfish. For the purposes of this document, we will be describing a setup 
- using the Glassfish server on a unix based os. Additionally, LoUIE out of the box has
+ using the Glassfish server on a unix based os. Additionally, Louie out of the box has
  logging settings and other templated configurations geared to working with glassfish, 
  but you can change those to work with the server you are most comfortable with..
 

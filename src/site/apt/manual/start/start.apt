@@ -8,12 +8,12 @@ Getting Started
  Using an IDE is advised as well, we prefer {{{https://netbeans.org/}netbeans}}. 
  You can find documentation on using these tools on their respective sites.
 
-* Creating a LoUIE based project
+* Creating a Louie based project
 
  To create a louie project from scratch, you will need to invoke the louie archetype. 
  You can do this through the new project dialog in your {{{./create.html}ide}}, if it supports maven, or via the {{{./create.html}command line}}.
 
-* Running your LoUIE based project
+* Running your Louie based project
 
  To run a newly built project, you'll need to first {{{./addserver.html}add}} your GlassFish server to your NetBeans IDE.
  Then you can {{{./run.html}run}} the application from within NetBeans.

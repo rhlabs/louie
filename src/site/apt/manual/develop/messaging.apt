@@ -4,10 +4,98 @@
 
 Messaging
 
-* Message Server
+ Louie is designed to work with multiple servers, in potentially different data centers. In order for these servers to communicate effectively support for messaging has been built into the core. Primarily this messaging takes the form of JMS, however the message management has been abstracted to be able to support custom implementations of message handlers, should the need arise.
 
- Something about ActiveMQ
+* Messaging Adapter
 
-* Configuring Destinations for use with LoUIE
+ Included with Louie is a messaging adapter for ActiveMQ. This adapter can be loaded at runtime by specifying the jmsadapter in your louie.xml. Additionally, you will need to specify where the server is. By default it will assume that the server is running on the same host as the Louie instance. Here is an example configuration:
 
- Some more stuff
++-----+
+<messaging>
+   <jmsadapter class="com.rhythm.louie.activemq.ActiveMQAdapter" host="jmshost" port="61616" />
+</messaging>
++-----+
+ 
+* Sending Messages
+
+ Sending messages has been designed to be as easy as possible. Typically you will be sending messages from a DAO layer. To send a message simply use the MessageUpdate utility class. Specify the service name, the Type of the update, and the protocol buffer you wish to send:
+
++----+
+  MessageUpdate.getInstance().sendUpdate(SERVICE_NAME, MessageAction.UPDATE, updatedPB);
++----+
+
+* Listening to Messages from Services
+
+ Usually message handling within services is used to update a cache. In order to make your CacheDelegate (or whatever service layer you wish) listen to messages, you will need to do a few things:
+
+** Write a MessageHandler.
+
+ A message handler is just a class that extends AnnotatedMessageHandler and has one or more methods tagged with @MessageOperation. This tag is used to register each method at runtime with the MessageManager. Methods with this annotation must take a MessageAction as the first argument and a Protocol Buffer as the send. When a message is received carrying a protocol buffer of the type of the method, the MessageManager will call the corresponding message. Multiple MessageHandlers can be registered with the MessageManager, all requesting the same type of protocol buffer, and each in turn will get called. Louie will handle all the connections and message processing, you simply need to implement the callbacks.
+
+ An example MessageHandler:
+
++----+
+    public class MyMessageHandler extends AnnotatedMessageHandler {
+        @MessageOperation
+        public void updateData(MessageAction action, MyDataPB data) throws Exception {
+            updateCache(data);
+        }
+    } 
++----+   
+
+** Service layer must implement CacheLayer
+ 
+ The Service machinery detects this and then attempts to load a message handler. Primarily you just need to have getMessageHandler() return the handler you created above. The other methods: intialize, shutdown, and getCacheManager can just be empty or return null.
+
+* Configuring Destinations for use with Louie
+
+ This is more advanced usage, so feel free to skip this information if you are new to Louie.
+
+ By default, Louie will use a JMS Topic named "louie."+SERVICE_NAME to send and receive messages for a given service. The prefix of the topic, as well as the type (topic or queue) can be configured in the messaging properties as well. For a simple setup, using a shared Topic should suffice, however as you scale to multiple locations, you may want to change your messaging to use queues per location. The bulk of this configuration is driven by what you can do with ActiveMQ and virtual destinations. We will not go into that here yet, but it is worth noting that this behavior is available. Here is an example of our preferred multi-location settings.
+
++-----+
+<messaging>
+    <jmsadapter class="com.rhythm.louie.activemq.ActiveMQAdapter"/>
+    <server prefix="louie.server." type="queue"/>
+    <update prefix="louie.update." type="queue"/>
+    <client prefix="louie." type="topic"/>
+</messaging>
++-----+
+
+ And the corresponding snippet from the ActiveMQ configuration, that makes this all viable. This is a hypothetical configuration file for an ActiveMQ server running in LA that is communicating to similar server in Mumbai.
+
++-----+
+      <networkConnectors>
+        <networkConnector name="la-mumbai" uri="static:(tcp://10.100.2.94:61616)" staticBridge="true">
+          <staticallyIncludedDestinations>
+            <queue physicalName="louie.server.mumbai.myservice" />
+          </staticallyIncludedDestinations>
+        </networkConnector>
+      </networkConnectors>
+
+      <destinations>
+        <queue physicalName="louie.server.la.myservice" />
+      </destinations>
+
+      <destinationInterceptors>
+        <virtualDestinationInterceptor>
+          <virtualDestinations>
+            <compositeQueue name="louie.update.myservice">
+              <forwardTo>
+                <queue physicalName="louie.server.mumbai.myservice" />
+                <queue physicalName="louie.server.la.myservice" />
+              </forwardTo>
+            </compositeQueue>
+            <compositeQueue name="louie.server.la.myservice">
+              <forwardTo>
+                <queue physicalName="louie.server.myservice" />
+                <topic physicalName="louie.myservice" />
+              </forwardTo>
+             </compositeQueue>
+          </virtualDestinations>
+        </virtualDestinationInterceptor>
+      </destinationInterceptors>
++-----+
+
+ What the above configurations achieve is a robust messaging network between multiple ActiveMQ instances. Each instance is guaranteed to get one and only one copy of a message. Those messages will be pushed directly to the target destination, if possible, or queued locally until the network is available. Locally the message will be queued onto a server specific queue to ensure that the server does not miss any messages. And finally a copy of the message will be broadcasted on a Topic, meant for client consumption. ie, other applications that may be interested in consuming the message.
+

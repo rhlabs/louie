@@ -15,7 +15,7 @@
         <item name="Running a project" href="manual/start/run.html"/>
         <item name="Undeploying" href="manual/start/undeploy.html"/>
       </item>
-      <item name="Developing with LoUIE" href="manual/develop/develop.html" collapse="true">
+      <item name="Developing with Louie" href="manual/develop/develop.html" collapse="true">
         <item name="Protocol Buffers" href="manual/develop/pb.html"/>
         <item name="Writing a Service" href="manual/develop/service.html"/>
         <item name="Adding a Datasource" href="manual/develop/datasource.html"/>

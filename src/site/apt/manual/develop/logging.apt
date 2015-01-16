@@ -4,12 +4,11 @@
 
 Logging
 
+ Louie utilizes logging frameworks to primarily record requests and database queries. You can also access information about cache events, messages, and debugging information. Logging of request and database queries allows you to analyze usage and patterns.
+
 * {{{http://www.slf4j.org/}SLF4J}} 
 
- LoUIE is configured by default to log of all requests as well as all database 
-queries performed. This allows us to analyze usage and patterns. All logging is 
-done using {{{http://www.slf4j.org/}SLF4J}}, which provides a facade to the actual logging code so that 
-the logging implementation can be swapped out. 
+ All logging throughout Louie uses {{{http://www.slf4j.org/}SLF4J}}, which provides a facade to the actual logging code so that the actual logging implementation can be simply loaded at run time.
 
 * {{{http://code.google.com/p/log4jdbc/}Log4jdbc}} 
 
@@ -20,9 +19,11 @@ automatically into the connection so that all queries can be captured and logged
 
 * {{{http://logging.apache.org/log4j/2.x/}Log4J2}}
 
- The LoUIE archetype will template out a server configuration to use 
+ The Louie archetype will template out a server configuration to use 
 {{{http://logging.apache.org/log4j/2.x/}Log4J2}}. This is our preferred 
 logging framework, but you can change the dependency bindings to a different 
 slf4j adapter. You will need to account for the Log4Jdbc configurations. 
 Log4j2 provides a Routing Appender which we are using in the default log4j2.xml
 to split logging into different files based upon your logger key.
+
+

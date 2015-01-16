@@ -2,11 +2,11 @@
  Introduction
  ------
 
-Welcome to LoUIE!
+Welcome to Louie!
 
- LoUIE is a service that provides a unified interface to a disparate set of data-sources. It is language and platform independent and an integral part of our infrastructure technology.
+ Louie is a service that provides a unified interface to a disparate set of data-sources. It is language and platform independent and an integral part of our infrastructure technology.
 
- The main goals of LoUIE:
+ The main goals of Louie:
 
    * Centralize data access to facilitate caching and modification of the underlying data sources without effecting client APIs.
 

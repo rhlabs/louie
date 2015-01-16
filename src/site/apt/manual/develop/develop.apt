@@ -1,11 +1,11 @@
  ------
- Developing with LoUIE
+ Developing with Louie
  ------
 
-Developing with LoUIE
+Developing with Louie
 
 
- To develop with LoUIE you will need to setup your data objects with 
+ To develop with Louie you will need to setup your data objects with 
 {{{./pb.html}Protocol Buffers}} and write a {{{./service.html}service interface}}.
    
  If this is a database driven service, you will want to configure a {{{./datasource.html} datasource}}.

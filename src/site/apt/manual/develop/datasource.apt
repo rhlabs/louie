@@ -10,7 +10,7 @@ please read their provided documentation.
 * Database Pool Configuration
 
  A very useful feature to utilize in an application server like glassfish is database 
-connection pooling. The base JDBC functionality in LoUIE is designed with database 
+connection pooling. The base JDBC functionality in Louie is designed with database 
 pooling in mind. It is made very easy to lookup and use a server configured pool.
 
  To setup a mysql pool, first install the connector library, ie mysql-connector-java-5.1.28-bin.jar 
@@ -47,7 +47,7 @@ asadmin ping-connection-pool TestPool
 
 * JDBC Factory
 
- To integrate your datasource into a LoUIE source you will need to setup a JdbcFactory.
+ To integrate your datasource into a Louie source you will need to setup a JdbcFactory.
 You can incapsulate this logic into your own class if you like, or just create it directly
 in your DAO layer.  Below is an example of a factory class and it's use in code.
 
