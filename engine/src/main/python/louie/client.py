@@ -1,15 +1,22 @@
-# =============================================================================
-# $Id: client.py,v 1.23 2014/08/29 22:43:13 eyasukoc Exp $
-# =============================================================================
-# Module: rh.louie.client.py
-# Contacts: Chris Johnson (cjohnson), Ellison Yasukochi (eyasukoc)
-#           MIS, Rhythm & Hues Studios
-# =============================================================================
-"""Client for communicating with the LoUIE server
+# Copyright 2015 Rhythm & Hues Studios.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Client for communicating with a Louie server
 
 Classes:
     LouieHttpClient
-        Generic client for LoUIE via HTTP
+        Generic client for Louie via HTTP
 
 """
 
@@ -17,7 +24,6 @@ Classes:
 # IMPORTS
 # =============================================================================
 
-# Non-R&H imports
 import sys
 import os
 import socket
@@ -26,7 +32,6 @@ import time
 import getpass
 import logging
 
-# R&H imports
 from louie.http import HTTPConnection, HTTPSConnection, HTTPException, BadStatusLine
 from louie.request_pb2 import SessionKey, IdentityPB
 from louie.request_pb2 import RequestPB, RequestHeaderPB
@@ -55,11 +60,11 @@ LOGGER = logging.getLogger('louie');
 
 LOUIE_DEBUG = os.environ.get('LOUIE_DEBUG', 'false').lower() in ("yes", "true", "t", "1")
 if LOUIE_DEBUG:
-    print "LoUIE Debug mode Enabled"
+    print "Louie Debug mode Enabled"
     LOGGER.setLevel(logging.DEBUG)
 
 class LouieHttpClient(object):
-    """HTTP interface to the LoUIE server
+    """HTTP interface to the Louie server
     """
     _instances = {}
     
@@ -139,7 +144,7 @@ class LouieHttpClient(object):
     # =======================  
         
     def request(self, system, method, params=None, decodeFunction=None):
-        """Perform a request to the LoUIE server.  Params should be an array
+        """Perform a request to the Louie server.  Params should be an array
            of the arguments that the method takes.  If a decodeFunction is
            specified then it will be used on each binary block and the results
            of that decoding will be returned instead of the raw binary.
@@ -174,7 +179,7 @@ class LouieHttpClient(object):
                     for i in params:
                         paramString += str(i) + ","
                     
-                    LOGGER.debug("LoUIE Request: %s:%s - %s", system, method, paramString)
+                    LOGGER.debug("Louie Request: %s:%s - %s", system, method, paramString)
                     
                 res = self._doRequest(system, method, params, decodeFunction)
                 self._lockOffRetry = False
@@ -234,7 +239,7 @@ class LouieHttpClient(object):
     #    Name: _createConnection
     #  Raises: ConnectError
     # Returns: HTTPConnection
-    #    Desc: Establishes an HTTP connection to the LoUIE server, possibly over
+    #    Desc: Establishes an HTTP connection to the Louie server, possibly over
     #          specified auth port
     # -----------------------------------------------------------------------------    
     def _createConnection(self):
@@ -290,7 +295,7 @@ class LouieHttpClient(object):
     #              Returns an array of serialized PBs.  If a decodeFunction is 
     #              specified then that is ran on each binary block and the 
     #              resultant PB objects are returned instead
-    #    Desc: Encodes a request to the LoUIE server over an http connection.
+    #    Desc: Encodes a request to the Louie server over an http connection.
     #          Returns the resultant data in binary form or the decoded PBs
     #          if a decodeFunction is provided
     # -----------------------------------------------------------------------------

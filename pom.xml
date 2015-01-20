@@ -15,7 +15,8 @@
     </prerequisites>
     
     <scm>
-        <connection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie</connection>
+        <connection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie.git</connection>
+        <developerConnection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie.git</developerConnection>
         <url>https://github.com/Rhythm-and-Hues-Labs/louie</url>
     </scm>
     
@@ -23,8 +24,15 @@
         <name>Rhythm &amp; Hues Studios</name>
         <url>http://www.rhythm.com</url>
     </organization>
-  
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
     <inceptionYear>2011</inceptionYear>
+    
     <developers>
         <developer>
             <id>cjohnson</id>
@@ -78,7 +86,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.license>rh</netbeans.hint.license>
+        <netbeans.hint.license>apache20</netbeans.hint.license>
 
         <javadoc.plugin.version>2.10.1</javadoc.plugin.version>
         <pmd.plugin.version>3.2</pmd.plugin.version>
