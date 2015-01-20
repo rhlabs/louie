@@ -110,10 +110,10 @@ public class Identity {
     
     public static IdentityPB createLouieIdentity() {
         return defaultIdentity()
-                .setLanguage("LoUIE")
+                .setLanguage("Louie")
                 .setLanguageVersion("")
-                .setProgram("LoUIE/"+LocalConstants.HOST)
-                .setUser("LoUIE")
+                .setProgram("Louie/"+LocalConstants.HOST)
+                .setUser("Louie")
                 .build();
     }
 }

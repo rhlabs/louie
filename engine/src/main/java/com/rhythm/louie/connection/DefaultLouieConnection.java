@@ -358,7 +358,7 @@ public class DefaultLouieConnection implements LouieConnection {
                         // TODO determine how the identity could be null...
                         // (identity could be null if key in request is null, but that should not be happening either
 
-                        // Set the Routed User, as the current User is may be "LoUIE"
+                        // Set the Routed User, as the current User is may be "Louie"
                         reqBuilder.setRouteUser(currentRequest.getIdentity().getUser());
                     }
                 }

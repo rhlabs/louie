@@ -38,7 +38,7 @@ import com.rhythm.louie.*;
 import com.rhythm.louie.process.ServiceCall;
 
 /**
- * Executes the LoUIE client generator
+ * Executes the Louie client generator
  * @author eyasukoc
  */
 @Mojo(name="generate", requiresDependencyResolution = ResolutionScope.TEST)
@@ -83,7 +83,7 @@ public class GeneratorMojo extends AbstractMojo{
     @SuppressWarnings("unchecked")
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("Executing LoUIE Service Client Generator");
+        getLog().info("Executing Louie Service Client Generator");
         List<URL> urls = new ArrayList<>();
         try {
             String outputDir = project.getBuild().getOutputDirectory();

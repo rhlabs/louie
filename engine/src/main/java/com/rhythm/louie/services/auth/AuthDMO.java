@@ -87,7 +87,7 @@ public class AuthDMO implements AuthService {
     private AuthClient getAuthClient() {                                          
         if (authClient == null) {                                                 
             LouieConnection authConnection = LouieConnectionFactory.getConnectionForServer(Server.getCentralAuth(), 
-                    Identity.createIdentity("LoUIE", "LoUIE-"+Server.LOCAL.getHostName()+"/"+Server.LOCAL.getGateway()));
+                    Identity.createIdentity("Louie", "Louie-"+Server.LOCAL.getHostName()+"/"+Server.LOCAL.getGateway()));
             authClient = new AuthServiceClient(authConnection);                 
         }                                                                                       
         return authClient;                                                                      
