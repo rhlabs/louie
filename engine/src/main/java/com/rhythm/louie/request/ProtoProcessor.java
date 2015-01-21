@@ -61,9 +61,10 @@ public class ProtoProcessor implements ProtoProcess {
     public ProtoProcessor() {
         secured = Server.LOCAL.isSecure();
         userCN = Pattern.compile(".*CN=([\\w\\s]+),*.*");
-        int monitorCycle = AlertProperties.getMonitorPollCycle();
-        if (monitorCycle != -1) {
-            TaskScheduler.getInstance().scheduleWithFixedDelay(new RequestMonitor(), monitorCycle, monitorCycle, TimeUnit.SECONDS);
+        AlertProperties prop = AlertProperties.getProperties(AlertProperties.REQUEST);
+        if (prop != null) {
+            int cycle = prop.getMonitorPollCycle();
+            TaskScheduler.getInstance().scheduleWithFixedDelay(new RequestMonitor(prop), cycle, cycle, TimeUnit.SECONDS);
             LOGGER.info("Request Monitor started");
         } else {
             LOGGER.info("No Request Monitor configured");
@@ -268,11 +269,11 @@ public class ProtoProcessor implements ProtoProcess {
         private final String email;
         private int hour;
         
-        public RequestMonitor() {
+        public RequestMonitor(AlertProperties prop) {
             fmt = DateTimeFormat.forPattern("MM/dd/yyy HH:mm:ss");
-            duration = AlertProperties.getDuration();
-            summaryHour = AlertProperties.getSummaryHour();
-            email = AlertProperties.getEmail();
+            duration = prop.getDuration();
+            summaryHour = prop.getSummaryHour();
+            email = prop.getEmail();
             hour = -1;
         }
         

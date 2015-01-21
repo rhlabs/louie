@@ -32,45 +32,89 @@ public class AlertProperties {
     private static final String REQUEST_DURATION = "request_duration";
     private static final String MONITOR_CYCLE = "monitor_cycle";
     private static final String SUMMARY_HOUR = "summary_hour";
+    private static final String PERCENTAGE = "percentage";
     
-    private static String email = null;
-    private static long duration = -1L;
-    private static int monitorPollCycle = -1;
-    private static int summaryHour = -1;
+    public static final String REQUEST = "request";
+    public static final String MEMORY = "memory";
+    
+    private String email = null;
+    private long duration = -1L;
+    private int monitorPollCycle = -1;
+    private int summaryHour = -1;
+    private double percentThreshold = 1.0;
+
+    private static final Map<String, AlertProperties> properties = new ConcurrentHashMap<>();
+    
+    public static AlertProperties getProperties(String alert) {
+        return properties.get(alert);
+    }
     
     public static void processProperties(Element alerts) {
         for (Element child : alerts.getChildren()) {
-            String propName = child.getName();
-            String value = child.getTextTrim();
-            switch (propName) {
-                case EMAIL: email = value;
-                    break;
-                case REQUEST_DURATION: duration = Long.parseLong(value);
-                    break;
-                case MONITOR_CYCLE: monitorPollCycle = Integer.parseInt(value);
-                    break;
-                case SUMMARY_HOUR: summaryHour = Integer.parseInt(value);
-                    break;
-                default: LoggerFactory.getLogger(LouieProperties.class)
-                            .warn("Unexpected alert property  {}",propName);
-                    break;
-            }    
+            String alert = child.getName();
+            AlertProperties prop = new AlertProperties();
+            properties.put(alert,prop);
+            for (Element grandchild : child.getChildren()) {
+                String propName = grandchild.getName();
+                String value = grandchild.getTextTrim();
+                switch (propName) {
+                    case EMAIL: prop.setEmail(value);
+                        break;
+                    case REQUEST_DURATION: prop.setDuration(Long.parseLong(value));
+                        break;
+                    case MONITOR_CYCLE: prop.setMonitorPollCycle(Integer.parseInt(value));
+                        break;
+                    case SUMMARY_HOUR: prop.setSummaryHour(Integer.parseInt(value));
+                        break;
+                    case PERCENTAGE: int capture = Integer.parseInt(value);
+                        double adjusted = (double) capture/100;
+                        prop.setPercentThreshold(adjusted);
+                        break;
+                    default: LoggerFactory.getLogger(LouieProperties.class)
+                                .warn("Unexpected alert property  {}",propName);
+                        break;
+                }    
+            }
         }
     }
 
-    public static String getEmail() {
+    private void setPercentThreshold(double percentTheshold) {
+        this.percentThreshold = percentTheshold;
+    }
+    
+    private void setEmail(String email) {
+        this.email = email;
+    }
+    
+    private void setDuration(long duration) {
+        this.duration = duration;
+    }
+    
+    private void setMonitorPollCycle(int period) {
+        this.monitorPollCycle = period;
+    }
+    
+    private void setSummaryHour(int hour) {
+        this.summaryHour = hour;
+    }
+    
+    public double getPercentThreshold() {
+        return percentThreshold;
+    }
+    
+    public String getEmail() {
         return email;
     }
 
-    public static long getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public static int getMonitorPollCycle() {
+    public int getMonitorPollCycle() {
         return monitorPollCycle;
     }
 
-    public static int getSummaryHour() {
+    public int getSummaryHour() {
         return summaryHour;
     }
     

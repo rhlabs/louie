@@ -16,8 +16,6 @@
 package com.rhythm.louie.server;
 
 
-import com.rhythm.louie.Delegate;
-import com.rhythm.louie.ServiceProcessor;
 
 import java.io.*;
 import java.net.*;
@@ -25,13 +23,13 @@ import java.util.*;
 
 import javax.servlet.ServletContext;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rhythm.louie.Delegate;
+import com.rhythm.louie.ServiceProcessor;
 import com.rhythm.louie.cache.CacheManager;
 import com.rhythm.louie.connection.Identity;
 import com.rhythm.louie.email.EmailService;
@@ -119,6 +117,8 @@ public class ServiceManager {
         
         sb.append("\nServices:\n");
         initializeServices(sb, false);
+        
+        MemoryAlertManager.initializeMonitors(); //should be configurable
         
         LOGGER.info(sb.toString());
     }
