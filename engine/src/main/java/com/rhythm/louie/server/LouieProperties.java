@@ -19,8 +19,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jdom2.*;
+import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.XMLOutputter;
@@ -28,10 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.email.MailProperties;
 import com.rhythm.louie.jms.MessagingProperties;
-
-import com.rhythm.louie.service.layer.AnnotatedServiceLayer;
-import com.rhythm.louie.service.layer.CustomServiceLayer;
-import com.rhythm.louie.service.layer.RemoteServiceLayer;
+import com.rhythm.louie.service.layer.*;
 
 /**
  * A central driver for populating ServiceProperties and Server objects, as well as additional
@@ -200,27 +200,46 @@ public class LouieProperties {
         }
         if (!serversConfigured) processServers(null); //ugly bootstrapping workflow
     }
+
+    private static Document loadDocument(URL configs) {
+        return loadDocument(configs,true);
+    }
     
-    private static Document loadDocument(URL configs){
+    private static final Pattern missingElem = Pattern.compile(".*Cannot find the declaration of element 'louie'.*");
+    
+    private static Document loadDocument(URL configs, boolean validate){
         Document properties;
-        SAXBuilder docBuilder = new SAXBuilder(XMLReaders.XSDVALIDATING);
+        SAXBuilder docBuilder;
+        if (validate) {
+            docBuilder = new SAXBuilder(XMLReaders.XSDVALIDATING);
+        } else {
+            docBuilder = new SAXBuilder(XMLReaders.NONVALIDATING);
+        }
         try {
             properties = docBuilder.build(configs);
         } catch (NullPointerException ex) {
             LoggerFactory.getLogger(LouieProperties.class)
                     .error("Failed to load properties file. Defaults will be used.\n{}",ex.toString());
+            System.out.println(ex.getMessage());
             List<Server> empty = Collections.emptyList();
             Server.processServers(empty);
             return null;
         } catch (IOException | JDOMException ex) {
-            String error = "Properties file error! All services shutdown";
-            ServiceManager.recordError(error, ex);
-            LoggerFactory.getLogger(LouieProperties.class)
-                    .error("{}\n{}",error,ex.toString());
-            List<Server> empty = Collections.emptyList();
-            ServiceProperties.globalDisable(); //brute disable
-            Server.processServers(empty);
-            return null;
+            Matcher match = missingElem.matcher(ex.getMessage());
+            if (match.matches()) {
+                LoggerFactory.getLogger(LouieProperties.class)
+                        .info("No schema located: no validation performed.");
+                return loadDocument(configs, false);
+            } else {
+                String error = "Properties file error! All services shutdown";
+                ServiceManager.recordError(error, ex);
+                LoggerFactory.getLogger(LouieProperties.class)
+                        .error("{}\n{}",error,ex.toString());
+                List<Server> empty = Collections.emptyList();
+                ServiceProperties.globalDisable(); //brute disable
+                Server.processServers(empty);
+                return null;
+            }
         }
         document = new XMLOutputter().outputString(properties);
         return properties;
