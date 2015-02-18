@@ -112,6 +112,9 @@ public class Tree<K,V> {
      * @return true if the node exists and was deleted
      */
     synchronized public boolean removeNode(K key) {
+        if (key==null) {
+            return false;
+        }
         TreeNode<K,V> node = nodes.get(key);
         if (node==null) {
             return false;
