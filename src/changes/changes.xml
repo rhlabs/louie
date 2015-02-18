@@ -5,6 +5,37 @@
     <title>Changes</title>
   </properties>
   <body>
+    <release version="1.12" date="2015-02-18" description="louie-1.12">
+      <action dev="eyasukoc" type="add">
+        Request monitoring and introspection to keep track of long running requests
+      </action>
+      <action dev="eyasukoc" type="add">
+        Admin and Restricted annotations
+      </action>
+       <action dev="eyasukoc" type="update">
+        Changed messaging defaults to use same topic for update and
+        broadcast so it will work on a bare bones message queue.
+      </action>
+      <action dev="cjohnson" type="update">
+        Switch license to Apache 2.0 for open source
+      </action>
+      <action dev="cjohnson" type="add">
+        Record errors on startup and display on info web page
+      </action>
+      <action dev="eyasukoc" type="add">
+        Memory monitoring and alerts
+      </action>
+      <action dev="eyasukoc" type="update">
+        XSD validation is now optional and more forgiving
+      </action>
+      <action dev="cjohnson" type="add">
+        LoadingSupplier to return previous value in case of exceptions
+      </action>
+      <action dev="cjohnson" type="update">
+        Tree bug fix for removing null keys
+      </action>
+    </release>
+
     <release version="1.11" date="2014-12-15" description="louie-1.11">
       <action dev="cjohnson" type="add">
         Layer based configuration for services

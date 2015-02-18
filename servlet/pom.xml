@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.rhythm.louie</groupId>
         <artifactId>louie-parent</artifactId>
-        <version>1.12-SNAPSHOT</version>
+        <version>1.12</version>
     </parent>
     <artifactId>louie-servlet</artifactId>
     <packaging>jar</packaging>
