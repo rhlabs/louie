@@ -17,7 +17,6 @@ package com.rhythm.louie.cache;
 
 import com.google.common.cache.CacheLoader;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class CacheManager {
     private final String managerName;
     
     private CacheManager(String name) {
-        caches = new TreeMap<String,Cache<?,?>>();
+        caches = new TreeMap<>();
         this.managerName = name;
     }
     
