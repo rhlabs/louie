@@ -28,8 +28,12 @@ import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -276,6 +280,16 @@ public class ProtoProcessor implements ProtoProcess {
             email = prop.getEmail();
             hour = -1;
         }
+        private final PeriodFormatter timeFmt = new PeriodFormatterBuilder()
+            .appendHours()
+            .appendSuffix(" hour", " hours")
+            .appendSeparator(" ")
+            .appendMinutes()
+            .appendSuffix(" minute", " minutes")
+            .appendSeparator(" ")
+            .appendSeconds()
+            .appendSuffix(" second", " seconds")
+            .toFormatter();
         
         @Override
         public void run() {
@@ -303,6 +317,8 @@ public class ProtoProcessor implements ProtoProcess {
                         sb.append("Language:   ").append(ctx.getLanguage()).append("\n");
                         DateTime create = new DateTime(ctx.getCreateTime());
                         sb.append("Start time: ").append(fmt.print(create)).append("\n");
+                        sb.append("Duration:   ");
+                        sb.append(timeFmt.print(new Interval(create, new Instant()).toPeriod())).append("\n");
                         sb.append("Request:    ");
                         
                         sb.append(ctx.getRequest().getService()).append(":");
