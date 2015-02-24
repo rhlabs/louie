@@ -7,10 +7,13 @@ Louie was created to solve a few critical issues faced by Rhythm & Hues' interna
 
 ## Getting Started
 * **Step 1:** Read up on [Google's Protocol Buffers (protobuf)](https://developers.google.com/protocol-buffers/docs/overview)
-* **Step 2:** Download and install [Maven](http://maven.apache.org/download.cgi)
-* **Step 3:** Download and install [Netbeans with Glassfish](https://netbeans.org/downloads/)
-* **Step 4:** Clone the repo, and then build it and prepare the docs:
-```mvn clean install site```
-```mvn site:stage```
-* **Step 5:** Open louie/target/site/index.html in a browser to start reading the docs!
+* **Step 2:** Download and install [Java 7](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* **Step 3:** Download and install [Maven](http://maven.apache.org/download.cgi)
+* **Step 4:** Download and install [Netbeans with Glassfish](https://netbeans.org/downloads/)
+* **Step 5:** Clone the repo, and then build it and prepare the docs:
+```
+~/louie> mvn clean install site
+~/louie> mvn site:stage
+```
+* **Step 6:** Open louie/target/staging/index.html in a browser to start reading the docs!
 
