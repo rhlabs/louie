@@ -108,6 +108,9 @@
         </profile>
         <profile>
             <id>python</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>

@@ -90,6 +90,9 @@
    <profiles>
         <profile>
             <id>python</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <gen.python>true</gen.python>
             </properties>
