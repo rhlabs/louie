@@ -19,11 +19,11 @@
              Also truncate stack traces to a reasonable length.
         -->
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%m%n %throwable{15}"/>
+            <PatternLayout pattern="[/${rootArtifactId}] %m%n %throwable{15}"/>
             <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
         </Console>
         <Console name="ConsoleError" target="SYSTEM_ERR">
-            <PatternLayout pattern="%m%n %throwable{15}"/>
+            <PatternLayout pattern="[/${rootArtifactId}] %m%n %throwable{15}"/>
             <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
         
