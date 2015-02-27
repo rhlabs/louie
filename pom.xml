@@ -1,37 +1,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-  
     <groupId>com.rhythm.louie</groupId>
     <artifactId>louie-parent</artifactId>
     <version>1.13-SNAPSHOT</version>
-  
     <packaging>pom</packaging>
+
     <name>Louie</name>
-    <description>Louie the Universal Information Exchange</description>
-    <url>https://github.com/Rhythm-and-Hues-Labs/louie</url>
-  
+    <description>Louie</description>
+    <url>https://github.com/rhlabs/louie</url>
+    <inceptionYear>2011</inceptionYear>
+
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
     
     <scm>
-        <connection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie.git</connection>
-        <developerConnection>scm:git:https://github.com/Rhythm-and-Hues-Labs/louie.git</developerConnection>
-        <url>https://github.com/Rhythm-and-Hues-Labs/louie</url>
+        <connection>scm:git:https://github.com/rhlabs/louie.git</connection>
+        <developerConnection>scm:git:https://github.com/rhlabs/louie.git</developerConnection>
+        <url>https://github.com/rhlabs/louie</url>
     </scm>
     
     <organization>
         <name>Rhythm &amp; Hues Studios</name>
         <url>http://www.rhythm.com</url>
     </organization>
+
     <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        <distribution>repo</distribution>
-      </license>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
-    <inceptionYear>2011</inceptionYear>
     
     <developers>
         <developer>
@@ -66,23 +66,16 @@
         </developer>
     </developers>
     
-    
     <distributionManagement>
-        <repository>
-            <id>deployment</id>
-            <name>Internal Releases</name>
-            <url>http://nexushost.rhythm.com:8081/nexus/content/repositories/releases/</url>
-        </repository>
         <snapshotRepository>
-            <id>deployment</id>
-            <name>Internal Releases</name>
-            <url>http://nexushost.rhythm.com:8081/nexus/content/repositories/snapshots/</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
-        <site>
-            <id>mis.local</id>
-            <url>file:///src/mis/docs/louie</url>
-        </site>
-    </distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>    
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -145,14 +138,11 @@
     
     <reporting>	
         <plugins>
-            <!-- NCSS -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javancss-maven-plugin</artifactId>
                 <version>2.1</version>
             </plugin>
-
-            <!-- Changes report -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-changes-plugin</artifactId>
@@ -192,6 +182,18 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
@@ -288,7 +290,7 @@
             <artifactId>guava</artifactId>
             <version>17.0</version>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.7</version>
