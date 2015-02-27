@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>com.rhythm.louie</groupId>
-            <artifactId>louie-servlet</artifactId>
+            <artifactId>louie-web</artifactId>
             <version>${louie.version}</version>
         </dependency>
         <dependency>

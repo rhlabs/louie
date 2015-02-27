@@ -32,7 +32,7 @@
       <item name="Engine" href="louie/index.html"/>
       <item name="Processor" href="louie-processor/index.html"/>
       <item name="Plugin" href="louie-maven-plugin/index.html"/>
-      <item name="Web" href="louie-servlet/index.html"/>
+      <item name="Web" href="louie-web/index.html"/>
     </menu>
   
     <menu name="Project Creation" inherit="top">

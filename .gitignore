@@ -1,7 +1,7 @@
 /target/
 /engine/target/
 /processor/target/
-/servlet/target/
+/web/target/
 /plugin/target/
 /archetype/target/
 /activemq-adapter/target/

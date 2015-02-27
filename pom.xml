@@ -95,7 +95,7 @@
         <module>processor</module>
         <module>plugin</module>
         <module>engine</module>
-        <module>servlet</module>
+        <module>web</module>
         <module>archetype</module>
         <module>activemq-adapter</module>
     </modules>

@@ -6,8 +6,9 @@
         <artifactId>louie-parent</artifactId>
         <version>1.13-SNAPSHOT</version>
     </parent>
-    <artifactId>louie-servlet</artifactId>
+    <artifactId>louie-web</artifactId>
     <packaging>jar</packaging>
+
     <name>Louie Web</name>
     <description>Web Implementation of Louie and Admin Pages</description>
    
