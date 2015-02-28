@@ -73,7 +73,9 @@ public class MemoryAlertManager {
             report.append("\n");
         }
         String email = AlertProperties.getProperties(AlertProperties.MEMORY).getEmail();
-        String subject = "Memory usage threshold exceeded on "+Server.LOCAL.getHostName();
+        Server local = Server.LOCAL;
+        String subject = local.getHostName() +" ("+ local.getIp() +"/"+ local.getGateway() 
+                    +") ["+ local.getName() +"] Memory usage threshold exceeded";
         try {
             EmailService.getInstance().sendMail(email, email, subject, report.toString());
         } catch (Exception ex) {

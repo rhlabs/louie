@@ -20,6 +20,8 @@ import com.rhythm.louie.Constants;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.slf4j.LoggerFactory;
 
@@ -345,6 +347,15 @@ public class Server {
     }
     
     public String getHostName() {
+        //try to resolve "localhost" into an actual name if this Server is the LOCAL Server
+        if ("localhost".equals(host) && this.name.equals(Server.LOCAL.getName())) {
+            try {
+                InetAddress addr = InetAddress.getLocalHost();
+                host = addr.getHostName();
+            } catch (UnknownHostException ex) {
+                LoggerFactory.getLogger(Server.class).error("Failed to determine local host name");
+            }
+        }
         return host;
     }
     

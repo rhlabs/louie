@@ -303,7 +303,8 @@ public class ProtoProcessor implements ProtoProcess {
             
             List<RequestContext> requests = getLongRunningRequests(duration);
             Server local = Server.LOCAL;
-            String subject = local.getName() + "(" + local.getHostName() + ") Louie Request Monitor update";
+            String subject = local.getHostName() +" ("+ local.getIp() +"/"+ local.getGateway() 
+                    +") ["+ local.getName() +"] Louie Request Monitor";
             if (!requests.isEmpty()) {
                 Set<Long> foundThreads = new HashSet<>();
                 StringBuilder sb = new StringBuilder();
