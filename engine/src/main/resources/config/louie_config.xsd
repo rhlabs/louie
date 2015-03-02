@@ -322,7 +322,7 @@
             </xs:annotation>
             <xs:complexType>
                 <xs:all>
-                    <xs:element name="request">
+                    <xs:element name="request" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
                             <xs:annotation>
                                 <xs:documentation>Specify + enable a Request Monitor</xs:documentation>
@@ -351,7 +351,7 @@
                             </xs:all>
                         </xs:complexType>
                     </xs:element>
-                    <xs:element name="memory">
+                    <xs:element name="memory" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
                             <xs:annotation>
                                 <xs:documentation>Specify + enable a Memory Monitor</xs:documentation>
