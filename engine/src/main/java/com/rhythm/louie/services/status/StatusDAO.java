@@ -17,7 +17,6 @@ package com.rhythm.louie.services.status;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import com.rhythm.louie.connection.LouieConnectionFactory;
 import com.rhythm.louie.request.RequestContextManager;
@@ -27,11 +26,9 @@ import com.rhythm.pb.RequestProtos.ErrorPB;
 import com.rhythm.louie.util.CalcList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +46,7 @@ import com.rhythm.pb.RequestProtos.RequestPB;
  */
 @DAO
 public class StatusDAO implements StatusService {
-    private static final int THREAD_POOL_SIZE = 20;
-    public StatusDAO() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                    .setNameFormat("qhostTEST-threadscheduler-%d").build();
-    }
+    public StatusDAO() {}
  
     @Override
     public String echoTest(String value, Integer sleep) throws Exception {
@@ -92,7 +85,10 @@ public class StatusDAO implements StatusService {
                 if (sleep>0) {
                     try {
                         Thread.sleep(sleep);
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        LoggerFactory.getLogger(StatusDAO.class)
+                                .error("Error sleeping in streamTest", e);
+                    }
                 }
                 
                 return ErrorPB.newBuilder().setDescription(Strings.repeat("a", resultSize)).build();
@@ -133,47 +129,6 @@ public class StatusDAO implements StatusService {
         return consumer.getStreamList();
     }
     
-
-//    @Override
-//    public List<TestServicePB> streamTest(Integer resultSize, Integer sleepTime) throws Exception {
-//        FutureList<TestServicePB> results = new FutureList<TestServicePB>();
-//        
-//        SleepThread s = new SleepThread(resultSize, sleepTime);
-//        
-//        for(int i = 0; i < resultSize; i++) {
-//            SettableFuture<TestServicePB> sf = SettableFuture.create();
-//            results.addFuture(sf);
-//            s.addFuture(sf);
-//        }
-//        scheduler.submit(s);
-//        return results;
-//    }
-    
-//    private class SleepThread implements Callable<TestServicePB>{
-//
-//        private int size;
-//        private int sleep;
-//        private List<SettableFuture<TestServicePB>> res = new ArrayList<SettableFuture<TestServicePB>>();
-//        
-//        SleepThread(int size, int sleep) {
-//            this.size = size;
-//            this.sleep = sleep;
-//        }
-//        
-//        public void addFuture(SettableFuture<TestServicePB> sf) {
-//            res.add(sf);
-//        }
-//
-//        @Override
-//        public TestServicePB call() throws Exception {
-//            for (int i = 0; i<size; i++) {
-//                Thread.sleep(sleep);
-//                res.get(i).set(TestServicePB.newBuilder().setValue("String response # " + i + " @ "+ System.nanoTime() / 1000000).build());
-//            }   
-//            return null;
-//        }
-//    }
-
     @Override
     public Map<String, String> mapTest() throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");

@@ -15,6 +15,7 @@
  */
 package com.rhythm.louie.services.status;
 
+import java.net.InetAddress;
 import java.util.List;
 
 import com.rhythm.louie.connection.Identity;
@@ -29,6 +30,7 @@ import com.rhythm.pb.RequestProtos.RoutePathPB;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,6 +49,9 @@ import com.rhythm.louie.stream.StreamingConsumer;
  */
 public class StatusServiceTest {
     
+    private static final List<String> HOSTS = 
+            Arrays.asList("louietest");
+
     private static StatusServiceClient client;
     public StatusServiceTest() {}
 
@@ -60,12 +65,13 @@ public class StatusServiceTest {
     
     /**
      * Test of getService method, of class LouieClient.
+     * @throws java.lang.Exception
      */
     @Test
     public void echoTest() throws Exception {
         System.out.println("echoTest");
         
-        ArrayList<Thread> threads = new ArrayList<Thread>();
+        ArrayList<Thread> threads = new ArrayList<>();
         
         for (int i=0;i<10;i++) {
             final int f = i;
@@ -102,12 +108,13 @@ public class StatusServiceTest {
     
      /**
      * Test of getService method, of class LouieClient.
+     * @throws java.lang.Exception
      */
     @Test
     public void loopTest() throws Exception {
         System.out.println("loopTest");
         
-        String result = client.loopTest(Arrays.asList("louiebeta.van.rhythm.com","louiebeta.rhythm.com"));
+        String result = client.loopTest(HOSTS);
         assertNotNull(result);
         
         System.out.println(result);
@@ -115,12 +122,17 @@ public class StatusServiceTest {
     
      /**
      * Test of getService method, of class LouieClient.
+     * @throws java.lang.Exception
      */
     @Test(expected = Exception.class)
     public void loopTest_FAIL() throws Exception {
         System.out.println("loopTest");
         
-        String result = client.loopTest(Arrays.asList("louiebeta.van.rhythm.com","louiebeta.rhythm.com", "lid1577"));
+        List<String> dupHosts =new ArrayList<>();
+        dupHosts.addAll(HOSTS);
+        dupHosts.addAll(HOSTS);
+        
+        String result = client.loopTest(dupHosts);
         assertNotNull(result);
         
         System.out.println(result);
@@ -128,33 +140,33 @@ public class StatusServiceTest {
     
     /**
      * Test of getService method, of class LouieClient.
+     * @throws java.lang.Exception
      */
     @Test
     public void routeTest() throws Exception {
         System.out.println("loopTest");
         
-        List<String> hosts = Arrays.asList("louiebeta.van.rhythm.com","louiebeta.rhythm.com");
-        
         SingleConsumer<com.rhythm.pb.DataTypeProtos.StringPB> consumer = Consumers.newSingleConsumer();
-        Response response = client.loopTest(hosts,consumer);
+        Response response = client.loopTest(HOSTS,consumer);
         assertNotNull(response);
-        
-        System.out.println(response);
         
         assertTrue(response.getRouteList().size()==1);
         
         RoutePathPB route = response.getRouteList().get(0);
         
-        assertEquals(route.getRoute().getHostIp(), "10.4.23.77");
-        assertTrue(route.getPathCount()==1);
-        route = route.getPath(0);
-        assertEquals(route.getRoute().getHostIp(), "10.48.5.200");
-        assertTrue(route.getPathCount()==1);
-        route = route.getPath(0);
-        assertEquals(route.getRoute().getHostIp(), "10.4.37.48");
+        String localIp = InetAddress.getLocalHost().getHostAddress();
+        assertEquals(route.getRoute().getHostIp(), localIp);
+        for (String host : HOSTS) {
+            String ip = InetAddress.getByName(host).getHostAddress();
+            
+            System.out.println(host+" : "+ip);
+            
+            assertTrue(route.getPathCount()==1);
+            route = route.getPath(0);
+            
+            assertEquals(route.getRoute().getHostIp(), ip);
+        }
         assertTrue(route.getPathCount()==0);
-     
-        System.out.println("RESULTS: "+consumer.get().getValue());
     }
     
     @Test
@@ -194,16 +206,54 @@ public class StatusServiceTest {
 
         long start = System.nanoTime();
         
-        List<String> hosts = Arrays.asList("louiebeta.rhythm.com","louiebeta.van.rhythm.com");
         
-        client.streamLoopTest(10, 100, 500, hosts, new Consumer<ErrorPB>() {
+        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<>(4);
+        Thread t = new Thread(new Runnable() {
             @Override
-            public void consume(ErrorPB object) {
-                System.out.println("Got Object : "+(System.nanoTime()/1000000));
+            public void run() {
+                try {
+                    client.streamLoopTest(10, 100, 1000, HOSTS, consumer);
+                } catch (Exception ex) {
+                    Logger.getLogger(StatusServiceTest.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
+        t.start();
+        
+        Thread.sleep(1000);
+        for (ErrorPB error : consumer.getStreamList()) {
+            System.out.println("Got Object : "+(System.nanoTime()/1000000));
+        }
         System.out.println("YES:" + (System.nanoTime() - start) / 1000000);
     }
+    
+    @Test
+    public void streamTestLoop_LOCAL() throws Exception {
+        System.out.println("streamTest");
+
+        long start = System.nanoTime();
+        
+        final List<String> EMPTY_HOSTS = Collections.emptyList();
+        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<>(100);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    client.streamLoopTest(20, 100, 100, EMPTY_HOSTS, consumer);
+                } catch (Exception ex) {
+                    Logger.getLogger(StatusServiceTest.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        t.start();
+        
+        Thread.sleep(1000);
+        for (ErrorPB error : consumer.getStreamList()) {
+            System.out.println("Got Object : "+(System.nanoTime()/1000000));
+        }
+        System.out.println("YES:" + (System.nanoTime() - start) / 1000000);
+    }
+    
     
     @Test
     public void streamTest_StreamConsumer() throws Exception {
@@ -211,7 +261,7 @@ public class StatusServiceTest {
 
         long start = System.nanoTime();
         
-        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<ErrorPB>(4);
+        final StreamingConsumer<ErrorPB> consumer = new StreamingConsumer<>(4);
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {

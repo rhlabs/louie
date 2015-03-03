@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +30,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  *
  * @author cjohnson
+ * @param <T>
  */
 public class StreamingConsumer<T> extends Consumer<T>{
 
@@ -39,7 +41,7 @@ public class StreamingConsumer<T> extends Consumer<T>{
     public StreamingConsumer(int bufferSize) {
         if (bufferSize <= 0)
             throw new IllegalArgumentException("bufferSize must be >0");
-        queue = new ArrayBlockingQueue<T>(bufferSize);
+        queue = new ArrayBlockingQueue<>(bufferSize);
         list = new StreamList();
     };
     
@@ -63,14 +65,13 @@ public class StreamingConsumer<T> extends Consumer<T>{
     
     
     private class StreamList implements Collection<T>, List<T> {
-        public StreamList() {
-        }
+        public StreamList() {}
 
         @Override
         public int size() {
             try {
                 return count.get();
-            } catch (Exception ex) {
+            } catch (InterruptedException | ExecutionException ex) {
                 return 0;
             }
         }
@@ -198,7 +199,7 @@ public class StreamingConsumer<T> extends Consumer<T>{
 
         @Override
         public boolean equals(Object o) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return false;
         }
 
         @Override

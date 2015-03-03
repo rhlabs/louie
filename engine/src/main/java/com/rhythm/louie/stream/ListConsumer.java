@@ -24,12 +24,14 @@ import java.util.List;
  */
 public class ListConsumer<T> extends Consumer<T>{
 
-    private final List<T> list = new ArrayList<T>();
+    private final ArrayList<T> list = new ArrayList<>();
     
     public ListConsumer() {}
     
     @Override
-    public void informMessageCount(int count) {}
+    public void informMessageCount(int count) {
+        list.ensureCapacity(count);
+    }
 
     @Override
     public void consume(T item) {
