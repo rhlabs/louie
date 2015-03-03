@@ -29,7 +29,7 @@ import com.google.protobuf.Message;
  * Created: Mar 1, 2011 5:12:38 PM
  */
 public class Result {
-    private final List<? extends Message> messages;
+    private List<? extends Message> messages;
     private final List<? extends Object> arguments;
     private boolean success = true;
     private String info;
@@ -38,6 +38,7 @@ public class Result {
     private long size;
     private Exception ex;
     private boolean streaming = false;
+    private boolean sanitized = false;
     
     public static Result emptyResult() {
         List<?> args = Collections.emptyList();
@@ -95,7 +96,7 @@ public class Result {
     
     private Result(boolean success, List<? extends Object> args, List<? extends Message> messages) {
         this.success = success;
-        this.messages = sanitizeMessages(messages);
+        this.messages = messages;
         this.arguments = args;
         
         size=0;
@@ -140,7 +141,12 @@ public class Result {
         return info;
     }
     
-    public List<? extends Message> getMessages() {
+    synchronized public List<? extends Message> getMessages() {
+        if (streaming || sanitized) {
+            return messages;
+        }
+        messages = sanitizeMessages(messages);
+        sanitized = true;
         return messages;
     }
 
