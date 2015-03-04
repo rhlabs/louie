@@ -18,6 +18,8 @@ package com.rhythm.louie.server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * @author cjohnson
  * Created: Jul 21, 2011 5:39:57 PM
@@ -41,7 +43,9 @@ public class LocalConstants {
             hostdomain = me.getCanonicalHostName();
             address = me.getHostAddress();
             domain = hostdomain.replaceFirst(".*?\\.", "");
-        } catch (UnknownHostException ex) {}
+        } catch (UnknownHostException ex) {
+            LoggerFactory.getLogger(LocalConstants.class).error("Error initializing local host constants!", ex);
+        }
         HOST=host;
         HOSTDOMAIN=hostdomain;
         DOMAIN=domain;

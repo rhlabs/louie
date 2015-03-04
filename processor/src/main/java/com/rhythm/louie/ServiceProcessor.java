@@ -16,6 +16,7 @@
 package com.rhythm.louie;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import javax.annotation.processing.*;
@@ -34,7 +35,11 @@ import com.rhythm.louie.process.ServiceHandler;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
- *
+ * Process @Service annotations and auto-generate the service stack "glue" code.
+ * 
+ * Service methods are validated to conform to the Louie spec: All parameters 
+ * and return values must be GeneratedMessage or a supported dataType.
+ * 
  * @author cjohnson
  */
 @SupportedAnnotationTypes("com.rhythm.louie.Service")
@@ -43,18 +48,14 @@ public class ServiceProcessor extends AbstractProcessor {
     final Set<String> RESERVED = new HashSet<>();    
     public ServiceProcessor() {
         // Load list of RESERVED words
-        try {
-            InputStream is = getClass().getResourceAsStream("/reserved_words");
-            if (is == null) {
-                throw new Exception("Reserved List Not Found!");
-            }
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        try (InputStream is = getClass().getResourceAsStream("/reserved_words");
+                InputStreamReader in = new InputStreamReader(is, StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(in)) {
             String line;
-            while((line=br.readLine())!=null) {
+            while ((line = br.readLine()) != null) {
                 RESERVED.add(line.trim());
             }
-            br.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -62,7 +63,7 @@ public class ServiceProcessor extends AbstractProcessor {
     @Override
     public void init(ProcessingEnvironment pe) {
         super.init(pe);
-        processingEnv.getMessager().printMessage(
+        pe.getMessager().printMessage(
                         Diagnostic.Kind.NOTE,"\n"+
                         "################################################\n"+
                         "#############  SERVICE PROCESSING  #############\n"+
@@ -197,20 +198,6 @@ public class ServiceProcessor extends AbstractProcessor {
                     if (!isValidType(types, param.asType())) {
                         throw new Exception("Argument :"+param.asType()+" is not a valid type!  Must be a GeneratedMessage or be a supported dataType");
                     }
-                    
-//                    if (argcl == null) {
-//                        throw new Exception("Argument is not a GeneratedMessage: Not a Declared Type");
-//                    }
-//                    if (argcl.getSuperclass() == null) {
-//                        throw new Exception("Argument is not a GeneratedMessage: No Superclass");
-//                    }
-//                    if (argcl.getSuperclass() instanceof NoType) {
-//                        throw new Exception("Argument is not a GeneratedMessage: No Type");
-//                    }
-//                    TypeElement sup = (TypeElement) types.asElement(argcl.getSuperclass());
-//                    if (!sup.toString().equals("com.google.protobuf.GeneratedMessage")) {
-//                        throw new Exception("Argument is not a GeneratedMessage");
-//                    }
                 }
                 
                 Deprecated dep = e.getAnnotation(Deprecated.class);

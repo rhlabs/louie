@@ -25,15 +25,15 @@ import com.rhythm.louie.process.ServiceCall;
  *
  * @author sfong
  */
-public class MethodInfo implements Comparable<MethodInfo> {
+public class MethodInfo {
     protected final Method method;
-    protected final List<ParamInfo> params = new ArrayList<ParamInfo>();
+    protected final List<ParamInfo> params = new ArrayList<>();
     protected final ServiceCall serviceCall;
     private final String description;
     
     protected static final Map<String, String> pbargMap;
     static {
-        pbargMap = new HashMap<String, String>();
+        pbargMap = new HashMap<>();
         pbargMap.put("StringPB", "value");
         pbargMap.put("StringListPB", "values");
         pbargMap.put("DatePB", "time");
@@ -123,8 +123,4 @@ public class MethodInfo implements Comparable<MethodInfo> {
         return serviceCall.javadoc();
     }
 
-    @Override
-    public int compareTo(MethodInfo o) {
-        return method.getName().compareTo(o.method.getName());
-    }
 }

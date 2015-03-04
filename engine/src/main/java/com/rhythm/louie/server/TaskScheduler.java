@@ -18,7 +18,6 @@ package com.rhythm.louie.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.logging.Level;
 
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.naming.InitialContext;

@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
 
 import net.sf.log4jdbc.ConnectionSpy;
 
@@ -141,48 +140,15 @@ public class DefaultJdbcService implements JdbcService {
         return getPreparedStatement().getUpdateCount();
     }
     
-    @Deprecated
-    @Override
-    public ResultSet executeStatement() throws SQLException {
-        return executeQuery();
-    }
-    
-    @Deprecated
-    @Override
-    public ResultSet executePreparedStatement() throws SQLException {
-        return executeQuery();
-    }
-
-    @Deprecated
-    @Override
-    public void executePreparedStatementProcedure() throws SQLException {
-        execute();
-    }
-    
-    @Deprecated
-    @Override
-    public int executePreparedStatementUpdate() throws SQLException {
-        return executeUpdate();
-    }
-
     //CLOSE
     private void closeStatements() {
         if (pStatement != null) {
             try {
                 pStatement.close();
-            } catch (SQLException e) {}
+            } catch (SQLException e) {
+                LOGGER.error("Error closing JDBC statement", e);
+            }
             pStatement = null;
-        }
-    }
-
-    // Used to close all connections
-    @Deprecated
-    @Override
-    public void closeAll() {
-        try {
-            close();
-        } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(DefaultJdbcService.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -193,7 +159,9 @@ public class DefaultJdbcService implements JdbcService {
         if (conn != null) {
             try {
                 conn.close();
-            } catch(Exception e) {}
+            } catch(Exception e) {
+                LOGGER.error("Error closing JDBC Connection", e);
+            }
             conn = null;
         }
     }

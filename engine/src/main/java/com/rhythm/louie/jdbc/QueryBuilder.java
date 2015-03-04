@@ -401,7 +401,7 @@ public class QueryBuilder implements Closeable {
                 processor.processResults(executeBatch(query,batch), results);
                 batch++;
             } finally {
-                closeAll();
+                close();
             }
         }
     }
@@ -479,12 +479,6 @@ public class QueryBuilder implements Closeable {
     /**
      * Cleans up the internal JDBC Connection, must be called after execute()
      */ 
-    @Deprecated
-    public void closeAll() {
-        if (jdbc != null) jdbc.closeAll();
-        jdbc = null;
-    }
-
     @Override
     public void close() throws IOException {
         if (jdbc != null) jdbc.close();

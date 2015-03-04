@@ -17,7 +17,6 @@ package com.rhythm.louie.pb;
 
 import com.google.protobuf.Message;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,19 +28,19 @@ import com.google.common.base.Joiner;
  * @author cjohnson
  * Created: Aug 18, 2011 1:59:19 PM
  */
-public class PBParam implements Serializable {
+public class PBParam {
     public static final PBParam EMPTY = new PBParam(0);
     
     private final ArrayList<Message> arguments;
     
     private PBParam(int size) {
-        arguments = new ArrayList<Message>(size);
+        arguments = new ArrayList<>(size);
     }
     private PBParam(List<Message> messages) {
-        arguments = new ArrayList<Message>(messages);
+        arguments = new ArrayList<>(messages);
     }
     private PBParam(Message message) {
-        arguments = new ArrayList<Message>(1);
+        arguments = new ArrayList<>(1);
         arguments.add(message);
     }
     

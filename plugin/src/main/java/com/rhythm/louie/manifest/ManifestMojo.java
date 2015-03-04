@@ -15,9 +15,8 @@
  */
 package com.rhythm.louie.manifest;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -80,11 +79,13 @@ public class ManifestMojo extends AbstractMojo {
         
         Process p = Runtime.getRuntime().exec(versionexec);
         
-        try (BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()))
-            ) {
+        try (InputStreamReader errorIn = new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8);
+                BufferedReader error = new BufferedReader(errorIn);
+                InputStreamReader inputIn = new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8);
+                BufferedReader input = new BufferedReader(inputIn)) {
+
             String line;
-            
+
             //ERROR HANDLING
             StringBuilder errorText = new StringBuilder();
             while ((line = error.readLine()) != null) {

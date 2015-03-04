@@ -34,7 +34,6 @@ import com.rhythm.louie.request.data.Result;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author cjohnson
  */
-public class JsonProcessor implements JsonProcess{
+public class JsonProcessor implements JsonProcess {
     private final Logger LOGGER = LoggerFactory.getLogger(JsonProcessor.class);
     
     private static final String VERSION = "version";

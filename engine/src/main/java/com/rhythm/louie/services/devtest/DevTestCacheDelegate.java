@@ -83,7 +83,7 @@ public class DevTestCacheDelegate implements CacheLayer, DevTestService, Delegat
         return true;
     }
 
-    public class TestServiceMessageHandler extends AnnotatedMessageHandler {
+    static public class TestServiceMessageHandler extends AnnotatedMessageHandler {
         
         @MessageOperation
         public void updateTest(MessageAction action, StringPB received) throws Exception{

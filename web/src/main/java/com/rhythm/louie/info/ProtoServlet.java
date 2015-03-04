@@ -15,19 +15,17 @@
  */
 package com.rhythm.louie.info;
 
+import java.io.*;
+
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Type;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,13 +130,14 @@ public class ProtoServlet extends HttpServlet {
     private List<String> parseProtoFile(File proto) {
         List<String> pbs = new ArrayList<>();
         
-        try (BufferedReader reader = new BufferedReader(new FileReader(proto))) {
+        try (InputStream in = new FileInputStream(proto);
+                Reader r = new InputStreamReader(in, StandardCharsets.UTF_8);
+                BufferedReader reader = new BufferedReader(r)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 Matcher m = messagePattern.matcher(line);
                 if (m.matches()) {
                     pbs.add(m.group(1).trim());
-                } else {
                 }
             }
         } catch (IOException ex) {

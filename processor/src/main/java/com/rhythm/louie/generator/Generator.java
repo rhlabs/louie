@@ -21,14 +21,13 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.tools.JavaFileObject;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -82,11 +81,12 @@ public class Generator {
             JavaFileObject jfo = info.getProcessingEnv().getFiler().
                 createSourceFile(info.getPackageName()+"."+className,info.getTypeElement().getEnclosingElement());
 
-            Writer writer = jfo.openWriter();
-            vt.merge(vc, writer);
-            writer.close();
+            try (Writer writer = jfo.openWriter()) {
+                vt.merge(vc, writer);
+            }
         } catch (IOException ex) {
-            Logger.getLogger(Generator.class.getName()).log(Level.SEVERE, null, ex);
+            LoggerFactory.getLogger(Generator.class)
+                        .error("Error setting MaxTimeout", ex);
         }
     }
 }

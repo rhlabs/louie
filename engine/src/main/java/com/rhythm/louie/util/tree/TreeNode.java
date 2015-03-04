@@ -49,7 +49,7 @@ public class TreeNode<K, V> {
      * Return the node of the parent.
      * @return the parent, or null if the node does not have a parent
      */
-    public TreeNode<K, V> getParent() {
+    synchronized public TreeNode<K, V> getParent() {
         return parent;
     }
 
@@ -57,7 +57,7 @@ public class TreeNode<K, V> {
      * Returns true if the node has a parent
      * @return true if the node has a parent
      */
-    public boolean hasParent() {
+    synchronized public boolean hasParent() {
         return parent != null;
     }
 
@@ -65,7 +65,7 @@ public class TreeNode<K, V> {
      * Returns a the children of the node
      * @return the children of the node, or an emptySet if node does not have children
      */
-    public Iterable<TreeNode<K, V>> getChildren() {
+    synchronized public Iterable<TreeNode<K, V>> getChildren() {
         if (children == null) {
             return Collections.emptySet();
         }
@@ -77,7 +77,7 @@ public class TreeNode<K, V> {
      * 
      * @param parent the new parent node of this node 
      */
-    protected synchronized void setParent(TreeNode<K, V> parent) {
+    synchronized protected void setParent(TreeNode<K, V> parent) {
         if (this.parent == parent) {
             return;
         }
@@ -95,7 +95,7 @@ public class TreeNode<K, V> {
      * Adds a child to this node
      * @param child node to be added
      */
-    protected synchronized void addChild(TreeNode<K, V> child) {
+    synchronized protected void addChild(TreeNode<K, V> child) {
         // lazy create the child map
         if (children == null) {
             children = new ConcurrentHashMap<>();
@@ -110,7 +110,7 @@ public class TreeNode<K, V> {
      * @param child to be removed
      * @return true of the child is successfully removed
      */
-    protected synchronized boolean removeChild(TreeNode<K, V> child) {
+    synchronized protected boolean removeChild(TreeNode<K, V> child) {
         if (children == null) {
             return false;
         }
@@ -122,7 +122,7 @@ public class TreeNode<K, V> {
      * Returns true if this node has at least 1 child
      * @return true if the node has children 
      */
-    public boolean hasChildren() {
+    synchronized public boolean hasChildren() {
         if (children == null) {
             return false;
         }

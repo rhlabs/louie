@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdom2.*;
-import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.XMLOutputter;
@@ -263,15 +262,15 @@ public class LouieProperties {
         Server.setDefaultIP(serverDef.getChildText(IP));
         Server.setDefaultTimezone(serverDef.getChildText(TIMEZONE));
         Server.setDefaultLocation(serverDef.getChildText(LOCATION));
-        Server.setDefaultPort(Integer.valueOf(serverDef.getChildText(PORT)));
-        Server.setDefaultSecure(Boolean.valueOf(serverDef.getChildText(SECURE)));
+        Server.setDefaultPort(Integer.parseInt(serverDef.getChildText(PORT)));
+        Server.setDefaultSecure(Boolean.parseBoolean(serverDef.getChildText(SECURE)));
             
         //Load internal defaults into ServiceProperties
         Element serviceDef = louie.getChild("service_defaults");
 
-        ServiceProperties.setDefaultCaching(Boolean.valueOf(serviceDef.getChildText(CACHING)));
-        ServiceProperties.setDefaultEnable(Boolean.valueOf(serviceDef.getChildText(ENABLE)));
-        ServiceProperties.setDefaultReadOnly(Boolean.valueOf(serviceDef.getChildText(READ_ONLY)));
+        ServiceProperties.setDefaultCaching(Boolean.parseBoolean(serviceDef.getChildText(CACHING)));
+        ServiceProperties.setDefaultEnable(Boolean.parseBoolean(serviceDef.getChildText(ENABLE)));
+        ServiceProperties.setDefaultReadOnly(Boolean.parseBoolean(serviceDef.getChildText(READ_ONLY)));
 
         //Load internal services into ServiceProperties
         Element coreServices = louie.getChild("core_services");
@@ -324,11 +323,11 @@ public class LouieProperties {
                         break;
                     case EXTERNAL_IP: prop.setExternalIp(propValue);
                         break;
-                    case CENTRAL_AUTH: prop.setCentralAuth(Boolean.valueOf(propValue));
+                    case CENTRAL_AUTH: prop.setCentralAuth(Boolean.parseBoolean(propValue));
                         break;
-                    case PORT: prop.setPort(Integer.valueOf(propValue));
+                    case PORT: prop.setPort(Integer.parseInt(propValue));
                         break;
-                    case SECURE: prop.setSecure(Boolean.valueOf(propValue));
+                    case SECURE: prop.setSecure(Boolean.parseBoolean(propValue));
                         break;
                     case TIMEZONE: prop.setTimezone(propValue);
                         break;
@@ -352,15 +351,15 @@ public class LouieProperties {
             String propName = defaultProp.getName().toLowerCase();
             String propValue = defaultProp.getTextTrim();
             if (null != propName) switch (propName) {
-                case CACHING: ServiceProperties.setDefaultCaching(Boolean.valueOf(propValue));
+                case CACHING: ServiceProperties.setDefaultCaching(Boolean.parseBoolean(propValue));
                     break;
-                case ENABLE: ServiceProperties.setDefaultEnable(Boolean.valueOf(propValue));
+                case ENABLE: ServiceProperties.setDefaultEnable(Boolean.parseBoolean(propValue));
                     break;
                 case REMOTE_HOST: ServiceProperties.setDefaultRemoteHost(propValue);
                     break;
                 case REMOTE_SERVER: ServiceProperties.setDefaultRemoteServer(propValue);
                     break;
-                case READ_ONLY: ServiceProperties.setDefaultReadOnly(Boolean.valueOf(propValue));
+                case READ_ONLY: ServiceProperties.setDefaultReadOnly(Boolean.parseBoolean(propValue));
                     break;
                 default: 
                     LoggerFactory.getLogger(LouieProperties.class)

@@ -17,7 +17,6 @@ package com.rhythm.louie.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,13 +31,10 @@ import com.rhythm.louie.request.HttpProcessor;
  */
 @WebServlet(name = "PBServlet", urlPatterns = {"/pb"})
 public class PBServlet extends HttpServlet {
-    HttpProcessor processor = new HttpProcessor();
+    private static final long serialVersionUID = 1L;
     
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-         super.init(config);
-    }
-
+    private transient HttpProcessor processor;
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      * @param request servlet request
@@ -48,7 +44,14 @@ public class PBServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        processor.processRequest(request, response);
+        loadProcessor().processRequest(request, response);
+    }
+
+    synchronized private HttpProcessor loadProcessor() {
+        if (processor == null) {
+            processor = new HttpProcessor();
+        }
+        return processor;
     }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

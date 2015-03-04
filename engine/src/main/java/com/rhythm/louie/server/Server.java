@@ -20,8 +20,6 @@ import com.rhythm.louie.Constants;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +40,7 @@ public class Server {
         UNKNOWN.gateway = Constants.DEFAULT_GATEWAY;
     }
     
-    public static Server LOCAL = UNKNOWN;
-    
+    private static Server LOCAL = UNKNOWN;
     private static Server CENTRAL_AUTH = null;
     
     private static final Map<ServerKey,Server> SERVERS_BY_ADDRESS = 
@@ -52,6 +49,13 @@ public class Server {
             Collections.synchronizedMap(new HashMap<String,Server>());
     private static final Map<String,Server> SERVERS_BY_LOCATION = 
             Collections.synchronizedMap(new HashMap<String,Server>());
+
+    /**
+     * @return the Local Server
+     */
+    public static Server getLocal() {
+        return LOCAL;
+    }
     
     private final Map<String,String> properties;
     
@@ -99,7 +103,7 @@ public class Server {
             server.timezone=TimeZone.getDefault().getDisplayName();
             SERVERS.put("localhost", server);
             server.secure = defaultSecure;
-            Server.LOCAL = server;
+            LOCAL = server;
         }
 
         List<String> disabled = new ArrayList<>();
@@ -166,7 +170,7 @@ public class Server {
         sb.append("\n**** Louie Servers ****\n");
         for (Server server : Server.allServers()) {
             if (server.getIp().equals(LocalConstants.IP)) {
-                Server.LOCAL = server;
+                LOCAL = server;
                 sb.append("*");
                 if (liveIsDefaultGateway) {
                     server.setGateway(defaultGateway); //blindly reset it
@@ -178,7 +182,7 @@ public class Server {
         }
         LoggerFactory.getLogger(Server.class).info(sb.toString());
 
-        if (Server.LOCAL==UNKNOWN) {
+        if (LOCAL == UNKNOWN) {
             LoggerFactory.getLogger(Server.class)
                     .error("This Server: {} is UNKNOWN! Disabling all Services!", LocalConstants.HOSTDOMAIN);
         }

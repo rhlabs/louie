@@ -237,7 +237,7 @@ public class FutureList<E> implements Collection<E>, List<E> {
     
     @Override
     public boolean equals(Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this==o;
     }
 
     @Override

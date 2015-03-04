@@ -16,6 +16,7 @@
 package com.rhythm.louie.devgen;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.maven.plugin.*;
 import org.apache.maven.plugins.annotations.*;
@@ -41,7 +42,7 @@ public class DevMojo extends AbstractMojo{
     @Parameter
     private String configpath = null;
    
-    private final String OUTPUT_DIR = "target/classes/louie.xml";
+    private static final String OUTPUT_DIR = "target/classes/louie.xml";
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -62,7 +63,11 @@ public class DevMojo extends AbstractMojo{
         louiexml.append("</louie>\n");
         
         File f = new File(projectbase, OUTPUT_DIR);
-        try (Writer writer = new PrintWriter(f)) {
+        
+        try (FileOutputStream out = new FileOutputStream(f);
+                OutputStreamWriter w = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+                BufferedWriter buf = new BufferedWriter(w);
+                Writer writer = new PrintWriter(buf, false)) {
             writer.append(louiexml.toString());
         } catch (IOException ex) {
             getLog().error("Failed to write the dev config file");

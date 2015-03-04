@@ -18,7 +18,6 @@ package com.rhythm.louie.request;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.exception.LouieRouteException;
-import com.rhythm.louie.request.data.Result;
-import com.rhythm.louie.server.Server;
 import com.rhythm.louie.services.auth.UnauthorizedSessionException;
 
 /**
@@ -37,14 +34,14 @@ import com.rhythm.louie.services.auth.UnauthorizedSessionException;
  * @author cjohnson
  */
 public class HttpProcessor {
-     private final Logger LOGGER = LoggerFactory.getLogger(HttpProcessor.class);
-            
-     private final String localIp;
-     
-     private final ProtoProcess processor;
-     public HttpProcessor() {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(HttpProcessor.class);
+    private final String localIp;
+    private final ProtoProcess processor;
+
+    public HttpProcessor() {
         processor = new ProtoProcessor();
-        
+
         String ip;
         try {
             ip = InetAddress.getLocalHost().getHostAddress();
@@ -53,7 +50,7 @@ public class HttpProcessor {
             ip = "UNKNOWN_ADDRESS";
         }
         localIp = ip;
-     }
+    }
     
     public void processRequest(HttpServletRequest req,
             HttpServletResponse resp) throws ServletException, IOException {
@@ -64,8 +61,7 @@ public class HttpProcessor {
             
             resp.setContentType("application/x-protobuf");
             RequestProperties props = RequestProperties.fromHttpRequest(req, localIp);
-            List<Result> results = processor.processRequest(req.getInputStream(), resp.getOutputStream(), props);
-            //sendHttpError(results,resp);
+            processor.processRequest(req.getInputStream(), resp.getOutputStream(), props);
         } catch (LouieRouteException ex) {
             LOGGER.error(ex.toString());
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
@@ -78,31 +74,4 @@ public class HttpProcessor {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST,errorMessage);
         }
     }
-     
-    private void sendHttpError(List<Result> results, HttpServletResponse resp) {
-        for (Result result : results) {
-            if (result.isError()) {
-                Exception e = result.getException();
-                try {
-                    int errorcode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-                    if (e instanceof NoSuchMethodException) {
-                        errorcode = HttpServletResponse.SC_METHOD_NOT_ALLOWED;
-                    }
-                    if (e instanceof LouieRouteException) {                     //logically, yes. name-wise, no.
-                        errorcode = HttpServletResponse.SC_NOT_FOUND;           //trigger a retry from clients
-                    }
-                    
-                    String message = "Unknown Error";
-                    if (e!=null) {
-                        message = e.getMessage() == null ? e.toString() : e.getMessage();
-                    }
-                    
-                    resp.sendError(errorcode, message);
-                } catch (Exception e2) {
-                    LOGGER.error("Error Writing - Exception: {}", e2.toString());
-                }
-            }
-        }
-    }
-
 }

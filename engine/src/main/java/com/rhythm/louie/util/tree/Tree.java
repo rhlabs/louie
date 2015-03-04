@@ -301,11 +301,7 @@ public class Tree<K,V> {
     private class NodeToStringFunction<V> implements Function<V, String> {
         @Override
         public String apply(V o) {
-            if (o==null) {
-                return String.valueOf(o);
-            } else {
-                return o.toString();
-            }
+            return String.valueOf(o);
         }
     }
     

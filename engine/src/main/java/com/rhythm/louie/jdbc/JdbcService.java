@@ -34,9 +34,6 @@ public interface JdbcService extends Closeable {
      */
     Connection getConnection();
 
-    @Deprecated
-    void closeAll();
-
     /**
      * Set the SQL query for the service
      * 
@@ -138,38 +135,4 @@ public interface JdbcService extends Closeable {
      */
     int getUpdateCount() throws SQLException;
 
-    /**
-     * Use executeQuery()
-     * @return
-     * @throws SQLException
-     * @deprecated
-     */
-    @Deprecated
-    ResultSet executeStatement() throws SQLException;
-    
-     /**
-     * Use executeQuery()
-     * @return
-     * @throws SQLException
-     * @deprecated
-     */
-    @Deprecated
-    ResultSet executePreparedStatement() throws SQLException;
-    
-    /**
-     * Use execute()
-     * @throws SQLException
-     * @deprecated
-     */
-    @Deprecated
-    void executePreparedStatementProcedure() throws SQLException;
-    
-    /**
-     * Use executeUpdate()
-     * @return 
-     * @throws SQLException
-     * @deprecated
-     */
-    @Deprecated
-    int executePreparedStatementUpdate() throws SQLException;
 }

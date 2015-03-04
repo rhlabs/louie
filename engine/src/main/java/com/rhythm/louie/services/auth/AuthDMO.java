@@ -68,7 +68,7 @@ public class AuthDMO implements AuthService {
     private boolean isCentralAuth() {                                                           
         if (centralAuthProvider == null) {                 
             if (Server.getCentralAuth() != null) {
-                centralAuthProvider = Server.LOCAL.equals(Server.getCentralAuth());
+                centralAuthProvider = Server.getLocal().equals(Server.getCentralAuth());
             } else { // there is no configured central auth, revert to basic behavior
                 centralAuthProvider = true;
             }
@@ -87,7 +87,7 @@ public class AuthDMO implements AuthService {
     private AuthClient getAuthClient() {                                          
         if (authClient == null) {                                                 
             LouieConnection authConnection = LouieConnectionFactory.getConnectionForServer(Server.getCentralAuth(), 
-                    Identity.createIdentity("Louie", "Louie-"+Server.LOCAL.getHostName()+"/"+Server.LOCAL.getGateway()));
+                    Identity.createIdentity("Louie", "Louie-"+Server.getLocal().getHostName()+"/"+Server.getLocal().getGateway()));
             authClient = new AuthServiceClient(authConnection);                 
         }                                                                                       
         return authClient;                                                                      
@@ -215,9 +215,9 @@ public class AuthDMO implements AuthService {
         }
         if (!isCentralAuth()) {
             SessionBPB remoteSession = getAuthClient().getSession(sessionKey);
-            SessionStat remoteStat = new SessionStat(remoteSession.getKey(), remoteSession.getIdentity());
-            if (remoteStat.getLastRequestTime()!=null) { // Need to somehow check that the returned object was valid
-                SESSION_STATS.put(null, stat);
+            if (remoteSession != null) {
+                SessionStat remoteStat = new SessionStat(remoteSession.getKey(), remoteSession.getIdentity());
+                SESSION_STATS.put(sessionKey.getKey(), remoteStat);
                 return Boolean.TRUE;
             }
         }

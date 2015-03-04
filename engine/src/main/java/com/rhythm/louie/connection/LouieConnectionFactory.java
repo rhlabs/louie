@@ -23,8 +23,6 @@ import com.rhythm.pb.RequestProtos.IdentityPB;
 import com.rhythm.pb.RequestProtos.SessionKey;
 
 import java.net.URLConnection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +140,8 @@ public class LouieConnectionFactory {
             try {
                 return getDelegate().getGateway();
             } catch (Exception ex) {
-                Logger.getLogger(LouieConnectionFactory.class.getName()).log(Level.SEVERE, null, ex);
+                LoggerFactory.getLogger(LouieConnectionFactory.class)
+                        .error("Error getting Gateway", ex);
                 return "unknown";
             }
         }
@@ -209,17 +208,17 @@ public class LouieConnectionFactory {
     
     public static LouieConnection getLocalConnection() {
         LouieConnection lc = new DefaultLouieConnection(Identity.getIdentity(),LOCALHOST);
-        lc.setGateway(Server.LOCAL.getGateway());
+        lc.setGateway(Server.getLocal().getGateway());
         return lc;
     }
     public static LouieConnection getLocalConnection(IdentityPB id) {
         LouieConnection lc = new DefaultLouieConnection(id,LOCALHOST);
-        lc.setGateway(Server.LOCAL.getGateway());
+        lc.setGateway(Server.getLocal().getGateway());
         return lc;
     }
     public static LouieConnection getLocalConnection(IdentityPB id, String key) {
         LouieConnection lc = new DefaultLouieConnection(id,LOCALHOST,key);
-        lc.setGateway(Server.LOCAL.getGateway());
+        lc.setGateway(Server.getLocal().getGateway());
         return lc;
     }
     

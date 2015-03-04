@@ -19,7 +19,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,7 +62,7 @@ public class ProtoProcessor implements ProtoProcess {
     private static final Map<Long, RequestContext> currentRequestMap = new ConcurrentHashMap<>();
     
     public ProtoProcessor() {
-        secured = Server.LOCAL.isSecure();
+        secured = Server.getLocal().isSecure();
         userCN = Pattern.compile(".*CN=([\\w\\s]+),*.*");
         AlertProperties prop = AlertProperties.getProperties(AlertProperties.REQUEST);
         if (prop != null) {
@@ -76,11 +75,9 @@ public class ProtoProcessor implements ProtoProcess {
     }
     
     @Override
-    public List<Result> processRequest(InputStream input, OutputStream output, RequestProperties props) throws UnauthorizedSessionException, IOException, Exception {
+    public void processRequest(InputStream input, OutputStream output, RequestProperties props) throws UnauthorizedSessionException, IOException, Exception {
         long start = System.nanoTime();
 
-        List<Result> results = new ArrayList<>();
-        
         RequestHeaderPB header = RequestHeaderPB.parseDelimitedFrom(input);
         if (header.getCount()>1) {
             throw new Exception("Batching Requests is not supported!");
@@ -181,10 +178,8 @@ public class ProtoProcessor implements ProtoProcess {
                 }
                 currentRequestMap.remove(Thread.currentThread().getId());
                 start = end;
-                results.add(result);
             }
         }
-        return results;
     }
 
     private void handleResult(RequestContext requestContext,Result result,OutputStream output) throws Exception {
@@ -302,7 +297,7 @@ public class ProtoProcessor implements ProtoProcess {
             hour = currentHour;
             
             List<RequestContext> requests = getLongRunningRequests(duration);
-            Server local = Server.LOCAL;
+            Server local = Server.getLocal();
             String subject = local.getHostName() +" ("+ local.getIp() +"/"+ local.getGateway() 
                     +") ["+ local.getName() +"] Louie Request Monitor";
             if (!requests.isEmpty()) {

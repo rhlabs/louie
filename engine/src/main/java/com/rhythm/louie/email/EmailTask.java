@@ -56,7 +56,9 @@ public class EmailTask implements Runnable {
         for (String to : toList){
             toAddr.add(new InternetAddress(to));
         }
-        this.msg.addRecipients(Message.RecipientType.TO, (Address[]) toAddr.toArray());
+        
+        Address[] addresses = toAddr.toArray(new Address[toAddr.size()]);
+        this.msg.addRecipients(Message.RecipientType.TO, addresses);
         this.msg.setSubject(subject);
         this.msg.setText(body);
     }
@@ -125,9 +127,9 @@ public class EmailTask implements Runnable {
         msg.addHeader("Content-Type", contentType);
     }
     
-    public void addHeaders(Map<String,String> xHeaders) throws MessagingException {
-        for (String xHeader : xHeaders.keySet()) {
-            msg.addHeader(xHeader, xHeaders.get(xHeader));
+    public void addHeaders(Map<String, String> xHeaders) throws MessagingException {
+        for (Map.Entry<String, String> entry : xHeaders.entrySet()) {
+            msg.addHeader(entry.getKey(), entry.getValue());
         }
     }
     
@@ -144,7 +146,7 @@ public class EmailTask implements Runnable {
         }
     }
     
-    private class CustomIDMessage extends MimeMessage {
+    static private class CustomIDMessage extends MimeMessage {
         
         private String messageId;
         

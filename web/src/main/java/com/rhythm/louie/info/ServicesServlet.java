@@ -43,7 +43,6 @@ public class ServicesServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String service = request.getParameter("service");
-        String config = request.getParameter("configs");
         
         if (service==null || service.isEmpty()) {
             listAllServices(request,response);

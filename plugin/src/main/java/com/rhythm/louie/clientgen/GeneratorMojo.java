@@ -19,7 +19,10 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 
 import com.google.common.collect.ImmutableSet;
@@ -84,7 +87,7 @@ public class GeneratorMojo extends AbstractMojo{
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Executing Louie Service Client Generator");
-        List<URL> urls = new ArrayList<>();
+        final List<URL> urls = new ArrayList<>();
         try {
             String outputDir = project.getBuild().getOutputDirectory();
             List<Artifact> artifacts = project.getCompileArtifacts();
@@ -92,13 +95,18 @@ public class GeneratorMojo extends AbstractMojo{
             for (Artifact a : artifacts) {
                 urls.add(a.getFile().toURI().toURL());
             }
-
         } catch (MalformedURLException ex) {
-            ex.printStackTrace();
+            LoggerFactory.getLogger(GeneratorMojo.class).error("Error loading artifact urls", ex);
         }
         
-        ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
-        Thread.currentThread().setContextClassLoader(cl);
+        AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            @Override
+            public ClassLoader run()  {
+                ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
+                Thread.currentThread().setContextClassLoader(cl);
+                return cl;
+            }
+        });
         
         //sanitize python output dir
         if (pythondir.startsWith("/")) pythondir = pythondir.substring(1);
@@ -141,7 +149,12 @@ public class GeneratorMojo extends AbstractMojo{
             
             // Python
             try {
-                Collections.sort(pythonMethods);
+                Collections.sort(pythonMethods, new Comparator<MethodInfo>() {
+                    @Override
+                    public int compare(MethodInfo o1, MethodInfo o2) {
+                        return o1.getName().compareTo(o2.method.getName());
+                    }
+                });
                 ServiceInfo info = new ServiceInfo(service, host, gateway, pythonMethods);
                 generatePython(info, pypackage, project.getBasedir().toString(),pythondir);
             } catch (Exception e) {
@@ -177,8 +190,9 @@ public class GeneratorMojo extends AbstractMojo{
         
         while (serviceClasses.hasMoreElements()) {
             URL serviceClass = serviceClasses.nextElement();
-            
-            try (BufferedReader reader = new BufferedReader( new InputStreamReader(serviceClass.openStream()))) {
+    
+            try (InputStreamReader in = new InputStreamReader(serviceClass.openStream(), StandardCharsets.UTF_8);
+                    BufferedReader reader = new BufferedReader(in)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     try {
@@ -224,7 +238,7 @@ public class GeneratorMojo extends AbstractMojo{
         
         //generate some __init__ files
         try {
-            Files.write(file,initTemplate.getBytes());
+            Files.write(file,initTemplate.getBytes(StandardCharsets.UTF_8));
         } catch (FileAlreadyExistsException ex) {
         } catch (IOException ex) {
             System.out.println("Failed to create __init__.py file in " + output);
@@ -249,8 +263,14 @@ public class GeneratorMojo extends AbstractMojo{
 
         Template vt = ve.getTemplate(template);
         File f = new File(output);
-        f.getParentFile().mkdirs();
-        try (Writer writer = new PrintWriter(f)) {
+        if (!f.exists() && !f.getParentFile().mkdirs()) {
+            throw new Exception("Error creating directory path: "+f.getPath());
+        }
+
+        try (FileOutputStream out = new FileOutputStream(f);
+                OutputStreamWriter w = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+                BufferedWriter buf = new BufferedWriter(w);
+                Writer writer = new PrintWriter(buf, false)) {
             vt.merge(vc, writer);
         }
     }

@@ -19,6 +19,7 @@ package com.rhythm.louie.server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import javax.servlet.ServletContext;
@@ -89,10 +90,10 @@ public class ServiceManager {
             return;
         }
         
-        if (Server.LOCAL==Server.UNKNOWN) {
+        if (Server.getLocal() == Server.UNKNOWN) {
             return;
         }
-        
+
         // Services
         loadServiceProviders();
         
@@ -207,7 +208,7 @@ public class ServiceManager {
         while (serviceClasses.hasMoreElements()) {
             URL serviceClass = serviceClasses.nextElement();
             
-            try (BufferedReader reader = new BufferedReader( new InputStreamReader(serviceClass.openStream()))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(serviceClass.openStream(), Charset.forName("UTF-8")))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     try {
@@ -257,34 +258,6 @@ public class ServiceManager {
         }
         String contextGateway = context.getContextPath().replaceFirst("/", "");
         LouieProperties.processProperties(louieXml, contextGateway);
-    }
-    
-    private static Properties loadProperties(ServletContext context,String dir,String propFile) {
-        Properties props = new Properties();
-        InputStream in = null;
-        try {
-            in = context.getResourceAsStream(dir + propFile+"."+LocalConstants.HOST);
-            if (in == null){
-                in = context.getResourceAsStream(dir + propFile);
-            }
-            props.load(in);
-        } catch (IOException ex) {
-            LoggerFactory.getLogger(ServiceManager.class).warn(ex.getMessage());
-            return props;
-        } catch (NullPointerException npe) {
-            System.out.println("NPE encountered for file: " 
-                    + dir + propFile + "." + LocalConstants.HOST);
-        } finally {
-            if (in!=null)  {
-                try {
-                    in.close();
-                } catch (IOException ex) {
-                    LoggerFactory.getLogger(ServiceManager.class).warn(ex.getMessage());
-                }
-            }
-        }
-        
-        return props;
     }
     
     private static void initializeService(ServiceFactory factory) throws Exception, MessageAdapterException {

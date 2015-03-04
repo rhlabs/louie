@@ -15,11 +15,8 @@
  */
 package com.rhythm.louie.request;
 
-import com.rhythm.louie.request.data.Result;
-
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  *
@@ -27,6 +24,6 @@ import java.util.List;
  */
 public interface ProtoProcess {
     
-    public List<Result> processRequest(InputStream input, OutputStream output, RequestProperties props) throws Exception;
+    public void processRequest(InputStream input, OutputStream output, RequestProperties props) throws Exception;
 
 }

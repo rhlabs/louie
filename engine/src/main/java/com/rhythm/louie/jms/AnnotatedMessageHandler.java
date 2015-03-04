@@ -41,7 +41,7 @@ public class AnnotatedMessageHandler implements MessageHandler {
 
     private final Map<String,MessageProcessor> actionMap;
     protected AnnotatedMessageHandler() {
-        Map<String, MessageProcessor> tmpMap = new TreeMap<String, MessageProcessor>();
+        Map<String, MessageProcessor> tmpMap = new TreeMap<>();
         for (Method meth : this.getClass().getDeclaredMethods()) {
             try {
                 if (!Modifier.isStatic(meth.getModifiers())
@@ -71,7 +71,7 @@ public class AnnotatedMessageHandler implements MessageHandler {
         return Collections.unmodifiableCollection(actionMap.values());
     }
     
-    private class AnnotatedMessageProcessor implements MessageProcessor {
+    private static class AnnotatedMessageProcessor implements MessageProcessor {
 
         private final Method meth;
         private final MessageOperation action;
@@ -125,7 +125,7 @@ public class AnnotatedMessageHandler implements MessageHandler {
         if (!(o instanceof Builder)) {
             throw new Exception("Not a PB Descriptor!");
         }
-        return new BuilderParser<Object>((Builder) o);
+        return new BuilderParser<>((Builder) o);
     }
 
     private static Descriptor lookupDescriptor(Class<?> cl) throws Exception {

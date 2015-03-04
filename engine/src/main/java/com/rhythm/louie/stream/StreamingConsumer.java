@@ -22,10 +22,10 @@ import java.util.ListIterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.SettableFuture;
+
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -55,7 +55,8 @@ public class StreamingConsumer<T> extends Consumer<T>{
         try {
             queue.put(item);
         } catch (InterruptedException ex) {
-            Logger.getLogger(StreamingConsumer.class.getName()).log(Level.SEVERE, null, ex);
+            LoggerFactory.getLogger(StreamingConsumer.class)
+                        .error("Error consuming item", ex);
         }
     }
     
@@ -109,7 +110,8 @@ public class StreamingConsumer<T> extends Consumer<T>{
                 try {
                     item = queue.take();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(StreamingConsumer.class.getName()).log(Level.SEVERE, null, ex);
+                    LoggerFactory.getLogger(StreamingConsumer.class)
+                        .error("Error Iterating over items", ex);
                 }
                 index++;
                 
@@ -199,7 +201,7 @@ public class StreamingConsumer<T> extends Consumer<T>{
 
         @Override
         public boolean equals(Object o) {
-            return false;
+            return this==o;
         }
 
         @Override

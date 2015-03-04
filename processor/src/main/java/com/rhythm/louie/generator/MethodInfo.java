@@ -34,7 +34,7 @@ import com.rhythm.louie.process.ServiceCall;
  */
 public class MethodInfo {
     private final ExecutableElement method;
-    private final List<ParamInfo> params = new ArrayList<ParamInfo>();
+    private final List<ParamInfo> params = new ArrayList<>();
     private String javaDoc;
     
     private final boolean returnsCollection;
@@ -358,7 +358,7 @@ public class MethodInfo {
         return sb.toString();
     }
     
-    public class ParamInfo {
+    static public class ParamInfo {
         VariableElement param;
         public ParamInfo(VariableElement param) {
             this.param = param;

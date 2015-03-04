@@ -48,7 +48,7 @@ public class BuildProperties implements Comparable<BuildProperties> {
         this.name = name;
     }
     
-    public static Collection<BuildProperties> getAllBuildProperties() {
+    public static synchronized Collection<BuildProperties> getAllBuildProperties() {
         if (!scanned) {
             processExternalProperties();
         }
@@ -59,7 +59,7 @@ public class BuildProperties implements Comparable<BuildProperties> {
         return sorted;
     }
     
-    public static Collection<BuildProperties> getServiceBuildProperties() {
+    public static synchronized Collection<BuildProperties> getServiceBuildProperties() {
         if (!scanned) {
             processExternalProperties();
         }
@@ -147,6 +147,28 @@ public class BuildProperties implements Comparable<BuildProperties> {
     @Override
     public int compareTo(BuildProperties o) {
         return this.name.compareTo(o.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final BuildProperties other = (BuildProperties) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        return true;
     }
     
 }

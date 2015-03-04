@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -127,9 +128,9 @@ public class PBCompilerMojo extends AbstractMojo{
     private boolean pygen;
     
     // A list of compiler libs in possible linux locations
-    private final String[] includeDirs = {"/usr/include","/usr/local/include"};
+    private static final String[] includeDirs = {"/usr/include","/usr/local/include"};
     
-    private final String mavenSharedDir = "maven-shared-archive-resources";
+    private static final String mavenSharedDir = "maven-shared-archive-resources";
     
     @Override
     public void execute() throws MojoExecutionException {
@@ -217,10 +218,12 @@ public class PBCompilerMojo extends AbstractMojo{
         getLog().info(Joiner.on(" ").join(args));
         Process p = Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
         
-        try (BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+        try (InputStreamReader errorIn = new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8);
+                BufferedReader error = new BufferedReader(errorIn);
+                InputStreamReader inputIn = new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8);
+                BufferedReader input = new BufferedReader(inputIn)) {
+        
             String line;
-
             while ((line = error.readLine()) != null) {
                 getLog().error(line);
             }
@@ -230,10 +233,10 @@ public class PBCompilerMojo extends AbstractMojo{
         }
     }
 
-    private void makeDir(String path) {
+    private void makeDir(String path) throws MojoExecutionException {
         File f = new File(path);
-        if (!f.exists()) {
-            f.mkdirs();
+        if (!f.exists() && !f.mkdirs()) {
+            throw new MojoExecutionException("Error creating directory path: "+path);
         }
     }
     
@@ -258,7 +261,7 @@ public class PBCompilerMojo extends AbstractMojo{
                     if (!containsinit) {
                         Path init = Paths.get(dir.toString(), "__init__.py");
                         try {
-                            Files.write(init, initTemplate.getBytes());
+                            Files.write(init, initTemplate.getBytes(StandardCharsets.UTF_8));
                         } catch (FileAlreadyExistsException ex) {
                         } catch (IOException ex) {
                             System.out.println("Failed to create __init__.py in " + dir.toString());

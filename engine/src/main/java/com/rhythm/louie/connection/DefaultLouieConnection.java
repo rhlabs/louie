@@ -244,7 +244,7 @@ public class DefaultLouieConnection implements LouieConnection {
         return connection;
     }
     
-    private class LouieHostVerifier implements HostnameVerifier{
+    static private class LouieHostVerifier implements HostnameVerifier {
 
         @Override
         public boolean verify(String string, SSLSession ssls) {
@@ -520,7 +520,7 @@ public class DefaultLouieConnection implements LouieConnection {
         this.port = port;
     }
     
-    class HttpException extends Exception {
+    static public class HttpException extends Exception {
         private int httpCode;
         private String httpMessage;
         public HttpException(int code,String message) {
@@ -538,7 +538,7 @@ public class DefaultLouieConnection implements LouieConnection {
         }
     }
     
-    public class BouncedException extends Exception {
+    static public class BouncedException extends Exception {
         public BouncedException(String message) {
             super(message);
         }
@@ -548,7 +548,7 @@ public class DefaultLouieConnection implements LouieConnection {
         }
     }
     
-    class HttpsException extends Exception {
+    static public class HttpsException extends Exception {
         public HttpsException(String message) {
             super(message);
         }

@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.base.Joiner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,12 +55,12 @@ public class CacheServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clearCache = request.getParameter("clear");
         if (clearCache!=null && !clearCache.isEmpty()) {
-            String result = clearCache(clearCache);
+            List<String> clearedCaches = clearCachePattern(clearCache);
             try (PrintWriter out = response.getWriter()) {
-                if (result == null){
-                    out.println("NONE");
+                if (clearedCaches.isEmpty()){
+                    out.println("No matching caches found.");
                 } else {
-                    out.println(clearCache);
+                    out.println("The following caches were cleared: "+Joiner.on(",").join(clearedCaches));
                 }
             }
         } else {
@@ -119,8 +121,8 @@ public class CacheServlet extends HttpServlet {
     }
     
     @SuppressWarnings("unchecked")
-    private String clearCache(String targetCache){
-        logger.info("ATTEMPTING CLEAR of "+targetCache);
+    private List<String> clearCachePattern(String targetCache){
+        logger.info("Cache clear request for: "+targetCache);
         
         Collection<CacheManager> managers = Collections.emptyList();
         String cacheName = null;
@@ -145,8 +147,7 @@ public class CacheServlet extends HttpServlet {
             }
         }
         
-        int cleared = 0;
-        boolean success = true;
+        List<String> cleared = new ArrayList<>();
         for (CacheManager manager : managers) {
             Collection<Cache<?,?>> caches;
             if (cacheName == null) {
@@ -162,18 +163,14 @@ public class CacheServlet extends HttpServlet {
             for (Cache<?,?> cache : caches) {
                 try {
                     cache.clear();
-                    cleared++;
-                    logger.info("Cache " + manager.getName() + "->" + cache.getCacheName() + " has been cleared locally!");
+                    cleared.add(manager.getName() + "->" + cache.getCacheName());
+                    logger.info("Cache " + manager.getName() + "->" + cache.getCacheName() + " has been cleared!");
                 } catch (Exception ex) {
-                    success = false;
                     logger.error(ex.toString());
                 }
             }
         }
-        if (success && cleared>0) {
-            return targetCache;
-        }
-        return null;
+        return cleared;
     }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

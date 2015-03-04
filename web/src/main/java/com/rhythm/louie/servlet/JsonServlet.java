@@ -17,11 +17,9 @@ package com.rhythm.louie.servlet;
 
 import com.rhythm.louie.request.JsonProcess;
 import com.rhythm.louie.request.JsonProcessor;
-import com.rhythm.louie.server.Server;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,13 +32,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "JsonServlet", urlPatterns = {"/json"})
 public class JsonServlet extends HttpServlet {
-    private JsonProcess processor;
+    private static final long serialVersionUID = 1L;
     
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        processor = new JsonProcessor();
-        super.init(config);
-    }
+    private transient JsonProcess processor;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -51,7 +45,14 @@ public class JsonServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        processor.processRequest(request, response);
+        loadProcessor().processRequest(request, response);
+    }
+
+    synchronized private JsonProcess loadProcessor() {
+        if (processor == null) {
+            processor = new JsonProcessor();
+        }
+        return processor;
     }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

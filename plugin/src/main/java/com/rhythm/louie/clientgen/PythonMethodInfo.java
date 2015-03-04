@@ -27,7 +27,7 @@ public class PythonMethodInfo extends MethodInfo {
 
     protected static final Map<String, String> pbtypeMap;
     static {
-        pbtypeMap = new HashMap<String, String>();
+        pbtypeMap = new HashMap<>();
         pbtypeMap.put("StringPB", "str");
         pbtypeMap.put("StringListPB", "list");
         pbtypeMap.put("DatePB", "int");
@@ -89,7 +89,7 @@ public class PythonMethodInfo extends MethodInfo {
     }
     
     public Set<String> getImports() throws Exception {
-        Set<String> imports = new LinkedHashSet<String>();
+        Set<String> imports = new LinkedHashSet<>();
         for (ParamInfo param : params) {
             if (isLouieDataType(param.getPbType())) {
                 imports.add("from " + getImportType(param.getParam()) + " import " + param.getPbType());

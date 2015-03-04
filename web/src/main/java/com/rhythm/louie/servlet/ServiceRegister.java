@@ -15,15 +15,13 @@
  */
 package com.rhythm.louie.servlet;
 
-
 import com.rhythm.louie.server.ServiceManager;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+
+import org.slf4j.LoggerFactory;
 
 /**
  * Web application lifecycle listener.
@@ -37,8 +35,8 @@ public class ServiceRegister implements ServletContextListener {
         try {
             ServiceManager.initialize(sce.getServletContext());
         } catch (Exception ex) {
-            Logger.getLogger(ServiceRegister.class.getName()).log(Level.SEVERE, 
-                    "ERROR Initializing Services", ex);
+            LoggerFactory.getLogger(ServiceRegister.class)
+                    .error("Error Initializing Services", ex);
         }
     }
 
