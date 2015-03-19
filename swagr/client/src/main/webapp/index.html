@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SWAGr</title>
+        <link rel="shortcut icon" href="swagrFavicon.ico" />
+        <link rel="stylesheet" type="text/css" href="http://internal.rhythm.com/extjs4/resources/css/ext-all.css"/>
+        <script type="text/javascript" charset="utf-8" src="http://internal.rhythm.com/extjs4/bootstrap.js"></script>
+        <script>
+            Ext.Loader.setConfig({ enabled: true });
+            Ext.Loader.setPath(
+                        'Ext.ux', 'http://internal.rhythm.com/extjs4/examples/ux'
+            );
+            //Ext.Loader.setPath('Ext.ux.menu', 'http://lid546.rhythm.com/Mvc/ux/menu');
+        </script> 
+        <script type="text/javascript" src="SWAGr.js"></script> 
+    </head>
+    <body>
+        <form id="history-form" class="x-hidden">
+            <input type="hidden" id="x-history-field" />
+            <iframe id="x-history-frame"></iframe>
+        </form>
+    </body>
+    
+</html>
+
+

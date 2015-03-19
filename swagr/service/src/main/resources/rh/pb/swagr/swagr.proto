@@ -1,0 +1,100 @@
+package rh.pb.swagr;
+
+import "google/protobuf/descriptor.proto"; 
+
+option java_package = "com.rhythm.pb.swagr";
+option java_outer_classname = "SwagrProtos";
+option java_generate_equals_and_hash = true;
+
+message SwagrChartFieldPB{
+    optional string             type            = 1;
+    optional string             name            = 2;
+}
+
+message SwagrChartDataPB{
+    optional string             fieldName       = 1;
+    optional int64              value           = 2;
+}
+
+message SwagrChartDataBPB{
+    optional string             xAxisParam      = 1;
+    repeated SwagrChartDataPB   dataPoints      = 2;
+}
+
+message SwagrChartBPB{
+    repeated SwagrChartFieldPB  chartFields     = 1;
+    repeated SwagrChartDataBPB  data            = 2;
+    repeated int32              queryId         = 3;
+}
+
+message SwagrStatPB{
+    optional int32              id              = 1;
+    optional string             idString        = 18;
+    optional int64              time            = 2;
+    optional int32              count           = 3;
+    optional int32              minTime         = 4;
+    optional int32              aveTime         = 5;
+    optional int32              maxTime         = 6;
+    optional int64              aveBytes        = 7;
+    optional int64              maxBytes        = 8;
+    optional int32              aveRows         = 9;
+    optional int32              maxRows         = 10;
+    optional int32              fails           = 11;
+    optional string             location        = 12;
+    optional string             dataType        = 13;
+    optional int64              value           = 14;
+    optional int32              valueType       = 15;
+    optional int32              systemId        = 16;
+    optional int32              hostTypeId      = 17; //unused so far
+    optional string             timeString      = 19;
+}
+
+message SwagrBPB{
+    optional int32              id              = 1;
+    optional string             idString        = 2;
+    optional string             suppString      = 3;
+    optional int32              valueType       = 6;
+    repeated SwagrStatPB        stats           = 5;
+}
+
+message SwagrComboBPB{
+    optional SwagrChartBPB      chart           = 1;
+    repeated SwagrBPB           stats           = 2;
+}
+
+message SwagrServicePB{
+    optional string             service         = 1;
+    optional int32              systemid        = 2;
+    repeated SwagrRequestPB     requests        = 3;
+}
+
+message SwagrLocationPB{
+    optional string             location        = 1;
+}
+
+message SwagrRequestPB {
+    optional int32              id              = 1;
+    optional string             function        = 2;
+    optional string             args            = 3;
+}
+
+message SwagrOptionsPB{
+    optional int32              topNum          = 1;                            //Top X Type request, X = top number
+    optional string             location        = 2     [default = "ALL"];      //Specific location to view data from
+    optional int32              dataType        = 3     [default = 0];          //Specific data type to view data within
+    optional int32              systemId        = 4;                            //Currently, louie or jt?
+    optional int32              timeShift       = 5     [default = 0];          //Collapse data by the sun or shift relative to MAIN? default is by the sun
+    optional int32              valType         = 6     [default = 1];          //count,load,or duration?
+    optional int32              id              = 15;                           //which specific query or request?
+    optional bool               locComposition  = 8     [default = false];      //for location=ALL, default will be to collapse into a single series, this overrides this
+    optional bool               dTypeComposition= 12    [default = false];      //same as location, but for data types instead
+    optional bool               serviceTotals   = 13    [default = false];      //distinct request trigger, this flag will automatically return service totals for a given request system
+    optional int32              hostTypeId      = 9;                            //for queries, host type id
+    optional int64              startDt         = 10;                           //custom date spec, defaults to 30 day range
+    optional int64              endDt           = 11;
+    optional bool               movingAvg       = 14    [default = false];      //distinct request trigger, for a given id this flag will return the computed moving average for that id
+    optional int32              ridOrQid        = 16;                           //when specifying an id, this flag must be set to identify as a request or query id number since they are not necessarily distinct.
+    optional bool               removeWeekends  = 17   [default = false];       //remove the weekend dates from returned pbs.
+    optional string             service         = 18;                           //service name
+    optional bool               systemTotals    = 19   [default = false];       //distinct request trigger, this flag will return system totals for a given request system ie: LoUIE summation.
+}

@@ -1,0 +1,200 @@
+create database retrospect;
+
+USE retrospect;
+
+CREATE TABLE `data_type` (
+  `id` tinyint(3) unsigned NOT NULL auto_increment,
+  `name` varchar(20) NOT NULL,
+  PRIMARY KEY  (`id`,`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+
+INSERT INTO `data_type` (`id`,`name`) VALUES ('1','unknown');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('2','JSON');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('3','python');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('4','objective c');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('5','java');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('6','perl');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('7','c');
+INSERT INTO `data_type` (`id`,`name`) VALUES ('8','louie');
+
+CREATE TABLE `system` (
+  `id` tinyint(3) unsigned NOT NULL auto_increment,
+  `name` varchar(64) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `host_type_uk` (`name`),
+  KEY `name_index` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+INSERT INTO `system` (`id`,`name`) VALUES ('1','louie');
+INSERT INTO `system` (`id`,`name`) VALUES ('2','jobtracker');
+
+CREATE TABLE `requests` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `service` varchar(1000) NOT NULL,
+  `function` varchar(1000) NOT NULL,
+  `args` varchar(2000) NOT NULL,
+  `systemid` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `id` (`id`),
+  KEY `sys` (`systemid`),
+  CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=664 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `host` (
+  `id` tinyint(3) unsigned NOT NULL auto_increment,
+  `systemid` tinyint(3) unsigned NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `active` tinyint(1) NOT NULL default '1',
+  `logdir` varchar(255) NOT NULL default '/var/log',
+  `filepattern` varchar(255) NOT NULL default 'request.log.%Y-%m-%d',
+  `location` varchar(20) NOT NULL,
+  `web` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `host_uk` (`systemid`,`name`),
+  KEY `host_active_index` (`active`),
+  KEY `name_index` (`name`),
+  CONSTRAINT `host_ibfk_1` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `host_scans` (
+  `id` int(20) unsigned NOT NULL auto_increment,
+  `hostid` tinyint(3) unsigned NOT NULL,
+  `filename` varchar(128) NOT NULL,
+  `count` int(20) unsigned NOT NULL default '0',
+  `start` datetime NOT NULL,
+  `end` datetime NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `id` (`id`),
+  KEY `host_scans_filename_index` (`hostid`,`filename`),
+  CONSTRAINT `host_scans_ibfk_1` FOREIGN KEY (`hostid`) REFERENCES `host` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8571 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `stats_daily` (
+  `rid` int(10) unsigned NOT NULL,
+  `logdate` date NOT NULL,
+  `count` int(20) unsigned NOT NULL,
+  `min_time` int(10) unsigned NOT NULL default '0',
+  `ave_time` int(10) unsigned NOT NULL default '0',
+  `max_time` int(10) unsigned NOT NULL default '0',
+  `ave_bytes` bigint(10) unsigned NOT NULL default '0',
+  `max_bytes` bigint(10) unsigned NOT NULL default '0',
+  `ave_rows` int(10) unsigned NOT NULL default '0',
+  `max_rows` int(10) unsigned NOT NULL default '0',
+  `fails` int(10) unsigned default '0',
+  `location` varchar(20) NOT NULL,
+  `data_type` tinyint(3) unsigned NOT NULL,
+  `max_client_time` int(10) unsigned NOT NULL default '0',
+  `min_client_time` int(10) unsigned NOT NULL default '0',
+  `ave_client_time` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rid`,`logdate`,`location`,`data_type`),
+  KEY `datatypefk` (`data_type`),
+  CONSTRAINT `stats_daily_ibfk_1` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`),
+  CONSTRAINT `stats_daily_ibfk_2` FOREIGN KEY (`rid`) REFERENCES `requests` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `stats_hourly` (
+  `rid` int(10) unsigned NOT NULL,
+  `logdate` date NOT NULL,
+  `loghour` time NOT NULL default '00:00:00',
+  `count` int(20) unsigned NOT NULL,
+  `min_time` int(10) unsigned NOT NULL default '0',
+  `ave_time` int(10) unsigned NOT NULL default '0',
+  `max_time` int(10) unsigned NOT NULL default '0',
+  `ave_bytes` bigint(10) unsigned NOT NULL default '0',
+  `max_bytes` bigint(10) unsigned NOT NULL default '0',
+  `ave_rows` int(10) unsigned NOT NULL default '0',
+  `max_rows` int(10) unsigned NOT NULL default '0',
+  `fails` int(10) unsigned default '0',
+  `location` varchar(20) NOT NULL,
+  `data_type` tinyint(3) unsigned NOT NULL,
+  `max_client_time` int(10) unsigned NOT NULL default '0',
+  `min_client_time` int(10) unsigned NOT NULL default '0',
+  `ave_client_time` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`rid`,`logdate`,`loghour`,`location`,`data_type`),
+  KEY `ridutc` (`rid`),
+  KEY `datatypefk` (`data_type`),
+  CONSTRAINT `datatypefk` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`),
+  CONSTRAINT `req_fk` FOREIGN KEY (`rid`) REFERENCES `requests` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `top_stats_type` (
+  `id` tinyint(5) unsigned NOT NULL auto_increment,
+  `name` varchar(64) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+INSERT INTO `top_stats_type` (`id`,`name`) VALUES ('1','count');
+INSERT INTO `top_stats_type` (`id`,`name`) VALUES ('2','duration');
+INSERT INTO `top_stats_type` (`id`,`name`) VALUES ('3','load');
+
+CREATE TABLE `top_stats_data` (
+  `rid` int(10) unsigned NOT NULL,
+  `dt` date NOT NULL,
+  `systemid` tinyint(3) unsigned NOT NULL,
+  `rank` tinyint(4) unsigned NOT NULL,
+  `data_type` tinyint(3) unsigned NOT NULL,
+  `location` varchar(20) NOT NULL,
+  `type` tinyint(5) unsigned NOT NULL,
+  PRIMARY KEY  (`rid`,`dt`,`systemid`,`data_type`,`location`,`type`),
+  KEY `hosttypeid` (`systemid`),
+  KEY `data_type` (`data_type`),
+  KEY `type` (`type`),
+  CONSTRAINT `top_stats_data_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `requests` (`id`),
+  CONSTRAINT `top_stats_data_ibfk_2` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`),
+  CONSTRAINT `top_stats_data_ibfk_3` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`),
+  CONSTRAINT `top_stats_data_ibfk_4` FOREIGN KEY (`type`) REFERENCES `top_stats_type` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `top_stats_service_data` (
+  `rid` int(10) unsigned NOT NULL,
+  `dt` date NOT NULL,
+  `systemid` tinyint(3) unsigned NOT NULL,
+  `service` varchar(100) NOT NULL,
+  `rank` tinyint(4) unsigned NOT NULL,
+  `data_type` tinyint(3) unsigned NOT NULL,
+  `location` varchar(20) NOT NULL,
+  `type` tinyint(5) unsigned NOT NULL,
+  PRIMARY KEY  (`rid`,`dt`,`systemid`,`service`,`data_type`,`location`,`type`),
+  KEY `service` (`service`),
+  KEY `hosttypeid` (`systemid`),
+  KEY `data_type` (`data_type`),
+  KEY `type` (`type`),
+  CONSTRAINT `top_stats_service_data_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `requests` (`id`),
+  CONSTRAINT `top_stats_service_data_ibfk_2` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`),
+  CONSTRAINT `top_stats_service_data_ibfk_3` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`),
+  CONSTRAINT `top_stats_service_data_ibfk_4` FOREIGN KEY (`type`) REFERENCES `top_stats_type` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `top_stats_system` (
+  `rid` int(10) unsigned NOT NULL,
+  `dt` date NOT NULL,
+  `systemid` tinyint(3) unsigned NOT NULL,
+  `rank` tinyint(4) unsigned NOT NULL,
+  `location` varchar(20) NOT NULL,
+  `type` tinyint(5) unsigned NOT NULL,
+  PRIMARY KEY  (`rid`,`dt`,`systemid`,`location`,`type`),
+  KEY `hosttypeid` (`systemid`),
+  KEY `type` (`type`),
+  CONSTRAINT `top_stats_system_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `requests` (`id`),
+  CONSTRAINT `top_stats_system_ibfk_2` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`),
+  CONSTRAINT `top_stats_system_ibfk_3` FOREIGN KEY (`type`) REFERENCES `top_stats_type` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `moving_avgs` (
+  `rid` int(10) unsigned NOT NULL,
+  `dt` date NOT NULL,
+  `value` bigint(20) unsigned NOT NULL,
+  `avg_range` smallint(4) unsigned NOT NULL,
+  `data_type` tinyint(3) unsigned NOT NULL,
+  `location` varchar(20) NOT NULL,
+  `type` tinyint(5) unsigned NOT NULL,
+  PRIMARY KEY  (`rid`,`dt`,`avg_range`,`data_type`,`location`,`type`),
+  KEY `data_type` (`data_type`),
+  KEY `type` (`type`),
+  CONSTRAINT `moving_avgs_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `requests` (`id`),
+  CONSTRAINT `moving_avgs_ibfk_2` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`),
+  CONSTRAINT `moving_avgs_ibfk_3` FOREIGN KEY (`type`) REFERENCES `top_stats_type` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+ 

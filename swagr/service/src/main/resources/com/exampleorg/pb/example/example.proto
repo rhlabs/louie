@@ -1,0 +1,11 @@
+package com.exampleorg.example;
+
+import "google/protobuf/descriptor.proto";
+
+option java_package = "com.exampleorg.pb.example";
+option java_outer_classname = "ExampleProtos";
+option java_generate_equals_and_hash = true;
+
+message ExampleResponsePB {
+    optional string         response = 1;
+}
