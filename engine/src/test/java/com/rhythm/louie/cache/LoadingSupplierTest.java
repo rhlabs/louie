@@ -15,6 +15,8 @@
  */
 package com.rhythm.louie.cache;
 
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.base.Supplier;
 
 import org.junit.Test;
@@ -67,10 +69,10 @@ public class LoadingSupplierTest {
     }
     
     
-     @Test
+    @Test
     public void testGet2() {
         int breakInterval = 3;
-        Supplier<Integer> supplier = new FaultTestSupplier2(new FaultySupplier(breakInterval));
+        Supplier<Integer> supplier = new FaultTestSupplier2<>(new FaultySupplier(breakInterval));
         
         for (int i=1;i<=10;i++) {
             Integer value = supplier.get();
@@ -122,4 +124,33 @@ public class LoadingSupplierTest {
         }
     }
     
+     private class RecordingSupplier extends LoadingSupplier<Integer> {
+
+        public int count = 0;
+                
+        @Override
+        public Integer load() {
+            count++;
+            System.out.println("load:" +count);
+            return count;
+        }
+    }
+    
+    @Test
+    public void testFlushing() throws Exception {
+        System.out.println("SupplierCache.permanent");
+        
+        CacheManager cacheManager = CacheManager.createIfNeeded("TestCacheManager");
+        
+        SupplierCache<Integer> cache = cacheManager.supplierCache("Groups", 
+                new RecordingSupplier(), 1, TimeUnit.HOURS);
+        
+        assertEquals(1, cache.get().intValue());
+        assertEquals(1, cache.get().intValue());
+        
+        cache.clear();
+        assertEquals(2, cache.get().intValue());
+        
+    }
+
 }
