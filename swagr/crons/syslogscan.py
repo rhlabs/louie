@@ -10,7 +10,7 @@ import re
 import subprocess
 import shlex
 
-import swagrAlert #local file swagrAlert.py triggers check for spikes in usage
+import swagrAlert #local file swagrAlert.py triggers check for spikes in usage MUST BE CONFIGURED WITH EMAIL ADDRESSES
 
 import urllib2
 
@@ -176,7 +176,7 @@ def main():
             
             logging.info("DONE. Total Queries Scanned: " + str(reqCnt))
             
-            #swagrAlert.startScan()
+            #swagrAlert.startScan() #NEEDS TO BE CONFIGURED WITH EMAIL ADDRESSES FIRST
             
         except MySQLdb.Error, e:
             logging.error("Error %d: %s" % (e.args[0], e.args[1]))

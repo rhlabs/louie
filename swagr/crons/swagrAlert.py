@@ -12,9 +12,8 @@ import email.encoders
 import email.mime.text
 import email.mime.base
 
-SENDMAIL_LOC = "/usr/sbin/sendmail"
-RECIPIENT = "swagr-alert@rhythm.com"
-
+RECIPIENT = "" #ADD SOME EMAIL ADDRESSES HERE
+SENDER = ""
 
 def startScan():
     """
@@ -133,12 +132,11 @@ def thousands(x):
     
 
 def emailSpike(message,yesterday):
-    mailFrom = "swagrAlert@pranamail.com"
-    mailSubject = "Subject: SWAGr Alert: LoUIE usage spike for "+ yesterday.strftime('%m/%d/%y') +"\n"
+    mailSubject = "Subject: SWAGr Alert: Service usage spike for "+ yesterday.strftime('%m/%d/%y') +"\n"
     msg = "There appears to have been a spike in usage by one or more of the LoUIE service functions.\n\n"
     msg += "To view the associated graphs, please go to: http://louiehost/swagr\n\n\n"
     msg += message
-    sendMail(mailFrom, RECIPIENT, mailSubject, msg)
+    sendMail(SENDER, RECIPIENT, mailSubject, msg)
 
 
 def sendMail(mailFrom, mailTo, mailSubject, body, attachment=None):
