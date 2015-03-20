@@ -43,6 +43,10 @@
       <item name="ActiveMQ" href="louie-activemq-adapter/index.html"/>
     </menu>
     
+    <menu name="Analytics" inherit="top">
+        <item name="Swagr" href="manual/swagr/start.html"/>
+    </menu>
+    
     <menu ref="reports"/>
   </body>
   <skin>
