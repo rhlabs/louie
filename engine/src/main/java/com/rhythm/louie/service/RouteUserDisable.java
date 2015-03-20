@@ -15,6 +15,7 @@
  */
 package com.rhythm.louie.service;
 
+import com.rhythm.louie.request.RequestContext;
 import com.rhythm.louie.request.RequestContextManager;
 
 /**
@@ -45,13 +46,20 @@ public class RouteUserDisable implements AutoCloseable {
      * @return a shared instance in order to perform the AutoClose.
      */
     public static RouteUserDisable disable() {
-        RequestContextManager.getRequest().enableRouteUser(false);
+        setEnabled(false);
         return INSTANCE;
     }
     
     @Override
     public void close() throws Exception {
-        RequestContextManager.getRequest().enableRouteUser(true);
+        setEnabled(true);
+    }
+    
+    private static void setEnabled(boolean enable) {
+        RequestContext request = RequestContextManager.getRequest();
+        if (request!=null) {
+            request.enableRouteUser(enable);
+        }
     }
     
 }
