@@ -29,17 +29,6 @@ Ext.define('RH.SWAGr', {
                     margins: '5 5 5 5',
                     layout: 'fit',
                     preventHeader: true,
-//                    items: { 
-//                        xtype: 'image',
-////                        html: '<center><img src="./Swagr.bmp"></center>',
-//                        src: 'Swagr.bmp',
-//                        id: 'swagrLogo',
-//                        maxWidth: 1000,
-//                        style:{
-////                            align: 'center'
-//                        },
-//                        region: 'south'
-//                    },
                     dockedItems: [
                         {
                             xtype: 'toolbar',
