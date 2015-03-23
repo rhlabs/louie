@@ -44,10 +44,9 @@ Ext.define('RH.controller.PopUp', {
                         
                         var dtype = Ext.getCmp('dTypeOverView').getValue();
                         var loc = Ext.getCmp('locOverView').getValue();
-                        var shifted = Ext.getCmp('timeShiftPopUp').getValue();
                         var valType = Ext.getCmp('valType').getValue();
-                        if((state.lgloc != loc) || (state.lgdType != dtype) || (state.lgshift != shifted) || (state.lvalueType != valType)){
-                            me.fetchSingleReq(loc,dtype,shifted,seriesId,'location',valType);
+                        if((state.lgloc !== loc) || (state.lgdType !== dtype) || (state.lvalueType !== valType)){
+                            me.fetchSingleReq(loc,dtype,seriesId,'location',valType);
                         }
                         else{
                             Ext.getCmp('compPanel2').hide();
@@ -73,10 +72,9 @@ Ext.define('RH.controller.PopUp', {
 
                         var dtype = Ext.getCmp('dTypeOverView').getValue();
                         var loc = Ext.getCmp('locOverView').getValue();
-                        var shifted = Ext.getCmp('timeShiftPopUp').getValue();
                         var valType = Ext.getCmp('valType').getValue();
-                        if((state.dgloc != loc) || (state.dgdType != dtype) || (state.dgshift != shifted) || (state.dvalueType != valType)){
-                            me.fetchSingleReq(loc,dtype,shifted,seriesId,'dType',valType);
+                        if((state.dgloc !== loc) || (state.dgdType !== dtype) || (state.dvalueType !== valType)){
+                            me.fetchSingleReq(loc,dtype,seriesId,'dType',valType);
                         }
                         else{
                             Ext.getCmp('compPanel1').hide();
@@ -101,10 +99,9 @@ Ext.define('RH.controller.PopUp', {
 
                         var dtype = Ext.getCmp('dTypeOverView').getValue();
                         var loc = Ext.getCmp('locOverView').getValue();
-                        var shifted = Ext.getCmp('timeShiftPopUp').getValue();
                         var valType = Ext.getCmp('valType').getValue();
-                        if((state.mgloc != loc) || (state.mgdType != dtype) || (state.mgshift != shifted) || (state.mvalueType != valType)){
-                            me.fetchMvgAvg(loc,dtype,shifted,seriesId,valType);
+                        if((state.mgloc !== loc) || (state.mgdType !== dtype) || (state.mvalueType !== valType)){
+                            me.fetchMvgAvg(loc,dtype,seriesId,valType);
                         }
                         else{
                             Ext.getCmp('compPanel1').hide();
@@ -130,14 +127,13 @@ Ext.define('RH.controller.PopUp', {
                     select: function(combo,records){
                         var loc = records[0].get('location');
                         var dtype = Ext.getCmp('dTypeOverView').getValue();
-                        var shifted = Ext.getCmp('timeShiftPopUp').getValue();
                         var toggle = me.masterPopUpState.selected;
                         var valType = Ext.getCmp('valType').getValue();
-                        if(toggle == 'mvgAvg'){
-                            me.fetchMvgAvg(loc,dtype,shifted,seriesId,valType);
+                        if(toggle === 'mvgAvg'){
+                            me.fetchMvgAvg(loc,dtype,seriesId,valType);
                         }
                         else{
-                            me.fetchSingleReq(loc,dtype,shifted,seriesId,toggle,valType);
+                            me.fetchSingleReq(loc,dtype,seriesId,toggle,valType);
                         }
                     }
                 },
@@ -156,14 +152,13 @@ Ext.define('RH.controller.PopUp', {
                     select: function(combo,records){
                         var dtype = records[0].get('id');
                         var loc = Ext.getCmp('locOverView').getValue();
-                        var shifted = Ext.getCmp('timeShiftPopUp').getValue();
                         var toggle = me.masterPopUpState.selected;
                         var valType = Ext.getCmp('valType').getValue();
-                        if(toggle == 'mvgAvg'){
-                            me.fetchMvgAvg(loc,dtype,shifted,seriesId,valType);
+                        if(toggle === 'mvgAvg'){
+                            me.fetchMvgAvg(loc,dtype,seriesId,valType);
                         }
                         else{
-                            me.fetchSingleReq(loc,dtype,shifted,seriesId,toggle,valType);
+                            me.fetchSingleReq(loc,dtype,seriesId,toggle,valType);
                         }
                     }
                 },
@@ -186,39 +181,6 @@ Ext.define('RH.controller.PopUp', {
             },
             {
                 xtype: 'combobox',
-                id: 'timeShiftPopUp',
-                valueField: 'id',
-                emptyText: 'Time Shift',
-                displayField: 'type',
-                width: 120,
-                value: 0,
-                listeners: {
-                    select: function(combo,records){
-                        var dtype = Ext.getCmp('dTypeOverView').getValue();
-                        var loc = Ext.getCmp('locOverView').getValue();
-                        var shifted = records[0].get('id');
-                        var toggle = me.masterPopUpState.selected;
-                        var valType = Ext.getCmp('valType').getValue();
-                        if(toggle == 'mvgAvg'){
-                            me.fetchMvgAvg(loc,dtype,shifted,seriesId,valType);
-                        }
-                        else{
-                            me.fetchSingleReq(loc,dtype,shifted,seriesId,toggle,valType);
-                        }
-                    }
-                },
-                store: {
-                    fields: [
-                        'type','id'
-                    ],
-                    data: [
-                        { 'type': 'Daylight Matched', 'id': 0},
-                        { 'type': 'LA Localized', 'id': 1}
-                    ]
-                }
-            },
-            {
-                xtype: 'combobox',
                 id: 'valType',
                 valueField: 'id',
                 emptyText: 'Volume Type',
@@ -229,14 +191,13 @@ Ext.define('RH.controller.PopUp', {
                     select: function(combo,records){
                         var dtype = Ext.getCmp('dTypeOverView').getValue();
                         var loc = Ext.getCmp('locOverView').getValue();
-                        var shifted = Ext.getCmp('timeShiftPopUp').getValue();
                         var toggle = me.masterPopUpState.selected;
                         var valType = records[0].get('id');
-                        if(toggle == 'mvgAvg'){
-                            me.fetchMvgAvg(loc,dtype,shifted,seriesId,valType);
+                        if(toggle === 'mvgAvg'){
+                            me.fetchMvgAvg(loc,dtype,seriesId,valType);
                         }
                         else{
-                            me.fetchSingleReq(loc,dtype,shifted,seriesId,toggle,valType);
+                            me.fetchSingleReq(loc,dtype,seriesId,toggle,valType);
                         }
                     }
                 },
@@ -251,7 +212,7 @@ Ext.define('RH.controller.PopUp', {
                     ]
                 }
             }
-        )
+        );
 
         Ext.create('Ext.Window', {
             title: 'Series ' + seriesId,
@@ -329,7 +290,7 @@ Ext.define('RH.controller.PopUp', {
         Ext.getCmp('locTog').fireEvent('click');
     },
     
-    fetchMvgAvg: function(loc,dType,shifted,id,valueType){ //split into two requests now
+    fetchMvgAvg: function(loc,dType,id,valueType){ //split into two requests now
         var me = this;
         var panelOne = Ext.getCmp('compPanel1');
         var panelTwo = Ext.getCmp('compPanel2');
@@ -344,12 +305,12 @@ Ext.define('RH.controller.PopUp', {
         argObj['id'] = parseInt(id);
         argObj['location'] = loc;
         argObj['dataType'] = dType;
-        argObj['timeShift'] = shifted;
+        argObj['timeShift'] = 0;
         argObj['valType'] = valueType;
         argObj['ridOrQid'] = 0;
         argObj['movingAvg'] = true;
-        argObj['startDt'] = startdt
-        argObj['endDt'] = enddt
+        argObj['startDt'] = startdt;
+        argObj['endDt'] = enddt;
         argObj['removeWeekends'] = Ext.getCmp('removeWeekendsCheck').getValue();
         
         me.getMovingAvgStoreStore().load({
@@ -382,7 +343,7 @@ Ext.define('RH.controller.PopUp', {
                     var obj = me.mvgAvgChartRen();
                     me.masterPopUpState['mgloc'] = loc;
                     me.masterPopUpState['mgdType'] = dType;
-                    me.masterPopUpState['mgshift'] = shifted;
+                    me.masterPopUpState['mgshift'] = 0;
                     me.masterPopUpState['mvalueType'] = valueType;
                     panelTwo.hide();
                     panelOne.hide();
@@ -397,7 +358,7 @@ Ext.define('RH.controller.PopUp', {
         
     },
 
-    fetchSingleReq: function(loc,dType,shifted,id,chartType,valueType){
+    fetchSingleReq: function(loc,dType,id,chartType,valueType){
         var me = this;
         var panelOne = Ext.getCmp('compPanel1');
         var panelTwo = Ext.getCmp('compPanel2');
@@ -410,7 +371,7 @@ Ext.define('RH.controller.PopUp', {
         args['id'] = parseInt(id);
         args['location'] = loc;
         args['dataType'] = dType;
-        args['timeShift'] = shifted;
+        args['timeShift'] = 0;
         args['valType'] = valueType;
         args['ridOrQid'] = 0;
         args['startDt'] = startdt
@@ -442,7 +403,7 @@ Ext.define('RH.controller.PopUp', {
                 if(chartType == 'location'){
                     me.masterPopUpState['lgloc'] = loc;
                     me.masterPopUpState['lgdType'] = dType;
-                    me.masterPopUpState['lgshift'] = shifted;
+                    me.masterPopUpState['lgshift'] = 0;
                     me.masterPopUpState['lvalueType'] = valueType;
                     panelTwo.hide();
                     panelOne.removeAll();
@@ -452,7 +413,7 @@ Ext.define('RH.controller.PopUp', {
                 else{
                     me.masterPopUpState['dgloc'] = loc;
                     me.masterPopUpState['dgdType'] = dType;
-                    me.masterPopUpState['dgshift'] = shifted;
+                    me.masterPopUpState['dgshift'] = 0;
                     me.masterPopUpState['dvalueType'] = valueType;
                     panelOne.hide();
                     panelTwo.removeAll();
@@ -595,14 +556,14 @@ Ext.define('RH.controller.PopUp', {
     areaChartRen: function(stackType){
         var me = this;
         var chartData = me.getStackChartStoreStore(); 
-        if (chartData.last() == undefined){
+        if (chartData.last() === undefined){
             Ext.Msg.alert('No Data', 'Lookup returned with no data.');
             return;
         }
         var leftAxesLabel = chartData.leftAxesLabel;
-        if (chartData.getAt(0).get('valueType') == 1)
+        if (chartData.getAt(0).get('valueType') === 1)
             leftAxesLabel = 'COUNT VOLUME';
-        else if (chartData.getAt(0).get('valueType') ==2)
+        else if (chartData.getAt(0).get('valueType') === 2)
             leftAxesLabel = 'LOAD VOLUME';
         else
             leftAxesLabel = 'DURATION';
@@ -614,7 +575,7 @@ Ext.define('RH.controller.PopUp', {
         chartData.each(function(rec){
             var stats = rec.statsStore;
             stats.each(function(item){
-                if(stackType == 'location'){
+                if(stackType === 'location'){
                     id = item.get('location').toString();
                 }
                 else{
