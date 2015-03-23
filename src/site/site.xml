@@ -44,7 +44,10 @@
     </menu>
     
     <menu name="Analytics" inherit="top">
-        <item name="Swagr" href="manual/swagr/start.html"/>
+        <item name="Swagr" href="manual/swagr/start.html" collapse="true">
+            <item name="Getting Started" href="manual/swagr/setup.html"/>
+            <item name="Using Swagr" href="manual/swagr/usage.html"/>
+        </item>
     </menu>
     
     <menu ref="reports"/>

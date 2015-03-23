@@ -1,0 +1,63 @@
+ ------
+Swagr
+ ------
+
+Using Swagr
+
+ The Swagr UI presents a series of options for configuring your request, depending on how you want to inspect the system.
+
+ Each of the combo boxes has a tooltip if you hover over it.
+
+ The toolbar across the top of the page presents the following filters/options, from left to right:
+
+     * <<System Category>> Only Louie Requests is still supported. Changing the System Category changes the rest of the combo boxes so this document focuses on Louie Requests.
+
+     * <<Chart Mode>>  Top X is the default, which displays the top X requests over a range of dates. Service Totals is per-service totals. System totals is the entire system. Deprecated Service Calls is dependent on annotated methods in the java code.
+
+     * <<Top X>> The numeric component for the Top X Chart Mode. ie; '10' would indicate Top 10 Requests
+
+     * <<Services>> The Louie-based service to filter on.
+
+     * <<Location>> Really, the specific server you want to see. It used to be that we only supported one Louie instance per location, hence the division by location.
+
+     * <<Data Type>> The requesting language
+
+     * <<Timeshift>> A deprecated mode (Daylight Matched should always be used)
+
+     * <<Start Date>> Beginning of request range
+
+     * <<End Date>> End of request range
+
+     * <<Calculation Type>> The X-Axis definition. ''Count Volume'' is the number of requests. ''Duration'' is count volume * average duration in ms. ''Load'' is count volume * average bytes. 
+
+     * <<Remove Weekends>> An option to prevent weekend dates from being included in results.
+
+     * <<DRAW>> Draw it! 
+
+
+ In Swagr, a unique request is defined by the System:Service:Method(Params), ie a specific method signature like louie:queue:getHostUsage(HostUsageFilterBPB filter). (Note that "System" is likely always Louie)
+
+ Once the chart has been drawn, the rendered image is also interactive. 
+
+ Swagr displays data points which intersect with the grid. So, if you hover your mouse over one of the colored lines where it intersects with a vertical grid line, you will see a tooltip displaying relevant information. If you right click on the same point, it will display an option to view more data, or remove the target request. Removing will cause the chart to be redrawn without that request. View more data opens a new window inside the application which shows composition information as well as moving averages for the target request.
+
+[../../images/swagr/swagr_hover.png]
+
+ <<An example tooltip>>
+
+[../../images/swagr/swagr_rightclick.png]
+
+ <<Right click menu>>
+
+[../../images/swagr/swagr_mini_view.png]
+
+ <<Swagr composition graph>>
+
+
+ * Understanding the chart
+
+ Typically, the most useful feature of a graphical representation of the data is seeing sharp upticks, or large disparities between services or methods. Swagr is meant to show you how your services are being used, and how each service and method stacks up against each other. Because the Y Axis is time, it's also possible to chart activity over a very long period of time (Beware though, that the browser can only render so many DOM elements before it will just crash). If you wish to look at long periods of time, I suggest first narrowing everything you can by adjusting your parameters.
+
+ The inner-charts visible by selecting "View more data..." from the right click menu are meant to show compositional data as stacked charts. For instance, the location button will display the utilization across all known locations, as a stacked chart. Also visible in this window is an option to view a moving average. This will display a line representing the 30 day average drawn across the normal request, useful for inspecting growth or decline over time. For a given day point, the value is computed as the average of the previous thirty days. 
+
+
