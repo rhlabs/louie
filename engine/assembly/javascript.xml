@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly
+  xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+    http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
+      http://maven.apache.org/xsd/assembly-1.1.2.xsd
+  "
+>
+  <id>javascript</id>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <filtered>true</filtered>
+      <outputDirectory>/</outputDirectory>
+      <directory>src/main/javascript</directory>
+    </fileSet>
+    <fileSet> 
+      <filtered>true</filtered>
+      <outputDirectory>/</outputDirectory>
+      <directory>target/generated-sources/javascript</directory>
+      <includes>
+        <include>**/*.js</include>
+      </includes>
+    </fileSet>
+    <!--<fileSet>
+      <filtered>false</filtered>
+      <outputDirectory>/</outputDirectory>
+      <directory>target/classes</directory>
+      <includes>
+        <include>**/*.proto</include>
+      </includes>
+    </fileSet>-->
+    <!--
+    <fileSet>
+      <filtered>false</filtered>
+      <outputDirectory>/</outputDirectory>
+      <directory>target/dependencies</directory>
+      <includes>
+        <include>**/*.js</include>
+      </includes>
+    </fileSet>
+    -->
+  </fileSets>
+ 
+  <!-- use this section if you want to package dependencies -->
+  
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>org.webjars:requirejs</include>
+      </includes>
+      <unpack>true</unpack>
+      <unpackOptions>
+        <includes>
+          <include>**/*min.js</include>
+        </includes>
+      </unpackOptions>
+    </dependencySet>
+  </dependencySets>
+  
+</assembly>

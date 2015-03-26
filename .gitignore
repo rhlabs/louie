@@ -6,3 +6,6 @@
 /archetype/target/
 /activemq-adapter/target/
 *~
+/swagr/server/target/
+/swagr/service/target/
+/swagr/client/target/

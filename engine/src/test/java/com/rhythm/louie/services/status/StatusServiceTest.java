@@ -59,8 +59,19 @@ public class StatusServiceTest {
     public static void setUpClass() throws Exception {
         LouieConnection conn = LouieConnectionFactory.getLocalConnection(
                         Identity.createJUnitIdentity());
-        
+        conn.setGateway("ellison-demo11");
         client = StatusClientFactory.getClient(conn);
+      
+    }
+    
+    @Test
+    public void threadExplorationTest() throws Exception {
+//        List<Long> ids = client.findDeadlockedThreads();
+//        for (Long id : ids) {
+//            System.out.println(id);
+//            System.out.println(client.dumpStack(id, 20));
+//        }
+       System.out.println(client.dumpStack(28L,20));
     }
     
     /**

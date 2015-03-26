@@ -38,7 +38,7 @@ public class ServiceInfo {
 
     private final List<MethodInfo> methods = new ArrayList<MethodInfo>();
     
-    public ServiceInfo(Class<?> cl, String host, String gateway, Collection<MethodInfo> methods) throws Exception {
+    public ServiceInfo(Class<?> cl, String host, String gateway, Collection<? extends MethodInfo> methods) throws Exception {
         this.host = host;
         this.gateway = gateway;
         

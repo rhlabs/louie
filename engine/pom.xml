@@ -103,13 +103,13 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>2.4</version>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>assembly/python.xml</descriptor>
-                            </descriptors>
-                        </configuration>
                         <executions>
                             <execution>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>assembly/python.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
                                 <id>create-py-distribution</id>
                                 <phase>package</phase>
                                 <goals>
@@ -120,6 +120,44 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>javascript</id>
+            <properties>
+                <!--<gen.python>true</gen.python>--> <!-- Re-consider organization of GeneratorMojo-->
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.webjars</groupId>
+                    <artifactId>requirejs</artifactId>
+                    <version>2.1.16</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>assembly/javascript.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                                <id>create-js-distribution</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <!-- How can you fully isolate a profile, it's dependencies, corresponding plugins etc -->
+            
         </profile>
     </profiles>
   

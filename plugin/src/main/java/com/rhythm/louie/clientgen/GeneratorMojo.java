@@ -71,10 +71,22 @@ public class GeneratorMojo extends AbstractMojo{
     private String pythonpackage = "";
     
     /**
+     * javascript client package name
+     */
+    @Parameter
+    private String javascriptpackage = "";
+    
+    /**
      * output directory for generated python
      */
     @Parameter(defaultValue="target/generated-sources/python")
     private String pythondir = "";
+    
+    /**
+     * output directory for generated javascript
+     */
+    @Parameter(defaultValue="target/generated-sources/javascript")
+    private String jsdir = "";
     
     /**
      * An optional list of ServiceHandlers to generate Clients for.
@@ -112,12 +124,19 @@ public class GeneratorMojo extends AbstractMojo{
         if (pythondir.startsWith("/")) pythondir = pythondir.substring(1);
         if (!pythondir.endsWith("/")) pythondir = pythondir + "/";
         
+        //sanitize python output dir
+        if (jsdir.startsWith("/")) jsdir = jsdir.substring(1);
+        if (!jsdir.endsWith("/")) jsdir = jsdir + "/";
+        
         List<Class<?>> services = loadClasses(servicehandlers);
         
         process(hostname, gateway, pythonpackage, services);
     }
     
     //////////////////////////// FROM GENERATOR ////////////////////////////////
+    
+    private static final String JS_TEMPLATE = "templates/javascript/ServiceClient.vm";
+    private static final String JS_CLIENT = "client.js";
     
     private static final String PYTHON_TEMPLATE = "templates/python/ServiceClient.vm";
     private static final String PYTHON_CLIENT_MODULE = "client.py";
@@ -133,6 +152,9 @@ public class GeneratorMojo extends AbstractMojo{
 
         for (Class<?> service : services) {
             List<MethodInfo> pythonMethods = new ArrayList<>();
+            List<JSMethodInfo> jsMethods = new ArrayList<>();
+//            Set<String> protos = new HashSet<>();       //there's no reason to extract the protos or pbs here, it can be done by ServiceInfo itself, as is needed. SO just adjust JSMethodInfo to collect that stuff. And change MethodInfo to include it.
+//            Set<String> pbs = new HashSet<>();
             try {
                 for (Method method : service.getMethods()) {
                     if (!Modifier.isStatic(method.getModifiers())
@@ -141,6 +163,12 @@ public class GeneratorMojo extends AbstractMojo{
                                 && !method.isAnnotationPresent(Internal.class)
                                 && !method.isAnnotationPresent(Disabled.class)) {
                         pythonMethods.add(new PythonMethodInfo(method));
+                        JSMethodInfo jsInfo = new JSMethodInfo(method);
+//                        protos.addAll(jsInfo.getProtos());
+//                        pbs.addAll(jsInfo.getPBs()); //this actually might be better for python anyway? tricky though because it's different for each language
+                        jsMethods.add(jsInfo);
+                        //each new JSMethodInfo should also be used to grab the proto file, as well as all pbs, into two hashsets
+                        //then we carry around the two sets in the ServiceInfo
                     }
                 }
             } catch (Exception e) {
@@ -159,6 +187,15 @@ public class GeneratorMojo extends AbstractMojo{
                 generatePython(info, pypackage, project.getBasedir().toString(),pythondir);
             } catch (Exception e) {
                 LoggerFactory.getLogger(GeneratorMojo.class).error("Error Generating Python Clients", e);
+            }
+            
+            try {
+                //jsMethods or something else needs to have collected the summation of the imports.... also the proto file name somehow?
+//                Collections.sort(jsMethods);
+                JSServiceInfo info = new JSServiceInfo(service, host, gateway, jsMethods);
+                generateJavascript(info, pypackage, project.getBasedir().toString(),jsdir); //swap pypackage for something else?
+            } catch (Exception e) {
+                LoggerFactory.getLogger(GeneratorMojo.class).error("Error Generating Javascript Clients", e);
             }
         }
     }
@@ -243,6 +280,31 @@ public class GeneratorMojo extends AbstractMojo{
         } catch (IOException ex) {
             System.out.println("Failed to create __init__.py file in " + output);
         }
+    }
+    
+    protected void generateJavascript(JSServiceInfo info, String jspath, String basedir, String jsdir) throws Exception {
+        //mostly incorrect still.....
+        
+        printServiceInfo(info);
+        String serviceName = info.getServiceName().toLowerCase();
+        
+        String pypackage = jspath.replaceAll("\\/","\\."); //lame that i'm converting back
+        if (pypackage.length() == 1) pypackage = "";
+        
+        StringBuilder output = new StringBuilder();
+        output.append(basedir).append("/");
+        output.append(jsdir);
+        //special case louie internal services
+        if (LOUIE_SERVICES.contains(serviceName)) {
+            output.append("louie/");
+            pypackage = "louie.";
+        } else {
+            output.append(jspath);
+        }
+        output.append(serviceName).append("/");
+        output.append(serviceName);
+        output.append(JS_CLIENT); //client.js
+        processTemplate(info, JS_TEMPLATE, output.toString(), pypackage);
     }
     
     protected void processTemplate(ServiceInfo info, String template, String output, String pkg) throws Exception {

@@ -56,12 +56,13 @@ public class MethodInfo {
         pbargMap.put("DoubleListPB", "values");
     }
 
-    public MethodInfo(Method method) {
+    public MethodInfo(Method method) throws Exception {
         this.method = method;
         serviceCall = method.getAnnotation(ServiceCall.class);
+        String[] args = serviceCall.args();
         int i = 0;
         for (Class<?> c : method.getParameterTypes()) {
-            params.add(new ParamInfo(c, serviceCall.args()[i]));
+            params.add(new ParamInfo(c, args[i]));
             i++;
         }
         description = ProcessorUtils.extractDescriptionFromJavadoc(serviceCall.javadoc());
@@ -77,6 +78,10 @@ public class MethodInfo {
 
     public List<ParamInfo> getParameters() {
         return params;
+    }
+    
+    public int getParameterCount() {
+        return this.params.size();
     }
 
     public String getBaseReturnType() {

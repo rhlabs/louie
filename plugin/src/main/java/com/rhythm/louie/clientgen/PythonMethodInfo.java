@@ -50,7 +50,7 @@ public class PythonMethodInfo extends MethodInfo {
         pbtypeMap.put("DoubleListPB", "list");
     }
     
-    public PythonMethodInfo(Method method) {
+    public PythonMethodInfo(Method method) throws Exception {
         super(method);
     }
     
@@ -78,7 +78,7 @@ public class PythonMethodInfo extends MethodInfo {
         Descriptors.Descriptor desc = (Descriptors.Descriptor) staticMethod.invoke(null, (Object[]) null);
         String file = desc.getFile().getName();
         file = file.replaceAll("\\.proto", "_pb2");
-        file = file.replaceAll("\\/", ".");
+        file = file.replaceAll("\\/", "."); 
         return file;
     }
     

@@ -15,6 +15,11 @@
  */
 package com.rhythm.louie.clientgen;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import com.google.protobuf.Descriptors;
+
 /**
  *
  * @author sfong
@@ -23,10 +28,15 @@ public class ParamInfo {
 
     private final Class<?> param;
     private final String name;
+    private final String pkg;
 
-    public ParamInfo(Class<?> param, String name) {
+    public ParamInfo(Class<?> param, String name) throws NoSuchMethodException, 
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         this.param = param;
         this.name = name;
+        Method staticMethod = param.getDeclaredMethod("getDescriptor");
+        Descriptors.Descriptor desc = (Descriptors.Descriptor) staticMethod.invoke(null, (Object[]) null);
+        pkg = desc.getFullName();
     }
 
     public Class<?> getParam() {
@@ -39,5 +49,9 @@ public class ParamInfo {
 
     public String getPbType() {
         return param.getSimpleName();
+    }
+    
+    public String getFullName() {
+        return pkg;
     }
 }

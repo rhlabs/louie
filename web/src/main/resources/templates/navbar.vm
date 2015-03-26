@@ -20,6 +20,7 @@
             <li><a href="${contextPath}/cache">Cache</a></li>
             <li><a href="${contextPath}/build">Build Info</a></li>
             <li><a href="${contextPath}/downloads">Downloads</a></li>
+            <li><a href="${contextPath}/admin">Admin</a></li>
           </ul>
         </div>
       </div>

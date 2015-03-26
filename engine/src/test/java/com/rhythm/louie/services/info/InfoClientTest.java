@@ -23,10 +23,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.rhythm.louie.connection.BasicSSLClientConfig;
 import com.rhythm.louie.connection.Identity;
+import com.rhythm.louie.connection.LouieConnection;
 import com.rhythm.louie.connection.LouieConnectionFactory;
 
 import com.rhythm.louie.info.InfoProtos.*;
+
+import com.rhythm.pb.RequestProtos.IdentityPB;
 
 import static org.junit.Assert.*;
 
@@ -41,9 +45,33 @@ public class InfoClientTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        client = InfoClientFactory.getClient(
-                LouieConnectionFactory.getLocalConnection(
-                Identity.createJUnitIdentity()));
+//        client = InfoClientFactory.getClient(
+//                LouieConnectionFactory.getLocalConnection(
+//                Identity.createJUnitIdentity()));
+        BasicSSLClientConfig ssl = new BasicSSLClientConfig("lid1329.rhythm.com");
+//        ssl.setCAKeyStore("/local/a/mine/sslConfig/testingCARelevant/TestingCA.cacert.jks");
+//        ssl.setClientCertificate("/local/a/mine/sslConfig/testingCARelevant/eyasukocTest.p12"); // a valid cer with testing ca, included in truststore
+//        ssl.setClientCertificate("/local/a/mine/sslConfig/mycert/eyasukoc.p12"); //a valid cert but for wrong ca and no included in truststore
+//        ssl.setClientCertificate("/local/a/mine/sslConfig/testingCARelevant/ellison.p12"); // a valid cer with testing ca, but not included in our truststore
+        
+        
+        ssl.setCAKeyStore("/local/a/mine/sslConfig/validTesting/RhythmandHuesIssuingCA.cacert.jks");
+//        ssl.setClientCertificate("/local/a/mine/sslConfig/validTesting/eyasukoc.p12");
+        ssl.setClientCertificate("/local/a/mine/sslConfig/brc_client_one/brc_client1.p12");
+//        ssl.setClientCertificate("/local/a/mine/sslConfig/revoked_brc_client/brc_client1.p12");
+        
+        ssl.setGateway("louie");
+        ssl.setPort(8181);
+        ssl.setSSLCAPass("changeit");
+        ssl.setSSLPass("changeit");
+//        ssl.setSSLPass("ykF4xQfQoK");
+        IdentityPB id = Identity.createJUnitIdentity();
+        LouieConnection connection = LouieConnectionFactory.getSecureConnection(id, ssl);
+
+//        LouieConnection connection = LouieConnectionFactory.getConnection("localhost", id);        
+        connection.setGateway("louie");
+
+        client = InfoClientFactory.getClient(connection);
     }
 
     @AfterClass
