@@ -17,11 +17,11 @@ SENDER = ""
 
 def startScan():
     """
-        Desc: interface function for retrospect log crawler, also initializes 
+        Desc: interface function for swagr log crawler, also initializes 
               dictionaries for requests and hosts. 
     """
     DBHOST = 'localhost'
-    DB = 'retrospect'
+    DB = 'swagr'
 
     try:
         logging.basicConfig(

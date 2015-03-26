@@ -34,7 +34,7 @@ import com.rhythm.pb.swagr.SwagrProtos.SwagrServicePB;
 import com.rhythm.pb.swagr.SwagrProtos.SwagrStatPB;
 
 import com.rhythm.swagr.datasource.DrjJdbc;
-import com.rhythm.swagr.datasource.RetroJdbc;
+import com.rhythm.swagr.datasource.SwagrJdbc;
 
 /**
  *
@@ -43,7 +43,7 @@ import com.rhythm.swagr.datasource.RetroJdbc;
 @DAO
 public class SwagrDAO implements SwagrService {
     
-    private final JdbcFactory retroJdbcFac = RetroJdbc.getFactory();
+    private final JdbcFactory swagrJdbcFac = SwagrJdbc.getFactory();
     private final JdbcFactory drjJdbcFac = DrjJdbc.getFactory();
     
     public SwagrDAO() {}
@@ -61,7 +61,7 @@ public class SwagrDAO implements SwagrService {
 //            + "concat(logdate,' ',logtime) BETWEEN ? AND ? AND "
 //            + "hosttypeid = ?";
     
-    private static final String RETRO_STATS_DAILY_PREFIX = "SELECT s.rid,"
+    private static final String SWAGR_STATS_DAILY_PREFIX = "SELECT s.rid,"
             + "UNIX_TIMESTAMP(s.logdate),s.count,s.min_time,s.ave_time,"
             + "s.max_time,s.ave_bytes,s.max_bytes,s.ave_rows,s.max_rows,"
             + "s.fails,s.location,d.name FROM stats_daily s, data_type d ";
@@ -70,28 +70,28 @@ public class SwagrDAO implements SwagrService {
             + "UNIX_TIMESTAMP(dt),hosttypeid,count,min,max,ave,fails,"
             + "ave_rows,ave_bytes FROM stats_daily ";
     
-    private static final String RETRO_TOP_SYS_DISTINCT = 
-            RETRO_STATS_DAILY_PREFIX 
+    private static final String SWAGR_TOP_SYS_DISTINCT = 
+            SWAGR_STATS_DAILY_PREFIX 
             + "WHERE d.id=s.data_type AND s.logdate BETWEEN ? AND ? AND "
             + "s.location LIKE ? AND s.rid IN "
             + "(SELECT DISTINCT rid FROM top_stats_system WHERE dt "
             + "BETWEEN ? AND ? AND rank <= ? AND location = ? AND systemid = ? "
             + "AND type = ?) GROUP BY s.rid,s.logdate,s.location,d.name"; 
     
-    private static final String RETRO_SERVICES = 
-            RETRO_STATS_DAILY_PREFIX
+    private static final String SWAGR_SERVICES = 
+            SWAGR_STATS_DAILY_PREFIX
             + "WHERE d.id=s.data_type AND s.logdate BETWEEN ? AND ? AND "
             + "s.location LIKE ? AND s.data_type LIKE ? AND s.rid IN "
             + "(SELECT id FROM requests WHERE service = ?)";
     
-    private static final String RETRO_SERVICES_DEPRECATED = 
-            RETRO_STATS_DAILY_PREFIX
+    private static final String SWAGR_SERVICES_DEPRECATED = 
+            SWAGR_STATS_DAILY_PREFIX
             + "WHERE d.id=s.data_type AND s.logdate BETWEEN ? AND ? AND "
             + "s.location LIKE ? AND s.data_type LIKE ? AND s.rid IN "
             + "("; 
     
     private static final String S_TOP_DATA_DISTINCT = 
-            RETRO_STATS_DAILY_PREFIX
+            SWAGR_STATS_DAILY_PREFIX
             + "WHERE d.id=s.data_type AND s.logdate BETWEEN ? AND ? AND "
             + "s.data_type LIKE ? AND location LIKE ? AND s.rid IN "
             + "(SELECT DISTINCT rid FROM top_stats_data WHERE dt "
@@ -100,7 +100,7 @@ public class SwagrDAO implements SwagrService {
             + "GROUP BY s.rid,s.logdate,s.location";
     
     private static final String SINGLE_REQ = 
-            RETRO_STATS_DAILY_PREFIX
+            SWAGR_STATS_DAILY_PREFIX
             + "WHERE s.data_type=d.id AND logdate BETWEEN ? AND ? AND "
             + "s.rid = ? AND s.location LIKE ? AND s.data_type LIKE ?";
     
@@ -115,25 +115,25 @@ public class SwagrDAO implements SwagrService {
             + "top_stats_daily WHERE dt BETWEEN ? AND ?"
             + " AND rank <=? and hosttypeid=?) ORDER BY dt";   
     
-    private static final String RETRO_STRINGS_PREFIX = "SELECT r.id,"
+    private static final String SWAGR_STRINGS_PREFIX = "SELECT r.id,"
             + "r.service,r.function,r.args,s.name FROM requests r, system s ";
     
-    private static final String RETRO_SERVICE_STRINGS_SYS = 
-            RETRO_STRINGS_PREFIX
+    private static final String SWAGR_SERVICE_STRINGS_SYS = 
+            SWAGR_STRINGS_PREFIX
             + "WHERE r.id IN (SELECT id FROM requests WHERE service = ?)";
     
-    private static final String RETRO_SINGLE_STRINGS_SYS = 
-            RETRO_STRINGS_PREFIX
+    private static final String SWAGR_SINGLE_STRINGS_SYS = 
+            SWAGR_STRINGS_PREFIX
             + "WHERE r.id = ?";
     
-    private static final String RETRO_STRINGS_SYS = 
-            RETRO_STRINGS_PREFIX
+    private static final String SWAGR_STRINGS_SYS = 
+            SWAGR_STRINGS_PREFIX
             + "WHERE s.id=r.systemid "
             + "AND r.id IN (SELECT DISTINCT rid FROM top_stats_system WHERE dt "
             + "BETWEEN ? AND ? AND rank<=? AND location=? AND systemid = ?)";    
 
-    private static final String RETRO_STRINGS_DATA =  
-            RETRO_STRINGS_PREFIX
+    private static final String SWAGR_STRINGS_DATA =  
+            SWAGR_STRINGS_PREFIX
             + "WHERE s.id=r.systemid "
             + "AND r.id IN (SELECT DISTINCT rid FROM top_stats_data WHERE dt "
             + "BETWEEN ? AND ? AND rank<=? AND location=? AND systemid = ? "
@@ -203,7 +203,7 @@ public class SwagrDAO implements SwagrService {
     @Override
     public List<SwagrLocationPB> getLocations() throws Exception {
         List<SwagrLocationPB> locations = new ArrayList<>();
-        try (JdbcService jdbc = retroJdbcFac.newService(LOCATIONS)) {
+        try (JdbcService jdbc = swagrJdbcFac.newService(LOCATIONS)) {
             ResultSet rs = jdbc.executeQuery();
             while (rs.next()) {
                 locations.add(SwagrLocationPB.newBuilder().setLocation(rs.getString(1)).build());
@@ -537,7 +537,7 @@ public class SwagrDAO implements SwagrService {
     }
     
     private List<SwagrServicePB> serviceList() throws Exception{
-        try(JdbcService jdbc = retroJdbcFac.newService(SERVICES)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(SERVICES)) {
             ResultSet rs = jdbc.executeQuery();
             return serviceListResSet(rs);
         }
@@ -548,7 +548,7 @@ public class SwagrDAO implements SwagrService {
         SwagrServicePB.Builder servicePB = SwagrServicePB.newBuilder();
         servicePB.setService(service);
         
-        try (JdbcService jdbc = retroJdbcFac.newService(SERVICE_REQUEST_TYPES)) {
+        try (JdbcService jdbc = swagrJdbcFac.newService(SERVICE_REQUEST_TYPES)) {
             jdbc.getPreparedStatement().setString(1, service);
             ResultSet rs = jdbc.executeQuery();
             while (rs.next()) {
@@ -611,7 +611,7 @@ public class SwagrDAO implements SwagrService {
         else if (valType == 3)
             systemTotals = SYSTEM_TOTALS_DURATION;
         
-        try(JdbcService jdbc = retroJdbcFac.newService(systemTotals)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(systemTotals)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1, req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2, req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -643,7 +643,7 @@ public class SwagrDAO implements SwagrService {
         else if (valType == 3)
             serviceQuery = SERVICE_TOTALS_DURATION;
         
-        try(JdbcService jdbc = retroJdbcFac.newService(serviceQuery)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(serviceQuery)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1, req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2, req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -670,7 +670,7 @@ public class SwagrDAO implements SwagrService {
         else
             tempDType = Integer.toString(req.getDataType());
         
-        try(JdbcService jdbc = retroJdbcFac.newService(SINGLE_REQ)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(SINGLE_REQ)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -681,7 +681,7 @@ public class SwagrDAO implements SwagrService {
             sysStatsDailyResSet(rs,struct);
         }
         
-        try(JdbcService jdbc = retroJdbcFac.newService(RETRO_SINGLE_STRINGS_SYS)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(SWAGR_SINGLE_STRINGS_SYS)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setInt(1,req.getId());
             ResultSet rs = jdbc.executeQuery();
@@ -695,7 +695,7 @@ public class SwagrDAO implements SwagrService {
         DateTime enddt = new DateTime();
         DateTime startdt = enddt.minusDays(30);
         
-        try(JdbcService jdbc = retroJdbcFac.newService(SINGLE_QUERY)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(SINGLE_QUERY)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -704,7 +704,7 @@ public class SwagrDAO implements SwagrService {
             queryStatsDailyResSet(rs,struct);
         }
         
-        try(JdbcService jdbc = retroJdbcFac.newService(DRJ_SINGLE_STRING)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(DRJ_SINGLE_STRING)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setInt(1,req.getId());
             ResultSet rs = jdbc.executeQuery();
@@ -731,7 +731,7 @@ public class SwagrDAO implements SwagrService {
             tempDType = Integer.toString(req.getDataType());
         
         //where start,end,loc,dtype,rid,valtype
-        try(JdbcService jdbc = retroJdbcFac.newService(MOVING_AVG)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(MOVING_AVG)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -743,7 +743,7 @@ public class SwagrDAO implements SwagrService {
             struct = movingAvgResSet(rs,req.getValType());
         }
         
-        try(JdbcService jdbc = retroJdbcFac.newService(RETRO_SINGLE_STRINGS_SYS)) {
+        try(JdbcService jdbc = swagrJdbcFac.newService(SWAGR_SINGLE_STRINGS_SYS)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setInt(1,req.getId());
             ResultSet rs = jdbc.executeQuery();
@@ -765,7 +765,7 @@ public class SwagrDAO implements SwagrService {
         if(req.getDataType() == 0){
             
             //start,end,loc,start,end,topnum,loc,sysid,type
-            try (JdbcService jdbc = retroJdbcFac.newService(RETRO_TOP_SYS_DISTINCT)) {
+            try (JdbcService jdbc = swagrJdbcFac.newService(SWAGR_TOP_SYS_DISTINCT)) {
                 PreparedStatement ps = jdbc.getPreparedStatement();
                 ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
                 ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -783,7 +783,7 @@ public class SwagrDAO implements SwagrService {
         }
         else{
             //start,end,dtype,loc,start,end,topnum,loc,sysid,dtype,valtype
-            try (JdbcService jdbc = retroJdbcFac.newService(S_TOP_DATA_DISTINCT)) {
+            try (JdbcService jdbc = swagrJdbcFac.newService(S_TOP_DATA_DISTINCT)) {
                 PreparedStatement ps = jdbc.getPreparedStatement();
                 ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
                 ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -803,7 +803,7 @@ public class SwagrDAO implements SwagrService {
         }     
         
         if(req.getDataType()==0){
-            try(JdbcService jdbc = retroJdbcFac.newService(RETRO_STRINGS_SYS)) {
+            try(JdbcService jdbc = swagrJdbcFac.newService(SWAGR_STRINGS_SYS)) {
                 PreparedStatement ps = jdbc.getPreparedStatement();
                 ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
                 ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -816,7 +816,7 @@ public class SwagrDAO implements SwagrService {
             }
         }
         else{
-            try(JdbcService jdbc = retroJdbcFac.newService(RETRO_STRINGS_DATA)) {
+            try(JdbcService jdbc = swagrJdbcFac.newService(SWAGR_STRINGS_DATA)) {
                 PreparedStatement ps = jdbc.getPreparedStatement();
                 ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
                 ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -869,7 +869,7 @@ public class SwagrDAO implements SwagrService {
         DateTime startdt = enddt.minusDays(30);
         
         //start,end,location,service
-        try (JdbcService jdbc = retroJdbcFac.newService(RETRO_SERVICES)) {
+        try (JdbcService jdbc = swagrJdbcFac.newService(SWAGR_SERVICES)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -880,7 +880,7 @@ public class SwagrDAO implements SwagrService {
             sysStatsDailyResSet(rs, struct);
         }
         
-        try (JdbcService jdbc = retroJdbcFac.newService(RETRO_SERVICE_STRINGS_SYS)) {
+        try (JdbcService jdbc = swagrJdbcFac.newService(SWAGR_SERVICE_STRINGS_SYS)) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setString(1,req.getService());
             ResultSet rs = jdbc.executeQuery();
@@ -938,7 +938,7 @@ public class SwagrDAO implements SwagrService {
         
         Map<RequestKey,Integer> requestIDMap = new HashMap<>();
 
-        try (JdbcService jdbc = retroJdbcFac.newService(SELECT_SYSTEM_REQUESTS)) {
+        try (JdbcService jdbc = swagrJdbcFac.newService(SELECT_SYSTEM_REQUESTS)) {
             jdbc.getPreparedStatement().setInt(1, req.getSystemId());
             ResultSet rs = jdbc.executeQuery();
             while (rs.next()) {
@@ -989,7 +989,7 @@ public class SwagrDAO implements SwagrService {
         }
         depQuery.append(")");
         
-        try (JdbcService jdbc = retroJdbcFac.newService(RETRO_SERVICES_DEPRECATED + depQuery.toString())) {
+        try (JdbcService jdbc = swagrJdbcFac.newService(SWAGR_SERVICES_DEPRECATED + depQuery.toString())) {
             PreparedStatement ps = jdbc.getPreparedStatement();
             ps.setDate(1,req.hasStartDt() ? new Date(req.getStartDt()) : new Date(startdt.getMillis()));
             ps.setDate(2,req.hasEndDt() ? new Date(req.getEndDt()) : new Date(enddt.getMillis()));
@@ -1002,7 +1002,7 @@ public class SwagrDAO implements SwagrService {
             ResultSet rs = jdbc.executeQuery();
             sysStatsDailyResSet(rs, struct);
         }
-        try (JdbcService jdbc = retroJdbcFac.newService(RETRO_STRINGS_PREFIX 
+        try (JdbcService jdbc = swagrJdbcFac.newService(SWAGR_STRINGS_PREFIX 
                     + " WHERE r.id IN (" 
                     + depQuery.toString())) { 
             PreparedStatement ps = jdbc.getPreparedStatement();

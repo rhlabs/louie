@@ -1,12 +1,12 @@
-create database retrospect;
+create database swagr;
 
-USE retrospect;
+USE swagr;
 
 CREATE TABLE `data_type` (
   `id` tinyint(3) unsigned NOT NULL auto_increment,
   `name` varchar(20) NOT NULL,
   PRIMARY KEY  (`id`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `data_type` (`id`,`name`) VALUES ('1','unknown');
 INSERT INTO `data_type` (`id`,`name`) VALUES ('2','JSON');
@@ -23,10 +23,9 @@ CREATE TABLE `system` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `host_type_uk` (`name`),
   KEY `name_index` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `system` (`id`,`name`) VALUES ('1','louie');
-INSERT INTO `system` (`id`,`name`) VALUES ('2','jobtracker');
 
 CREATE TABLE `requests` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -38,7 +37,7 @@ CREATE TABLE `requests` (
   UNIQUE KEY `id` (`id`),
   KEY `sys` (`systemid`),
   CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=664 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `host` (
   `id` tinyint(3) unsigned NOT NULL auto_increment,
@@ -54,7 +53,7 @@ CREATE TABLE `host` (
   KEY `host_active_index` (`active`),
   KEY `name_index` (`name`),
   CONSTRAINT `host_ibfk_1` FOREIGN KEY (`systemid`) REFERENCES `system` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 CREATE TABLE `host_scans` (
@@ -68,7 +67,7 @@ CREATE TABLE `host_scans` (
   UNIQUE KEY `id` (`id`),
   KEY `host_scans_filename_index` (`hostid`,`filename`),
   CONSTRAINT `host_scans_ibfk_1` FOREIGN KEY (`hostid`) REFERENCES `host` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8571 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `stats_daily` (
   `rid` int(10) unsigned NOT NULL,

@@ -95,12 +95,12 @@ class ReqData():
 
 def main():
     """
-        Desc: interface function for retrospect log crawler, also initializes 
+        Desc: interface function for swagr log crawler, also initializes 
               dictionaries for requests and hosts. 
     """
     DBHOST = 'localhost'
-    DB = 'retrospect'
-    TMPDIR = '/usr/scratch/retrospect'
+    DB = 'swagr'
+    TMPDIR = '/usr/scratch/swagr'
     TMPLOG = TMPDIR + '/tmpReqLog'
     
     if not os.path.exists(TMPDIR):
@@ -223,8 +223,7 @@ def main():
             sys.exit(0)
 
         try:
-            logging.basicConfig(filename='/src/mis/retrospect/retrospect.log',
-                                level=logging.DEBUG,
+            logging.basicConfig(level=logging.DEBUG,
                                 format='%(asctime)s %(levelname)s %(message)s', 
                                 datefmt='%m/%d/%Y %H:%M:%S')
 
@@ -282,8 +281,7 @@ def main():
             dayList.append(startDay+datetime.timedelta(days=i))
         
         try:
-            logging.basicConfig(filename='/src/mis/retrospect/retrospect.log',
-                                level=logging.DEBUG,
+            logging.basicConfig(level=logging.DEBUG,
                                 format='%(asctime)s %(levelname)s %(message)s', 
                                 datefmt='%m/%d/%Y %H:%M:%S')
 
