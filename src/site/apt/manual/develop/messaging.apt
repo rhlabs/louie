@@ -15,6 +15,16 @@ Messaging
    <jmsadapter class="com.rhythm.louie.activemq.ActiveMQAdapter" host="jmshost" port="61616" />
 </messaging>
 +-----+
+
+ You will also need to add this to your dependencies in your server pom.xml as well. 
+
++----+
+<dependency>
+  <groupId>com.rhythm.louie</groupId>
+  <artifactId>louie-activemq-adapter</artifactId>
+  <version>${louie.version}</version>
+</dependency>
++----+
  
 * Sending Messages
 
@@ -47,7 +57,36 @@ Messaging
  
  The Service machinery detects this and then attempts to load a message handler. Primarily you just need to have getMessageHandler() return the handler you created above. The other methods: intialize, shutdown, and getCacheManager can just be empty or return null.
 
-* Configuring Destinations for use with Louie
+ An example of a CacheDelegate with message support
+
++----+
+@CacheDelegate
+public class MyCacheDelegate implements MyService, CacheLayer {
+    private final CacheManager cacheManager;
+    private final MyMessageHandler messageHandler;
+    
+    public NoteCacheDelegate() {
+        cacheManager = CacheManager.createIfNeeded(SERVICE_NAME);
+        messageHandler = new MyMessageHandler();
+    }
+    
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    // These methods must be present, but can just be empty stubs if you are not using them
+    public void initialize() throws Exception {}
+    public void shutdown() throws Exception {}
+
+    // .... rest of class ....
+}
++----+
+
+
+* Custom Destination Configuration
 
  This is more advanced usage, so feel free to skip this information if you are new to Louie.
 
