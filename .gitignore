@@ -9,3 +9,4 @@
 /swagr/server/target/
 /swagr/service/target/
 /swagr/client/target/
+*.pyc
