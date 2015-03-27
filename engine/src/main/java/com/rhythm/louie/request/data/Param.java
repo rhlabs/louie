@@ -79,7 +79,7 @@ public class Param {
          } else if (argcount == 1) {
             return new Param(Collections.singletonList(Data.readPBData(input)));
         } else {
-            List<Data> args = new ArrayList<Data>(argcount);
+            List<Data> args = new ArrayList<>(argcount);
             for (int a = 0; a < argcount; a++) {
                 args.add(Data.readPBData(input));
             }
@@ -88,7 +88,7 @@ public class Param {
     }
     
     public static Param buildJsonParam(List<String> jsonArgs) {
-        List<Data> args = new ArrayList<Data>(jsonArgs.size());
+        List<Data> args = new ArrayList<>(jsonArgs.size());
         for (String arg : jsonArgs) {
             args.add(Data.newJsonData(arg));
         }

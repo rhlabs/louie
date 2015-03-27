@@ -40,6 +40,12 @@ import static org.junit.Assert.*;
  */
 public class QueryBuilderTest {
     JdbcFactory jdbc = null;
+    
+    private static final String HOST = "localhost";
+    private static final String DB = "test";
+    private static final String USER = "root";
+    private static final String PW = "";
+    
     private static final String SELECT_PREFIX = "SELECT label FROM node";
     public QueryBuilderTest() {
     }
@@ -71,83 +77,6 @@ public class QueryBuilderTest {
         assertEquals(builder.getBatchedQuery(1), expected);
     }
 
-//    @Test
-//    public void testAddInClause() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-//
-//    @Test
-//    public void testAddInLikeClause() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-//
-//    @Test
-//    public void testAddNotInClause() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-//
-//    @Test
-//    public void testAddClause_3args() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-//
-//    @Test
-//    public void testAddFieldClause() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-//
-//    @Test
-//    public void testAddNoParamClause() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-//
-//    @Test
-//    public void testAddClause_QueryClause() throws Exception {
-//         System.out.println("setSuffix");
-//        
-//        String suffix = "order by 1";
-//        QueryBuilder builder = new QueryBuilder(jdbc,SELECT_PREFIX,false);
-//        builder.setSuffix(suffix);
-//        String expected = SELECT_PREFIX+" "+suffix;
-//        assertEquals(builder.getQuery(), expected);
-//    }
-
     @Test
     public void testExecute_0args() throws Exception {
     }
@@ -162,7 +91,7 @@ public class QueryBuilderTest {
         
         List<?> values = Arrays.asList(1,2,3,4,5,6,7);
         
-        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory("localhost","cts", "root", ""), "test");
+        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory(HOST, DB, USER, PW), "test");
         QueryBuilder builder = new QueryBuilder(direct,SELECT_PREFIX,false);
         builder.addClause(QueryClause.createBatchedInClause("id", values, Types.INTEGER, 5));
         
@@ -189,7 +118,7 @@ public class QueryBuilderTest {
         
         List<?> values = Arrays.asList(1,2,3,4,5,6,7);
         
-        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory("localhost","cts", "root", ""), "test");
+        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory(HOST, DB, USER, PW), "test");
         QueryBuilder builder = new QueryBuilder(direct,SELECT_PREFIX,false);
         builder.addClause(QueryClause.createBatchedInClause("id", values, Types.INTEGER, 10));
         
@@ -202,7 +131,7 @@ public class QueryBuilderTest {
             }
         };
         
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         builder.execute(processor, results);
         
         System.out.println("Found "+results.size()+" Results!");
@@ -217,7 +146,7 @@ public class QueryBuilderTest {
         
         List<?> values = Arrays.asList(1,2,3,4,5,6,7);
         
-        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory("localhost","cts", "root", ""), "test");
+        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory(HOST, DB, USER, PW), "test");
         QueryBuilder builder = new QueryBuilder(direct,"SELECT id,label FROM node",false);
         builder.addClause(QueryClause.createBatchedInClause("id", values, Types.INTEGER, 5));
         
@@ -230,7 +159,7 @@ public class QueryBuilderTest {
             }
         };
         
-        Map<Integer,String> results = new HashMap<Integer,String>();
+        Map<Integer,String> results = new HashMap<>();
         builder.execute(processor, results);
         
         System.out.println("Found "+results.size()+" Results!");
@@ -245,7 +174,7 @@ public class QueryBuilderTest {
         
         List<?> values = Arrays.asList(1);
         
-        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory("localhost","cts", "root", ""), "test");
+        JdbcFactory direct = new StandardJdbcFactory(new MysqlConnectionFactory(HOST, DB, USER, PW), "test");
         QueryBuilder builder = new QueryBuilder(direct,"SELECT id,label FROM node",false);
         builder.addClause(QueryClause.createInClause("id", values, Types.INTEGER));
         
@@ -258,7 +187,7 @@ public class QueryBuilderTest {
             }
         };
         
-        Map<Integer,String> results = new HashMap<Integer,String>();
+        Map<Integer,String> results = new HashMap<>();
         builder.execute(processor, results);
         
         System.out.println("Found "+results.size()+" Results!");

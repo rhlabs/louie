@@ -23,7 +23,6 @@ import java.net.URLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.googlecode.protobuf.format.JsonFormat;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -72,7 +71,7 @@ public class JsonTest {
     @Test
     public void testJsonV1() {
         try {
-            URL url = new URL("http://lid604:8080/louie/json");
+            URL url = new URL("http://localhost:8080/louie/json");
             
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
@@ -83,33 +82,25 @@ public class JsonTest {
             connection.setConnectTimeout(15*1000);
             connection.connect();
             
-            
-//            ScenePKPB.Builder pkBuilder = ScenePKPB.newBuilder();
-//            JsonFormat.merge("{\"job\":\"ripd\",\"scn\":\"rd.wwhaley\"}", pkBuilder);
-//            ScenePKPB pk = pkBuilder.build();
-//            System.out.println(pk);
-            
-            String jsonRequest = "{\"version\":\"1\",\"user\":\"cjohnson\","
-                    + "\"agent\":\"JUNIT_TEST\",\"system\":\"scene\",\"method\":\"getScene\","
-                    + "\"types\":[\"rh.pb.scene.ScenePKPB\"],"
-                    + "\"params\":[{\"arg\":[\"{\\\"job\\\":\\\"ripd\\\",\\\"scn\\\":\\\"rd.wwhaley\\\"}\"]}]}";
-            //g":["{value: 274316}","{value: true}","{value: 1}","{value: 100}"]}]};
+            String jsonRequest = "{'version':'1','user':'cjohnson',"
+                    + "'agent':'JUNIT_TEST','system':'status','method':'echoTest',"
+                    + "'types':['louie.StringPB','louie.IntPB'],"
+                    + "'params':[{'arg':['{\\'value\\':\\'JSON Echo Test v1\\'}','{\\'value\\':10}']}]}";
             System.out.println(jsonRequest);
             
-            OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-            wr.write(jsonRequest);
-            wr.flush();
-            wr.close();
-            
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+            try (OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream())) {
+                wr.write(jsonRequest);
+                wr.flush();
             }
-            System.out.println(sb.toString());
-
-                
+            
+            StringBuilder sb = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
+            System.out.println("JSON RESPONSE: "+sb.toString());
         } catch (Exception ex) {
             Logger.getLogger(JsonTest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -118,7 +109,7 @@ public class JsonTest {
     @Test
     public void testJsonV2() {
         try {
-            URL url = new URL("http://lid604:8080/louie/json");
+            URL url = new URL("http://localhost:8080/louie/json");
             
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
@@ -129,25 +120,27 @@ public class JsonTest {
             connection.setConnectTimeout(15*1000);
             connection.connect();
             
-            String jsonRequest = "{\"version\":\"2\",\"user\":\"cjohnson\",\"agent\":\"JUNIT_TEST\",\"system\":\"scene\",\"method\":\"getScene\","
-                    + "\"params\":[{\"type\":\"rh.pb.scene.ScenePKPB\",\"value\":{\"job\":\"ripd\",\"scn\":\"rd.wwhaley\"}}]}";
+            String jsonRequest = "{'version':'2','user':'cjohnson','agent':'JUNIT_TEST',"
+                    + "'system':'status','method':'echoTest',"
+                    + "'params':[{'type':'louie.StringPB','value':{'value':'JSON Echo Test v2'}},"
+                    + "          {'type':'louie.IntPB','value':{'value':10}}]}";
             
+             
             System.out.println(jsonRequest);
             
-            OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-            wr.write(jsonRequest);
-            wr.flush();
-            wr.close();
-            
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+            try (OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream())) {
+                wr.write(jsonRequest);
+                wr.flush();
             }
-            System.out.println(sb.toString());
-
-                
+            
+            StringBuilder sb = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
+            System.out.println("JSON RESPONSE: "+sb.toString());
         } catch (Exception ex) {
             Logger.getLogger(JsonTest.class.getName()).log(Level.SEVERE, null, ex);
         }
