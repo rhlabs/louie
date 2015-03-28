@@ -58,8 +58,6 @@ public class LouieProperties {
     private static final String SERVICE = "service";
     private static final String SERVICE_PARENT = "services";
     private static final String ENABLE = "enable";
-    @Deprecated
-    private static final String REMOTE_HOST = "remote_host";
     private static final String REMOTE_SERVER = "remote_server";
     private static final String READ_ONLY = "read_only";
     private static final String CACHING = "caching";
@@ -355,8 +353,6 @@ public class LouieProperties {
                     break;
                 case ENABLE: ServiceProperties.setDefaultEnable(Boolean.parseBoolean(propValue));
                     break;
-                case REMOTE_HOST: ServiceProperties.setDefaultRemoteHost(propValue);
-                    break;
                 case REMOTE_SERVER: ServiceProperties.setDefaultRemoteServer(propValue);
                     break;
                 case READ_ONLY: ServiceProperties.setDefaultReadOnly(Boolean.parseBoolean(propValue));
@@ -477,11 +473,8 @@ public class LouieProperties {
                     } else {
                         String defaultServer = ServiceProperties.getDefaultRemoteServer();
                         if (defaultServer == null) {
-                            defaultServer = ServiceProperties.getDefaultRemoteHost();
-                            if (defaultServer == null) {
-                                LoggerFactory.getLogger(LouieProperties.class)
-                                    .error("Failed to configure remote layer for service {}. Check configs.",props.getName());
-                            } 
+                            LoggerFactory.getLogger(LouieProperties.class)
+                                    .error("Failed to configure remote layer for service {}. Check configs.", props.getName());
                         }
                         props.addLayer(new RemoteServiceLayer(defaultServer));
                     }

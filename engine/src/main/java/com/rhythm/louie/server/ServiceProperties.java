@@ -193,16 +193,6 @@ public class ServiceProperties {
         ServiceProperties.defaultEnable = defaultEnable;
     }
 
-    @Deprecated 
-    protected static void setDefaultRemoteHost(String defaultHost) {
-        ServiceProperties.defaultRemoteHost = defaultHost;
-    }
-
-    @Deprecated
-    public static String getDefaultRemoteHost() {
-        return defaultRemoteHost;
-    }
-    
     protected static void setDefaultRemoteServer(String defaultServer) {
         ServiceProperties.defaultRemoteServer = defaultServer;
     }
