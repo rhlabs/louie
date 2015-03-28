@@ -41,11 +41,11 @@ public class MessageTask implements Runnable {
     private final String service;
     private final JmsAdapter jmsAdapter;
     private final MessageAction action;
-    private final Collection<Message> pbList;
+    private final Collection<? extends Message> pbList;
     private final Map<String,String> headers;
 
     public MessageTask(String service, JmsAdapter jmsAdapter, MessageAction action, 
-            Collection<Message> pbList, Map<String,String> headers) {
+            Collection<? extends Message> pbList, Map<String,String> headers) {
         this.service = service;
         this.jmsAdapter = jmsAdapter;
         this.action = action;
@@ -61,7 +61,7 @@ public class MessageTask implements Runnable {
         return createMessage(action, Collections.singletonList(pb));
     }
     
-    public MessageBPB createMessage(MessageAction action, Collection<Message> pbList) {
+    public MessageBPB createMessage(MessageAction action, Collection<? extends Message> pbList) {
         List<ContentPB> contentList = new ArrayList<>();
         for (Message pb : pbList) {
             ContentPB content = ContentPB.newBuilder()

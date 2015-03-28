@@ -61,11 +61,11 @@ public class MessageUpdate {
     }
 
     // TODO all these permutations are terrible. Should convert this to a builder pattern
-    public void sendUpdate(String service, MessageAction action, Collection<Message> pbList) throws Exception {
+    public void sendUpdate(String service, MessageAction action, Collection<? extends Message> pbList) throws Exception {
         this.sendUpdate(service, action, pbList, null);
     }
 
-    public void sendUpdate(String service, MessageAction action, Collection<Message> pbList, Map<String,String> headers) throws Exception {
+    public void sendUpdate(String service, MessageAction action, Collection<? extends Message> pbList, Map<String,String> headers) throws Exception {
         if (queue==null) {
             throw new Exception("Executor Not initialized!");
         }
