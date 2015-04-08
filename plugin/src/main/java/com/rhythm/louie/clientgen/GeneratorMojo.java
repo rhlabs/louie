@@ -35,7 +35,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.slf4j.LoggerFactory;
 
 import com.rhythm.louie.*;
 import com.rhythm.louie.process.ServiceCall;
@@ -96,7 +95,7 @@ public class GeneratorMojo extends AbstractMojo{
                 urls.add(a.getFile().toURI().toURL());
             }
         } catch (MalformedURLException ex) {
-            LoggerFactory.getLogger(GeneratorMojo.class).error("Error loading artifact urls", ex);
+            getLog().error("Error loading artifact urls", ex);
         }
         
         AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
@@ -122,7 +121,8 @@ public class GeneratorMojo extends AbstractMojo{
     private static final String PYTHON_TEMPLATE = "templates/python/ServiceClient.vm";
     private static final String PYTHON_CLIENT_MODULE = "client.py";
     
-    protected static final Set<String> LOUIE_SERVICES = ImmutableSet.of("auth","info","test","jmstest");
+    protected static final Set<String> LOUIE_SERVICES = 
+            ImmutableSet.of("auth","info","devtest","jmstest","sql","status");
     
     public void process(String host, String gateway, String pypackage, List<Class<?>> services) {
         
@@ -144,7 +144,7 @@ public class GeneratorMojo extends AbstractMojo{
                     }
                 }
             } catch (Exception e) {
-                LoggerFactory.getLogger(GeneratorMojo.class).error("Error Processing Service Methods", e);
+                getLog().error("Error Processing Service Methods", e);
             }
             
             // Python
@@ -158,7 +158,7 @@ public class GeneratorMojo extends AbstractMojo{
                 ServiceInfo info = new ServiceInfo(service, host, gateway, pythonMethods);
                 generatePython(info, pypackage, project.getBasedir().toString(),pythondir);
             } catch (Exception e) {
-                LoggerFactory.getLogger(GeneratorMojo.class).error("Error Generating Python Clients", e);
+                getLog().error("Error Generating Python Clients", e);
             }
         }
     }
@@ -226,6 +226,10 @@ public class GeneratorMojo extends AbstractMojo{
         output.append(pydir);
         //special case louie internal services
         if (LOUIE_SERVICES.contains(serviceName)) {
+            if (!info.getPackageName().startsWith("com.rhythm.louie")) {
+                throw new Exception("Unable to generate clients: Service is using a reserved service name!");
+            }
+            
             output.append("louie/");
             pypackage = "louie.";
         } else {

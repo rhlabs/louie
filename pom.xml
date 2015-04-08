@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rhythm.louie</groupId>
     <artifactId>louie-parent</artifactId>
-    <version>1.13-SNAPSHOT</version>
+    <version>2.0-beta</version>
     <packaging>pom</packaging>
 
     <name>Louie</name>
@@ -37,18 +37,16 @@
         <developer>
             <id>cjohnson</id>
             <name>Chris Johnson</name>
-            <email>cjohnson@rhythm.com</email>
-            <organization>Rhythm &amp; Hues Studios</organization>
+            <email>chrisjohnson2@gmail.com</email>
             <roles>
                 <role>Developer</role>
             </roles>
             <timezone>America/Los_Angeles</timezone>
         </developer>
         <developer>
-            <id>eyasukoc</id>
+            <id>eyasukochi</id>
             <name>Ellison Yasukochi</name>
-            <email>eyasukoc@rhythm.com</email>
-            <organization>Rhythm &amp; Hues Studios</organization>
+            <email>eyasukochi@gmail.com</email>
             <roles>
                 <role>Developer</role>
             </roles>
@@ -131,6 +129,20 @@
                                 <id>attach-javadocs</id>
                                 <goals>
                                     <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
                                 </goals>
                             </execution>
                         </executions>

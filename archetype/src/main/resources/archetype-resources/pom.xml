@@ -10,7 +10,7 @@
     <name>${rootArtifactId}</name>
 
     <properties>
-        <louie.version>1.13-SNAPSHOT</louie.version>
+        <louie.version>2.0-beta</louie.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
